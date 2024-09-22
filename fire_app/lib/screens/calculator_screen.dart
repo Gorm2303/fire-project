@@ -36,8 +36,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     // Step 1: Add principal part if principal > 0
     if (principal > 0) {
-      String principalPart = "${principal.toStringAsFixed(2)}";
-      String ratePart = "\\frac{${(rate / 100).toStringAsFixed(4)}}{$compoundingFrequency}";
+      String principalPart = "${principal.toStringAsFixed(0)}";
+      String ratePart = "\\frac{${(rate / 100).toStringAsFixed(3)}}{$compoundingFrequency}";
       String exponentPart = "^{$compoundingFrequency \\times $time}";
       String mainFormula = "$principalPart \\times (1 + $ratePart)$exponentPart";
       fullFormula += "A = $mainFormula";
@@ -46,9 +46,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     // Step 2: Add contribution part if additionalAmount > 0
     if (additionalAmount > 0) {
       String contributionText = _contributionFrequency == 'Monthly'
-          ? "12 \\times ${additionalAmount.toStringAsFixed(2)}"
-          : "${additionalAmount.toStringAsFixed(2)}";
-      String ratePart = "\\frac{${(rate / 100).toStringAsFixed(4)}}{$compoundingFrequency}";
+          ? "12 \\times ${additionalAmount.toStringAsFixed(0)}"
+          : "${additionalAmount.toStringAsFixed(0)}";
+      String ratePart = "\\frac{${(rate / 100).toStringAsFixed(3)}}{$compoundingFrequency}";
       String exponentPart = "^{$compoundingFrequency \\times $time}";
       String contributionFormula = "$contributionText \\times \\frac{\\left( (1 + $ratePart)$exponentPart - 1 \\right)}{$ratePart}";
       if (fullFormula.isNotEmpty) {
@@ -195,9 +195,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     rows: _yearlyValues.map((value) {
                       return DataRow(cells: [
                         DataCell(Text(value['year']!.toInt().toString())),
-                        DataCell(Text(value['totalValue']!.toStringAsFixed(2))),
-                        DataCell(Text(value['totalDeposits']!.toStringAsFixed(2))),
-                        DataCell(Text(value['compoundEarnings']!.toStringAsFixed(2))),
+                        DataCell(Text(value['totalValue']!.toStringAsFixed(0))),
+                        DataCell(Text(value['totalDeposits']!.toStringAsFixed(0))),
+                        DataCell(Text(value['compoundEarnings']!.toStringAsFixed(0))),
                       ]);
                     }).toList(),
                   ),
