@@ -13,6 +13,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _timeController = TextEditingController(text: '25');
   final TextEditingController _compoundController = TextEditingController(text: '1');
   final TextEditingController _additionalAmountController = TextEditingController(text: '100');
+  final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');  // Default 4%
 
   @override
   void initState() {
@@ -71,10 +72,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');  // Default 4%
   double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
+  double _customWithdrawalTax = 0;  // Store the calculated tax
 
-  // Function to calculate the yearly breakdown and custom withdrawal rule
+  /// Function to calculate the yearly breakdown and custom withdrawal rule
   void _calculateYearlyValues() {
     double principal = double.tryParse(_principalController.text) ?? 0;
     double rate = double.tryParse(_rateController.text) ?? 0;
@@ -105,19 +106,45 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       });
     }
 
-    // Calculate custom withdrawal based on the input percentage
-    _customWithdrawalRule = totalAmount * (withdrawalPercentage / 100) / 12;
+    // Calculate custom withdrawal based on the input percentage (yearly)
+    _customWithdrawalRule = totalAmount * (withdrawalPercentage / 100);
 
+    // Calculate the tax for the withdrawal amount based only on earnings
+    double earningsRatio = (totalAmount - totalDeposits) / totalAmount;  // Ratio of earnings to total value
+    double earningsWithdrawal = _customWithdrawalRule * earningsRatio;  // Annual earnings-based withdrawal
+    double annualTax = _calculateTax(earningsWithdrawal);  // Annual tax based on earnings
+
+    // Add this to the state so it can be displayed
     setState(() {
       _yearlyValues = yearlyValues;
+      _customWithdrawalRule = totalAmount * (withdrawalPercentage / 100);  // Yearly withdrawal amount
+      _customWithdrawalTax = annualTax;  // Yearly tax on earnings
     });
+  }
+
+  bool _showTaxNote = false;  // Initially, the tax note is hidden
+
+  // Function to calculate the tax based on the progressive tax rates (applied to earnings only)
+  double _calculateTax(double earningsWithdrawal) {
+    double tax = 0;
+    double threshold = 61000;
+
+    if (earningsWithdrawal <= threshold) {
+      // Apply 27% tax if the earnings withdrawal is less than or equal to 61,000 kr
+      tax = earningsWithdrawal * 0.27;
+    } else {
+      // Apply 27% on the first 61,000 kr and 42% on the remaining amount
+      tax = threshold * 0.27 + (earningsWithdrawal - threshold) * 0.42;
+    }
+
+    return tax;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Dynamic Compound Interest Calculator')),
-      body: Padding(
+      body: SingleChildScrollView(  // Wrap the whole content in SingleChildScrollView
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
@@ -191,55 +218,133 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               'Investment After ${_timeController.text} Years: ${_yearlyValues.last['totalValue']!.toStringAsFixed(0)} kr.-',
               style: TextStyle(fontSize: 16),
             ),
-            Row(
+            Column(
               children: <Widget>[
-                // DropdownButton for the withdrawal percentage
-                DropdownButton<String>(
-                  value: _withdrawalPercentageController.text,  // Current selected value
-                  items: ['3', '4', '5'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value + '%'),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _withdrawalPercentageController.text = newValue!;  // Update the controller value
-                      _calculateYearlyValues();  // Recalculate the values based on the selected percentage
-                    });
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    DropdownButton<String>(
+                      value: _withdrawalPercentageController.text,
+                      items: ['3', '4', '5'].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value + '%'),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _withdrawalPercentageController.text = newValue!;
+                          _calculateYearlyValues();  // Recalculate the values based on the selected percentage
+                        });
+                      },
+                    ),
+                    SizedBox(width: 16),
+                    // Display the monthly withdrawal amount (divide yearly by 12)
+                    Text(
+                      'Withdrawal Each Month: ${( _customWithdrawalRule / 12).toStringAsFixed(0)} kr.-',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 16),  // Add some spacing between the Dropdown and Text
-                // Display the withdrawal amount
-                Text(
-                  'Withdrawal Each Month: ${_customWithdrawalRule.toStringAsFixed(0)} kr.-',
-                  style: TextStyle(fontSize: 16),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // GestureDetector to make "Tax" clickable
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _showTaxNote = !_showTaxNote;  // Toggle the visibility of the tax note
+                        });
+                      },
+                      child: Text(
+                        'Tax',  // Make "Tax" clickable
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,  // Indicate it's clickable
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      ' on Monthly Withdrawal: ${(_customWithdrawalTax / 12).toStringAsFixed(0)} kr.-',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
+                // Conditionally render the note if _showTaxNote is true
+                if (_showTaxNote)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Display the tax note
+                        Text(
+                          'Note: The tax is calculated annually. The first earned 61,000 kr is taxed at 27%, and any amount above that is taxed at 42%. The displayed amount is the monthly tax, calculated based on the following: Tax Ratio = Total portfolio value - Total deposits.',
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 8),
+
+                        // The LaTeX formulas for earnings and tax
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Math.tex(
+                                r"""
+                                \text{Earnings Percent} = \frac{\text{Total Value} - \text{Total Deposits}}{\text{Total Value}}
+                                """,
+                                textStyle: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(height: 8),
+                              Math.tex(
+                                r"""
+                                \text{Taxable Withdrawal} = \text{Earnings Percent} \times \text{Withdrawal Amount}
+                                """,
+                                textStyle: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(height: 8),
+                              Math.tex(
+                                r"""
+                                \text{Annual Tax} = 
+                                \begin{cases} 
+                                0.27 \times \text{Taxable Withdrawal}, & \text{if } \text{Taxable Withdrawal} \leq 61,000 \text{ kr} \\
+                                0.27 \times 61,000 + 0.42 \times (\text{Taxable Withdrawal} - 61,000), & \text{if } \text{Taxable Withdrawal} > 61,000 \text{ kr}
+                                \end{cases}
+                                """,
+                                textStyle: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
               ],
             ),
             // Displaying the table of yearly investments with breakdown
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    columns: [
-                      DataColumn(label: Text('Year')),
-                      DataColumn(label: Text('Total Value (kr)')),
-                      DataColumn(label: Text('Total Deposits (kr)')),
-                      DataColumn(label: Text('Compound Earnings (kr)')),
-                    ],
-                    rows: _yearlyValues.map((value) {
-                      return DataRow(cells: [
-                        DataCell(Text(value['year']!.toInt().toString())),
-                        DataCell(Text(value['totalValue']!.toStringAsFixed(0))),
-                        DataCell(Text(value['totalDeposits']!.toStringAsFixed(0))),
-                        DataCell(Text(value['compoundEarnings']!.toStringAsFixed(0))),
-                      ]);
-                    }).toList(),
-                  ),
-                ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: [
+                  DataColumn(label: Text('Year')),
+                  DataColumn(label: Text('Total Value (kr)')),
+                  DataColumn(label: Text('Total Deposits (kr)')),
+                  DataColumn(label: Text('Compound Earnings (kr)')),
+                ],
+                rows: _yearlyValues.map((value) {
+                  return DataRow(cells: [
+                    DataCell(Text(value['year']!.toInt().toString())),
+                    DataCell(Text(value['totalValue']!.toStringAsFixed(0))),
+                    DataCell(Text(value['totalDeposits']!.toStringAsFixed(0))),
+                    DataCell(Text(value['compoundEarnings']!.toStringAsFixed(0))),
+                  ]);
+                }).toList(),
               ),
             ),
           ],
