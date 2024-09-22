@@ -71,13 +71,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  // Function to calculate the yearly breakdown
+  final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');  // Default 4%
+  double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
+
+  // Function to calculate the yearly breakdown and custom withdrawal rule
   void _calculateYearlyValues() {
     double principal = double.tryParse(_principalController.text) ?? 0;
     double rate = double.tryParse(_rateController.text) ?? 0;
     double time = double.tryParse(_timeController.text) ?? 0;
     int compoundingFrequency = int.tryParse(_compoundController.text) ?? 1;
     double additionalAmount = double.tryParse(_additionalAmountController.text) ?? 0;
+    double withdrawalPercentage = double.tryParse(_withdrawalPercentageController.text) ?? 4;  // Get custom percentage
 
     List<Map<String, double>> yearlyValues = [];
     double totalAmount = principal;
@@ -87,7 +91,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     int contributionFrequency = _contributionFrequency == 'Monthly' ? 12 : 1;
 
     for (int year = 1; year <= time; year++) {
-      totalAmount = totalAmount * pow((1 + (rate / 100) / compoundingFrequency), compoundingFrequency);
+      // Apply compound interest for the current year
+      totalAmount = totalAmount * pow(1 + (rate / 100) / compoundingFrequency, compoundingFrequency);
       totalDeposits += additionalAmount * contributionFrequency;
       totalAmount += additionalAmount * contributionFrequency;
 
@@ -99,6 +104,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         'compoundEarnings': totalAmount - totalDeposits,
       });
     }
+
+    // Calculate custom withdrawal based on the input percentage
+    _customWithdrawalRule = totalAmount * (withdrawalPercentage / 100) / 12;
 
     setState(() {
       _yearlyValues = yearlyValues;
@@ -179,6 +187,36 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             // Dynamically display the formula
             _buildFormulaWidget(),
             SizedBox(height: 20),
+            Text(
+              'Investment After ${_timeController.text} Years: ${_yearlyValues.last['totalValue']!.toStringAsFixed(0)} kr.-',
+              style: TextStyle(fontSize: 16),
+            ),
+            Row(
+              children: <Widget>[
+                // DropdownButton for the withdrawal percentage
+                DropdownButton<String>(
+                  value: _withdrawalPercentageController.text,  // Current selected value
+                  items: ['3', '4', '5'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value + '%'),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _withdrawalPercentageController.text = newValue!;  // Update the controller value
+                      _calculateYearlyValues();  // Recalculate the values based on the selected percentage
+                    });
+                  },
+                ),
+                SizedBox(width: 16),  // Add some spacing between the Dropdown and Text
+                // Display the withdrawal amount
+                Text(
+                  'Withdrawal Each Month: ${_customWithdrawalRule.toStringAsFixed(0)} kr.-',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
             // Displaying the table of yearly investments with breakdown
             Expanded(
               child: SingleChildScrollView(
