@@ -13,7 +13,8 @@ class CalculatorScreen extends StatefulWidget {
   _CalculatorScreenState createState() => _CalculatorScreenState();
 }
 
-class _CalculatorScreenState extends State<CalculatorScreen> {
+class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final TextEditingController _principalController = TextEditingController(text: '1000');
   final TextEditingController _rateController = TextEditingController(text: '7');
   final TextEditingController _timeController = TextEditingController(text: '25');
@@ -31,9 +32,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void initState() {
     super.initState();
     // Calculate table when the page is loaded
+    _tabController = TabController(length: 2, vsync: this);  // Initialize the TabController with two tabs
     setState(() {
       _recalculateValues();
     });  
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   double _calculateTax(double earningsWithdrawal) {
@@ -83,7 +91,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dynamic Compound Interest Calculator')),
+      appBar: AppBar(title: const Text('Dynamic Compound Interest Calculator')), // Set the title
       body: SingleChildScrollView(  // Wrap the whole content in SingleChildScrollView
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -132,17 +140,41 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             TaxWidget(
               showTaxNote: _showTaxNote,  // Pass the value to control the note visibility
             ),
+            const SizedBox(height: 20),
             // Displaying the table of yearly investments with breakdown
-            SizedBox(
+            // Tabbed table view for switching between two investment tables
+            TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Investment Table 1'),
+            Tab(text: 'Investment Table 2'),
+          ],
+        ), SizedBox(
               height: 400,  // Define a height for the table
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,  // Allow vertical scrolling
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,  // Allow horizontal scrolling
-                  child: InvestmentTableWidget(
-                    yearlyValues: _yearlyValues,  // Pass the calculated values
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // First investment table
+                  SingleChildScrollView(
+                    scrollDirection: Axis.vertical,  // Allow vertical scrolling
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,  // Allow horizontal scrolling
+                      child: InvestmentTableWidget(
+                        yearlyValues: _yearlyValues,  // Pass the calculated values for table 1
+                      ),
+                    ),
                   ),
-                ),
+                  // Second investment table
+                  SingleChildScrollView(
+                    scrollDirection: Axis.vertical,  // Allow vertical scrolling
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,  // Allow horizontal scrolling
+                      child: InvestmentTableWidget(
+                        yearlyValues: _yearlyValues,  // Pass the calculated values for table 2
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
