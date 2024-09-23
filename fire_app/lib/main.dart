@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/calculator_screen.dart';  // Import the calculator screen
 
 void main() {
-  runApp(FireApp());
+  runApp(const FireApp());
 }
 
 class FireApp extends StatelessWidget {
@@ -15,9 +15,9 @@ class FireApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),  // This will be the main screen of your app
+      home: const HomeScreen(),  // This will be the main screen of your app
       routes: {
-        '/calculator': (context) => CalculatorScreen(),  // Add a route for the calculator
+        '/calculator': (context) => const CalculatorScreen(),  // Add a route for the calculator
       },
     );
   }

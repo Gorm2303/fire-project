@@ -24,7 +24,7 @@ class FormulaWidget extends StatelessWidget {
 
     return Math.tex(
       fullFormula,
-      textStyle: TextStyle(fontSize: 16),
+      textStyle: const TextStyle(fontSize: 16),
     );
   }
 

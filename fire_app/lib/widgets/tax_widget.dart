@@ -20,7 +20,7 @@ class TaxWidget extends StatelessWidget {
             children: [
               // Display the tax note
               const Text(
-                'Note: The tax is calculated annually. The first earned 61,000 kr is taxed at 27%, and any amount above that is taxed at 42%. The displayed amount is the monthly tax, calculated based on the following: Tax Ratio = Total portfolio value - Total deposits.',
+                'Note: The tax is calculated annually. The first earned 61,000 kr is taxed at 27%, and any amount above that is taxed at 42%. The displayed amount is the monthly tax, calculated based on the following formulars:',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
@@ -34,7 +34,14 @@ class TaxWidget extends StatelessWidget {
                   children: [
                     Math.tex(
                       r"""
-                      \text{Earnings Percent} = \frac{\text{Total Value} - \text{Total Deposits}}{\text{Total Value}}
+                      \text{Earnings} = \text{Total Value} - \text{Total Deposits}
+                      """,
+                      textStyle: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Math.tex(
+                      r"""
+                      \text{Earnings percent} = \frac{\text{Earnings}}{\text{Total Value}}
                       """,
                       textStyle: const TextStyle(fontSize: 16),
                     ),

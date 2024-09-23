@@ -4,6 +4,7 @@ import '../widgets/tax_widget.dart';
 import '../widgets/investment_calculator.dart';
 import '../widgets/investment_table_widget.dart';
 import '../widgets/input_fields_widget.dart';
+import '../widgets/the4percent_widget.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -20,6 +21,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _additionalAmountController = TextEditingController(text: '100');
   final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');  // Default 4%
 
+  List<Map<String, double>> _yearlyValues = [];  // Initialize the list to store yearly values
+  String _contributionFrequency = 'Monthly'; // Default contribution frequency
+  double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
+  double _customWithdrawalTax = 0;  // Store the calculated tax
+  bool _showTaxNote = false;  // Initially, the tax note is hidden
+
   @override
   void initState() {
     super.initState();
@@ -28,12 +35,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _recalculateValues();
     });  
   }
-
-  List<Map<String, double>> _yearlyValues = [];  // Initialize the list to store yearly values
-  String _contributionFrequency = 'Monthly'; // Default contribution frequency
-  double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
-  double _customWithdrawalTax = 0;  // Store the calculated tax
-  bool _showTaxNote = false;  // Initially, the tax note is hidden
 
   double _calculateTax(double earningsWithdrawal) {
   const double threshold = 61000;
@@ -116,70 +117,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               contributionFrequency: _contributionFrequency,
             ),
             const SizedBox(height: 20),
-            Text(
-              'Investment After ${_timeController.text} Years: ${_yearlyValues.last['totalValue']!.toStringAsFixed(0)} kr.-',
-              style: const TextStyle(fontSize: 16),
-            ),
-            Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    DropdownButton<String>(
-                      value: _withdrawalPercentageController.text,
-                      items: ['3', '4', '5'].map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text('$value%'),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _withdrawalPercentageController.text = newValue!;
-                          _recalculateValues();
-                        });
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    // Display the monthly withdrawal amount (divide yearly by 12)
-                    Text(
-                      'Withdrawal Each Month: ${( _customWithdrawalRule / 12).toStringAsFixed(0)} kr.-',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // GestureDetector to make "Tax" clickable
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _showTaxNote = !_showTaxNote;  // Toggle the visibility of the tax note
-                        });
-                      },
-                      child: const Text(
-                        'Tax',  // Make "Tax" clickable
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,  // Indicate it's clickable
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      ' on Monthly Withdrawal: ${(_customWithdrawalTax / 12).toStringAsFixed(0)} kr.-',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-                // Conditionally render the note if _showTaxNote is true
-                TaxWidget(
-                  showTaxNote: _showTaxNote,  // Pass the value to control the note visibility
-                ),
-              ],
+            The4PercentWidget(
+              withdrawalPercentageController: _withdrawalPercentageController,
+              customWithdrawalRule: _customWithdrawalRule,
+              customWithdrawalTax: _customWithdrawalTax,
+              recalculateValues: _recalculateValues,
+              showTaxNote: _showTaxNote,
+              toggleTaxNote: () {
+                setState(() {
+                  _showTaxNote = !_showTaxNote;
+                });
+              },
+            ),                // Conditionally render the note if _showTaxNote is true
+            TaxWidget(
+              showTaxNote: _showTaxNote,  // Pass the value to control the note visibility
             ),
             // Displaying the table of yearly investments with breakdown
             SizedBox(
@@ -194,7 +145,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
             ),
-
           ],
         ),
       ),
