@@ -4,7 +4,6 @@ class InputFieldsWidget extends StatelessWidget {
   final TextEditingController principalController;
   final TextEditingController rateController;
   final TextEditingController timeController;
-  final TextEditingController compoundController;
   final TextEditingController additionalAmountController;
   final String contributionFrequency;
   final Function(String) onContributionFrequencyChanged;  // Callback for dropdown
@@ -15,7 +14,6 @@ class InputFieldsWidget extends StatelessWidget {
     required this.principalController,
     required this.rateController,
     required this.timeController,
-    required this.compoundController,
     required this.additionalAmountController,
     required this.contributionFrequency,
     required this.onContributionFrequencyChanged,
@@ -44,32 +42,36 @@ class InputFieldsWidget extends StatelessWidget {
           keyboardType: TextInputType.number,
           onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
         ),
-        TextField(
-          controller: compoundController,
-          decoration: const InputDecoration(labelText: 'Compounding Frequency (Times/Year)'),
-          keyboardType: TextInputType.number,
-          onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
-        ),
-        TextField(
-          controller: additionalAmountController,
-          decoration: const InputDecoration(labelText: 'Additional Amount'),
-          keyboardType: TextInputType.number,
-          onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
-        ),
-        // Dropdown to select the contribution frequency
-        DropdownButton<String>(
-          value: contributionFrequency,
-          items: <String>['Monthly', 'Yearly'].map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              onContributionFrequencyChanged(newValue);  // Trigger recalculation on dropdown change
-            }
-          },
+        Row(
+          children: [
+            // Wrap the TextField with Expanded to give it more space
+            Expanded(
+              child: TextField(
+                controller: additionalAmountController,
+                decoration: const InputDecoration(labelText: 'Additional Amount'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
+              ),
+            ),
+            const SizedBox(width: 16),  // Add some spacing between TextField and DropdownButton
+            // Wrap DropdownButton with Flexible so it doesn't take too much space
+            Flexible(
+              child: DropdownButton<String>(
+                value: contributionFrequency,
+                items: <String>['Monthly', 'Yearly'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    onContributionFrequencyChanged(newValue);  // Trigger recalculation on dropdown change
+                  }
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -7,6 +7,9 @@ class The4PercentWidget extends StatelessWidget {
   final VoidCallback recalculateValues;
   final bool showTaxNote;
   final VoidCallback toggleTaxNote;
+  final TextEditingController breakController;
+  final double compoundGatheredDuringBreak; 
+  final VoidCallback onInputChanged;  // Callback for when any input changes
 
   const The4PercentWidget({
     Key? key,
@@ -16,12 +19,36 @@ class The4PercentWidget extends StatelessWidget {
     required this.recalculateValues,
     required this.showTaxNote,
     required this.toggleTaxNote,
+    required this.breakController,
+    required this.compoundGatheredDuringBreak,
+    required this.onInputChanged,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
+        Row(
+          children: [
+            // Break Period Input
+            Expanded(
+              child: TextField(
+                controller: breakController,
+                decoration: const InputDecoration(labelText: 'Break Period After Investing Time (No Deposits Nor Withdrawals in Years)'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
+              ),
+            ),
+            const SizedBox(width: 16),  // Add some spacing between TextField and the Text
+            // Display Compound Interest Gathered During Break Period
+            Expanded(
+              child: Text(
+                'Compound Gathered: ${compoundGatheredDuringBreak.toStringAsFixed(0)} kr.-',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

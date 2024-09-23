@@ -5,7 +5,6 @@ class FormulaWidget extends StatelessWidget {
   final double principal;
   final double rate;
   final double time;
-  final int compoundingFrequency;
   final double additionalAmount;
   final String contributionFrequency;
 
@@ -13,7 +12,6 @@ class FormulaWidget extends StatelessWidget {
     required this.principal,
     required this.rate,
     required this.time,
-    required this.compoundingFrequency,
     required this.additionalAmount,
     required this.contributionFrequency,
   });
@@ -35,8 +33,8 @@ class FormulaWidget extends StatelessWidget {
     // Step 1: Add principal part if principal > 0
     if (principal > 0) {
       String principalPart = principal.toStringAsFixed(0);
-      String ratePart = "\\frac{${(rate / 100).toStringAsFixed(3)}}{$compoundingFrequency}";
-      String exponentPart = "^{$compoundingFrequency \\times $time}";
+      String ratePart = (rate / 100).toStringAsFixed(3);
+      String exponentPart = "^{$time}";
       String mainFormula = "$principalPart \\times (1 + $ratePart)$exponentPart";
       fullFormula += "A = $mainFormula";
     }
@@ -46,8 +44,8 @@ class FormulaWidget extends StatelessWidget {
       String contributionText = contributionFrequency == 'Monthly'
           ? "12 \\times ${additionalAmount.toStringAsFixed(0)}"
           : additionalAmount.toStringAsFixed(0);
-      String ratePart = "\\frac{${(rate / 100).toStringAsFixed(3)}}{$compoundingFrequency}";
-      String exponentPart = "^{$compoundingFrequency \\times $time}";
+      String ratePart = "${(rate / 100).toStringAsFixed(3)}";
+      String exponentPart = "^{$time}";
       String contributionFormula = "$contributionText \\times \\frac{\\left( (1 + $ratePart)$exponentPart - 1 \\right)}{$ratePart}";
       if (fullFormula.isNotEmpty) {
         fullFormula += " + ";

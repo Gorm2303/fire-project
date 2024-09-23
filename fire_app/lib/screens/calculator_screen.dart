@@ -18,15 +18,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
   final TextEditingController _principalController = TextEditingController(text: '1000');
   final TextEditingController _rateController = TextEditingController(text: '7');
   final TextEditingController _timeController = TextEditingController(text: '25');
-  final TextEditingController _compoundController = TextEditingController(text: '1');
-  final TextEditingController _additionalAmountController = TextEditingController(text: '100');
+  final TextEditingController _additionalAmountController = TextEditingController(text: '1000');
   final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');  // Default 4%
+  final TextEditingController _breakController = TextEditingController(text: '0');
 
   List<Map<String, double>> _yearlyValues = [];  // Initialize the list to store yearly values
+  List<Map<String, double>> _secondTableValues = [];
   String _contributionFrequency = 'Monthly'; // Default contribution frequency
   double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
   double _customWithdrawalTax = 0;  // Store the calculated tax
   bool _showTaxNote = false;  // Initially, the tax note is hidden
+  double compoundGatheredDuringBreak = 0; 
 
   @override
   void initState() {
@@ -45,48 +47,106 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
   }
 
   double _calculateTax(double earningsWithdrawal) {
-  const double threshold = 61000;
-  double tax;
+    const double threshold = 61000;
+    double tax;
 
-  if (earningsWithdrawal <= threshold) {
-    // Apply 27% tax if the earnings withdrawal is less than or equal to 61,000 kr
-    tax = earningsWithdrawal * 0.27;
-  } else {
-    // Apply 27% on the first 61,000 kr and 42% on the remaining amount
-    tax = threshold * 0.27 + (earningsWithdrawal - threshold) * 0.42;
+    // Apply tax only if withdrawals occur (i.e., after the break period)
+    if (earningsWithdrawal > 0) {
+      if (earningsWithdrawal <= threshold) {
+        tax = earningsWithdrawal * 0.27;
+      } else {
+        tax = threshold * 0.27 + (earningsWithdrawal - threshold) * 0.42;
+      }
+    } else {
+      tax = 0;  // No tax if there are no earnings to withdraw
+    }
+
+    return tax;
   }
-
-  return tax;
-}
 
   List<Map<String, double>> _calculateYearlyValues() {
     // Calculate the yearly values based on the input fields
-    List<Map<String, double>> yearlyValues = calculateYearlyValues(
+    return calculateYearlyValues(
       principal: double.tryParse(_principalController.text) ?? 0,
       rate: double.tryParse(_rateController.text) ?? 0,
       time: double.tryParse(_timeController.text) ?? 0,
-      compoundingFrequency: int.tryParse(_compoundController.text) ?? 1,
       additionalAmount: double.tryParse(_additionalAmountController.text) ?? 0,
       contributionFrequency: _contributionFrequency,
     );
-    return yearlyValues;
   }
 
   void _recalculateValues() {
     setState(() {
-      _yearlyValues = _calculateYearlyValues();
-      // Additional calculation logic for withdrawal and tax
+      // Calculate the first investment table (with deposits)
+      _yearlyValues = calculateYearlyValues(
+        principal: double.tryParse(_principalController.text) ?? 0,
+        rate: double.tryParse(_rateController.text) ?? 0,
+        time: double.tryParse(_timeController.text) ?? 0,
+        additionalAmount: double.tryParse(_additionalAmountController.text) ?? 0,
+        contributionFrequency: _contributionFrequency,
+      );
+
       if (_yearlyValues.isNotEmpty) {
-        double totalAmount = _yearlyValues.last['totalValue']!;
+        double totalAmount = _yearlyValues.last['totalValue'] ?? 0;
         double withdrawalPercentage = double.tryParse(_withdrawalPercentageController.text) ?? 4;
+        int breakPeriod = int.tryParse(_breakController.text) ?? 0;
 
         _customWithdrawalRule = totalAmount * (withdrawalPercentage / 100);
-        double earningsRatio = (totalAmount - _yearlyValues.last['totalDeposits']!) / totalAmount;
-        double earningsWithdrawal = _customWithdrawalRule * earningsRatio;
-        _customWithdrawalTax = _calculateTax(earningsWithdrawal);
+
+        // Track the compound interest during the break period
+        compoundGatheredDuringBreak = 0;
+        double previousValue = totalAmount;
+        for (int i = 0; i < breakPeriod; i++) {
+          totalAmount = totalAmount * (1 + (_rateController.text.isNotEmpty ? double.parse(_rateController.text) : 0) / 100);
+          compoundGatheredDuringBreak += totalAmount - previousValue;
+          previousValue = totalAmount;
+        }
+
+        _secondTableValues = _calculateSecondTableValues(totalAmount);
+      } else {
+        _secondTableValues.clear();
       }
     });
   }
+
+  List<Map<String, double>> _calculateSecondTableValues(double initialValue) {
+    List<Map<String, double>> secondTableValues = [];
+    double totalAmount = initialValue;
+    double rate = double.tryParse(_rateController.text) ?? 0;
+    double previousValue = totalAmount;  // Track the total value from the previous year
+    int breakPeriod = int.tryParse(_breakController.text) ?? 0;  // Get break period input
+    double time = double.tryParse(_timeController.text) ?? 0;
+
+    // Apply interest for the break period or at least one year before withdrawals start
+    for (int year = 1; year <= (time + breakPeriod); year++) {
+      if (breakPeriod == 0 && year == 1) {
+        // If no break period, compound for at least 1 year before starting withdrawals
+        totalAmount = totalAmount * (1 + rate / 100);
+      } else if (year > breakPeriod) {
+        // Apply withdrawals after the break period
+        totalAmount -= _customWithdrawalRule * 12;
+      }
+
+      // Apply interest for the year (even after withdrawal)
+      totalAmount = totalAmount * (1 + rate / 100);
+
+      // Calculate compound interest earned this year
+      double compoundThisYear = totalAmount - previousValue;
+
+      secondTableValues.add({
+        'year': year.toDouble(),
+        'totalValue': totalAmount,
+        'compoundThisYear': compoundThisYear,
+        'compoundEarnings': totalAmount - initialValue,
+      });
+
+      // Update previous value for the next iteration
+      previousValue = totalAmount;
+    }
+
+    return secondTableValues;
+  }
+
   
   @override
   Widget build(BuildContext context) {
@@ -101,7 +161,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
               principalController: _principalController,
               rateController: _rateController,
               timeController: _timeController,
-              compoundController: _compoundController,
               additionalAmountController: _additionalAmountController,
               contributionFrequency: _contributionFrequency,
               onInputChanged: _recalculateValues,  // Trigger recalculation on input change
@@ -120,7 +179,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
               principal: double.tryParse(_principalController.text) ?? 0,
               rate: double.tryParse(_rateController.text) ?? 0,
               time: double.tryParse(_timeController.text) ?? 0,
-              compoundingFrequency: int.tryParse(_compoundController.text) ?? 1,
               additionalAmount: double.tryParse(_additionalAmountController.text) ?? 0,
               contributionFrequency: _contributionFrequency,
             ),
@@ -131,12 +189,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
               customWithdrawalTax: _customWithdrawalTax,
               recalculateValues: _recalculateValues,
               showTaxNote: _showTaxNote,
+              breakController: _breakController,
+              compoundGatheredDuringBreak: compoundGatheredDuringBreak,
+              onInputChanged: _recalculateValues,  // Trigger recalculation on input change
               toggleTaxNote: () {
                 setState(() {
                   _showTaxNote = !_showTaxNote;
                 });
               },
-            ),                // Conditionally render the note if _showTaxNote is true
+            ), // Conditionally render the note if _showTaxNote is true
             TaxWidget(
               showTaxNote: _showTaxNote,  // Pass the value to control the note visibility
             ),
@@ -146,8 +207,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
             TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Investment Table 1'),
-            Tab(text: 'Investment Table 2'),
+            Tab(text: 'Depositing Years'),
+            Tab(text: 'Withdrawal Years'),
           ],
         ), SizedBox(
               height: 400,  // Define a height for the table
@@ -161,16 +222,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
                       scrollDirection: Axis.horizontal,  // Allow horizontal scrolling
                       child: InvestmentTableWidget(
                         yearlyValues: _yearlyValues,  // Pass the calculated values for table 1
+                        showTotalDeposits: true,  // Show total deposits in the first table
                       ),
                     ),
                   ),
-                  // Second investment table
+                  // Second investment table: Evolution without additional deposits
                   SingleChildScrollView(
                     scrollDirection: Axis.vertical,  // Allow vertical scrolling
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,  // Allow horizontal scrolling
                       child: InvestmentTableWidget(
-                        yearlyValues: _yearlyValues,  // Pass the calculated values for table 2
+                        yearlyValues: _secondTableValues,  // Pass the calculated values for table 2
+                        showTotalDeposits: false,  // Hide total deposits in the second table
                       ),
                     ),
                   ),
