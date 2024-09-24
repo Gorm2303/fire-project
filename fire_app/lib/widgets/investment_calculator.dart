@@ -25,7 +25,7 @@ List<Map<String, double>> calculateYearlyValues({
       if (contributionFreq == 12) {
         // Monthly contributions with remaining months' interest
         int monthsLeft = 12 - (period - 1); // Months remaining in the year
-        totalAmount += additionalAmount * (rate / 100) * monthsLeft / 12;
+        totalAmount += additionalAmount * (rate / 100) * monthsLeft / 12; // Add the interest for the remaining months
       }
     }
 
