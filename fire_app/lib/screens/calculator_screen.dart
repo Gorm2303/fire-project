@@ -110,7 +110,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
     double totalCompound = 0;  // Track total compound interest during withdrawal years
     double withdrawal = 0;  // Initialize withdrawal amount to 0
     double tax = 0;  // Initialize tax amount to 0
-
+    compoundGatheredDuringBreak = 0;  // Reset compound gathered during break
+    
     // Handle compounding during the break period without adding rows to the table
     if (breakPeriod >= 1) {
       for (int year = 1; year <= breakPeriod; year++) {
