@@ -12,7 +12,7 @@ class The4PercentWidget extends StatelessWidget {
   final VoidCallback onInputChanged;  // Callback for when any input changes
 
   const The4PercentWidget({
-    Key? key,
+    super.key,
     required this.withdrawalPercentageController,
     required this.customWithdrawalRule,
     required this.customWithdrawalTax,
@@ -22,7 +22,7 @@ class The4PercentWidget extends StatelessWidget {
     required this.breakController,
     required this.compoundGatheredDuringBreak,
     required this.onInputChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

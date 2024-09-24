@@ -26,7 +26,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
   List<Map<String, double>> _secondTableValues = [];
   String _contributionFrequency = 'Monthly'; // Default contribution frequency
   double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
-  double _customWithdrawalTax = 0;  // Store the calculated tax
+  final double _customWithdrawalTax = 0;  // Store the calculated tax
   bool _showTaxNote = false;  // Initially, the tax note is hidden
   double compoundGatheredDuringBreak = 0; 
 
@@ -62,17 +62,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with SingleTickerPr
     }
 
     return tax;
-  }
-
-  List<Map<String, double>> _calculateYearlyValues() {
-    // Calculate the yearly values based on the input fields
-    return calculateYearlyValues(
-      principal: double.tryParse(_principalController.text) ?? 0,
-      rate: double.tryParse(_rateController.text) ?? 0,
-      time: double.tryParse(_timeController.text) ?? 0,
-      additionalAmount: double.tryParse(_additionalAmountController.text) ?? 0,
-      contributionFrequency: _contributionFrequency,
-    );
   }
 
   void _recalculateValues() {

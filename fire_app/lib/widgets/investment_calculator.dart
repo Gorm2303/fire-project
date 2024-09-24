@@ -1,4 +1,3 @@
-import 'dart:math';
 
 // Function to calculate the yearly investment values
 List<Map<String, double>> calculateYearlyValues({

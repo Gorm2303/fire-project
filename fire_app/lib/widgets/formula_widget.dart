@@ -44,7 +44,7 @@ class FormulaWidget extends StatelessWidget {
       String contributionText = contributionFrequency == 'Monthly'
           ? "12 \\times ${additionalAmount.toStringAsFixed(0)}"
           : additionalAmount.toStringAsFixed(0);
-      String ratePart = "${(rate / 100).toStringAsFixed(3)}";
+      String ratePart = (rate / 100).toStringAsFixed(3);
       String exponentPart = "^{$time}";
       String contributionFormula = "$contributionText \\times \\frac{\\left( (1 + $ratePart)$exponentPart - 1 \\right)}{$ratePart}";
       if (fullFormula.isNotEmpty) {
