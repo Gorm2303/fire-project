@@ -20,9 +20,12 @@ class FormulaWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     String fullFormula = _buildFormula();
 
-    return Math.tex(
-      fullFormula,
-      textStyle: const TextStyle(fontSize: 16),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,  // Enable horizontal scrolling
+      child: Math.tex(
+        fullFormula,
+        textStyle: const TextStyle(fontSize: 16),
+      ),
     );
   }
 
