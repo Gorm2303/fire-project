@@ -8,6 +8,10 @@ class InputFieldsWidget extends StatelessWidget {
   final String contributionFrequency;
   final Function(String) onContributionFrequencyChanged;  // Callback for dropdown
   final VoidCallback onInputChanged;  // Callback for when any input changes
+  final TextEditingController presettingsController;
+  final ValueChanged<String> onPresetSelected;  // Accept callback to handle preset selection
+  final Map<String, Map<String, String>> presetValues;  // Accept preset values
+
 
   const InputFieldsWidget({
     super.key,
@@ -18,6 +22,9 @@ class InputFieldsWidget extends StatelessWidget {
     required this.contributionFrequency,
     required this.onContributionFrequencyChanged,
     required this.onInputChanged,
+    required this.presettingsController,
+    required this.onPresetSelected,
+    required this.presetValues,
   });
 
   @override
@@ -26,6 +33,32 @@ class InputFieldsWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,  // Center the column content
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,  // Center the row
+            children: <Widget>[
+              const Text(
+                'Presettings: ',
+                style: TextStyle(fontSize: 16),
+                softWrap: true, // Allow text wrapping
+              ),
+              // Dropdown for preset selections
+                DropdownButton<String>(
+                  value: presettingsController.text,
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      presettingsController.text = newValue;
+                      onPresetSelected(newValue);  // Call the callback to update the controllers
+                    }
+                  },
+                  items: presetValues.keys.map<DropdownMenuItem<String>>((String key) {
+                    return DropdownMenuItem<String>(
+                      value: key,
+                      child: Text(key),  // Display the preset label
+                    );
+                  }).toList(),
+                ),
+            ],
+          ),
           // Constrain the TextFields to a fixed width of 305
           SizedBox(
             width: 305,
