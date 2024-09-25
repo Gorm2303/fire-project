@@ -35,5 +35,5 @@ jobs:
       - name: Deploy to Oracle Cloud VM
         run: |
           tar -czf /tmp/build.tar.gz -C fire_app/build/web .  # Archive the build files
-          scp -o StrictHostKeyChecking=no /tmp/build.tar.gz opc@${{ secrets.VM_IP_ADDRESS }}:/tmp/
-          ssh opc@${{ secrets.VM_IP_ADDRESS }} 'sudo tar -xzf /tmp/build.tar.gz -C /usr/share/nginx/html/ && sudo systemctl restart nginx'
+          scp -o StrictHostKeyChecking=no /tmp/build.tar.gz opc@${{ secrets.ORACLE_IP }}:/tmp/
+          ssh opc@${{ secrets.ORACLE_IP }} 'sudo tar -xzf /tmp/build.tar.gz -C /usr/share/nginx/html/ && sudo systemctl restart nginx'
