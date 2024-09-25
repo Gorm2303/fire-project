@@ -43,7 +43,7 @@ class The4PercentWidget extends StatelessWidget {
         const SizedBox(height: 15),  // Spacing between rows
         // Constrain the Compound Gathered Text
         Text(
-            'Compound Gathered During Break: ${compoundGatheredDuringBreak.toStringAsFixed(0)} kr.-',
+            'Interest Gathered During Break: ${compoundGatheredDuringBreak.toStringAsFixed(0)} kr.-',
             style: const TextStyle(fontSize: 16),
           ),
         const SizedBox(height: 15),  // Spacing between rows

@@ -229,6 +229,27 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     'additionalAmount': '5000',
     'breakPeriod': '0',
   },
+  'Child Savings': {
+    'principal': '5000',
+    'rate': '7',
+    'time': '21',
+    'additionalAmount': '100',
+    'breakPeriod': '0',
+  },
+  'Pension': {
+    'principal': '2000',
+    'rate': '7',
+    'time': '40',
+    'additionalAmount': '2000',
+    'breakPeriod': '0',
+  },
+  'Child Pension Savings': {
+    'principal': '5000',
+    'rate': '7',
+    'time': '10',
+    'additionalAmount': '1000',
+    'breakPeriod': '50',
+  },
 };
 
 
