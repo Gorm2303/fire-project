@@ -25,7 +25,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');  // Default 4%
   final TextEditingController _breakController = TextEditingController(text: '0');
   final TextEditingController _withdrawalTimeController = TextEditingController(text: '30'); // Add this controller
-  final TextEditingController _presettingsController = TextEditingController(text: 'None');  // Add this controller
+  final TextEditingController _presettingsController = TextEditingController(text: 'High Investment');  // Add this controller
 
   List<Map<String, double>> _yearlyValues = [];  // Initialize the list to store yearly values
   List<Map<String, double>> _secondTableValues = [];
@@ -178,36 +178,42 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     'rate': '0',
     'time': '0',
     'additionalAmount': '0',
+    'breakPeriod': '0',
   },
   'Medium Investment': {
     'principal': '5000',
     'rate': '7',
     'time': '25',
     'additionalAmount': '5000',
+    'breakPeriod': '0',
   },
   'Long Light Investment': {
     'principal': '2000',
     'rate': '7',
     'time': '40',
     'additionalAmount': '2000',
+    'breakPeriod': '0',
   }, 
   'High Investment': {
     'principal': '10000',
     'rate': '7',
     'time': '25',
     'additionalAmount': '10000',
+    'breakPeriod': '0',
   },
   'Slightly Extreme Investment': {
     'principal': '15000',
     'rate': '7',
     'time': '25',
     'additionalAmount': '15000',
+    'breakPeriod': '0',
   },
   'Extreme Investment': {
     'principal': '20000',
     'rate': '7',
     'time': '20',
     'additionalAmount': '20000',
+    'breakPeriod': '0',
   },
   'High Investment with Break': {
     'principal': '10000',
@@ -221,6 +227,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     'rate': '7',
     'time': '40',
     'additionalAmount': '5000',
+    'breakPeriod': '0',
   },
 };
 
@@ -233,10 +240,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
         _timeController.text = presettings[presetKey]!['time']!;
         _additionalAmountController.text = presettings[presetKey]!['additionalAmount']!;
         _presettingsController.text = presetKey;  // Update the dropdown text to the new selection
+        _breakController.text = presettings[presetKey]!['breakPeriod']!;
       });
-      if (presettings[presetKey]!['breakPeriod'] != null) {
-        _breakController.text = presettings[presetKey]!['breakPeriod']!;  // Update the break period if available
-      }
       _recalculateValues();  // Recalculate the values after updating the controllers
     }
   }
