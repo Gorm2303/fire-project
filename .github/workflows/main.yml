@@ -11,14 +11,14 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4.2.0
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.14.0
 
         # Use the webfactory/ssh-agent action to add the SSH key
       - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
