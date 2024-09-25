@@ -16,13 +16,15 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.14.0
 
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Install Flutter dependencies
         run: |
           cd fire_app  # Navigate to the fire_app directory
           flutter pub get  # Install the dependencies
-
-      - name: What is here
-        run: ls  
 
       - name: Build Flutter Web
         run: |
@@ -33,5 +35,3 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no -r build/web/* opc@${{ secrets.ORACLE_IP }}:/var/www/html/
           ssh opc@${{ secrets.ORACLE_IP }} 'sudo systemctl restart nginx'
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
