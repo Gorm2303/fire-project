@@ -16,14 +16,11 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.14.0
 
-      - name: Where are we
-        run: pwd  
+      - name: Navigate to fire_app directory
+        working-directory: fire_app  # Ensure you are in the fire_app directory
 
       - name: What is here
         run: ls  
-
-      - name: Navigate to Flutter Project
-        run: cd fire_app  
 
       - name: Install dependencies
         run: flutter pub get
