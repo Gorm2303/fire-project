@@ -16,6 +16,12 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.14.0
 
+        # Use the webfactory/ssh-agent action to add the SSH key
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Install Flutter dependencies
         run: |
           cd fire_app  # Navigate to the fire_app directory
@@ -28,5 +34,5 @@ jobs:
 
       - name: Deploy to Oracle Cloud VM
         run: |
-          scp -i ${{ secrets.SSH_PRIVATE_KEY }} -o StrictHostKeyChecking=no -r fire_app/build/web/* opc@${{ secrets.VM_IP_ADDRESS }}:/var/www/html/
-          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o StrictHostKeyChecking=no opc@${{ secrets.VM_IP_ADDRESS }} 'sudo systemctl restart nginx'
+          scp -o StrictHostKeyChecking=no -r fire_app/build/web/* opc@${{ secrets.VM_IP_ADDRESS }}:/var/www/html/
+          ssh opc@${{ secrets.VM_IP_ADDRESS }} 'sudo systemctl restart nginx'
