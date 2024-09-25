@@ -25,7 +25,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');  // Default 4%
   final TextEditingController _breakController = TextEditingController(text: '0');
   final TextEditingController _withdrawalTimeController = TextEditingController(text: '30'); // Add this controller
-  final TextEditingController _presettingsController = TextEditingController(text: 'High Investment');  // Add this controller
+  final TextEditingController _presettingsController = TextEditingController(text: 'None');  // Add this controller
 
   List<Map<String, double>> _yearlyValues = [];  // Initialize the list to store yearly values
   List<Map<String, double>> _secondTableValues = [];
@@ -43,7 +43,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _mainTabController = TabController(length: 2, vsync: this);  // Initialize the TabController with two tabs
     setState(() {
       _recalculateValues();
-      updatePresetControllers('Light Investment');  // Update the controllers with the preset values
+      updatePresetControllers('High Investment');  // Update the controllers with the preset values
     });  
   }
 
