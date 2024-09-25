@@ -16,17 +16,18 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.14.0
 
-      - name: Navigate to fire_app directory
-        working-directory: fire_app  # Ensure you are in the fire_app directory
+      - name: Install Flutter dependencies
+        run: |
+          cd fire_app  # Navigate to the fire_app directory
+          flutter pub get  # Install the dependencies
 
       - name: What is here
         run: ls  
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build the Flutter web app
-        run: flutter build web
+      - name: Build Flutter Web
+        run: |
+          cd fire_app  # Navigate to the fire_app directory
+          flutter build web  # Build the web app
 
       - name: Deploy to Oracle Cloud VM
         run: |
