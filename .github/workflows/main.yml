@@ -34,5 +34,5 @@ jobs:
 
       - name: Deploy to Oracle Cloud VM
         run: |
-          scp -o StrictHostKeyChecking=no -r fire_app/build/web/* opc@${{ secrets.ORACLE_IP }}:/var/www/html/
+          scp -o StrictHostKeyChecking=no -r fire_app/build/web/* opc@${{ secrets.ORACLE_IP }}:/usr/share/nginx/html
           ssh opc@${{ secrets.ORACLE_IP }} 'sudo systemctl restart nginx'
