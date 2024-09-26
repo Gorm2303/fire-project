@@ -2,7 +2,7 @@ import 'package:fire_app/models/tax_option.dart';
 import 'package:flutter/material.dart';
 import '../widgets/formula_widget.dart';
 import '../widgets/tax_widget.dart';
-import '../widgets/investment_calculator.dart';
+import '../services/investment_calculator.dart';
 import '../widgets/investment_table_widget.dart';
 import '../widgets/input_fields_widget.dart';
 import '../widgets/the4percent_widget.dart';
