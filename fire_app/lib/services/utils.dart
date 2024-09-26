@@ -1,6 +1,9 @@
 import 'dart:math';
 
 class Utils {
+  static const double threshold = 61000;  // The threshold for lower tax rate
+  static const double taxExemptionCard = 49700;  // The tax-free limit
+
   // Convert a String to double, returns 0 if the parsing fails
   static double parseTextToDouble(String text) {
     return double.tryParse(text) ?? 0.0;

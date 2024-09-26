@@ -34,12 +34,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   late SwitchAndTaxRate _toggleSwitchWidget;
   
-  List<Map<String, double>> _yearlyValues = [];
-  List<Map<String, double>> _secondTableValues = [];
+  final List<Map<String, double>> _yearlyValues = [];
+  final List<Map<String, double>> _secondTableValues = [];
 
   String _contributionFrequency = 'Monthly';
   double _customWithdrawalRule = 0;
   double _customWithdrawalTax = 0;
+  double _taxableWithdrawal = 0;
   double _totalAfterBreak = 0;
   double _earningsAfterBreak = 0;
   double _earningsPercentAfterBreak = 0;
@@ -110,65 +111,64 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   }
 
   void _recalculateValues() {
-    // Reset yearly values
-    _yearlyValues = [
+    setState(() {
+      _resetYearlyValues();
+      _calculateYearlyValues();
+      _calculateSecondTableValues();
+    });
+  }
+
+  void _resetYearlyValues() {
+    _yearlyValues.add(
       {
         'year': 0.0,
-        'totalValue': _parseTextToDouble(_principalController.text),
-        'totalDeposits': _parseTextToDouble(_principalController.text),
+        'totalValue': Utils.parseTextToDouble(_principalController.text),
+        'totalDeposits': Utils.parseTextToDouble(_principalController.text),
         'compoundEarnings': 0,
         'compoundThisYear': 0,
-      }
-    ];
-
-    _yearlyValues.addAll(_calculateYearlyValues());
-
-    if (_yearlyValues.isNotEmpty) {
-      double totalAmount = _yearlyValues.last['totalValue'] ?? 0;
-      _secondTableValues = _calculateSecondTableValues(totalAmount);
-    } else {
-      _secondTableValues.clear();
-    }
+      },
+    );
   }
 
-  double _parseTextToDouble(String text) {
-    return double.tryParse(text) ?? 0;
+  void _calculateYearlyValues() {
+    List<Map<String, double>> calculatedValues = _getYearlyValues();
+    _yearlyValues.addAll(calculatedValues);
   }
 
-  List<Map<String, double>> _calculateYearlyValues() {
-    // Extracted the logic for calculating yearly values.
+
+  List<Map<String, double>> _getYearlyValues() {
     return calculateYearlyValues(
-      principal: _parseTextToDouble(_principalController.text),
-      rate: _parseTextToDouble(_rateController.text),
-      time: _parseTextToDouble(_timeController.text),
-      additionalAmount: _parseTextToDouble(_additionalAmountController.text),
+      principal: Utils.parseTextToDouble(_principalController.text),
+      rate: Utils.parseTextToDouble(_rateController.text),
+      time: Utils.parseTextToDouble(_timeController.text),
+      additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
       contributionFrequency: _contributionFrequency,
     );
   }
 
-  List<Map<String, double>> _calculateSecondTableValues(double initialValue) {
-    List<Map<String, double>> secondTableValues = [];
-    double totalAmount = initialValue;
+  List<Map<String, double>> _calculateSecondTableValues() {
+    double initialValue = _yearlyValues.last['totalValue']!;
     double rate = double.tryParse(_rateController.text) ?? 0;
-    double previousValue = totalAmount;  // Track the total value from the previous year
+    double previousValue;  // Track the total value from the previous year
     int breakPeriod = int.tryParse(_breakController.text) ?? 0;  // Get break period input
     double withdrawalTime = double.tryParse(_withdrawalTimeController.text) ?? 30;  // Withdrawal time in years
     double totalCompound = 0;  // Track total compound interest during withdrawal years
     double withdrawal = 0;  // Initialize withdrawal amount to 0
     double tax = 0;  // Initialize tax amount to 0
     compoundGatheredDuringBreak = 0;  // Reset compound gathered during break
-
+    double totalAmount = initialValue;  // Initialize total amount to the initial value
+    
     // Handle compounding during the break period without adding rows to the table
     if (breakPeriod >= 1) {
       for (int year = 1; year <= breakPeriod; year++) {
         totalAmount *= (1 + rate / 100);  // Apply interest
         previousValue = totalAmount;  // Update previous value after applying interest
-        compoundGatheredDuringBreak = totalAmount - initialValue;  // Track compound interest during the break period
       }
+      compoundGatheredDuringBreak = totalAmount - initialValue;  // Track compound interest during the break period
     }
 
     // Add the current year (within break period) to the table
-    secondTableValues.add({
+    _secondTableValues.add({
       'year': 0,
       'totalValue': totalAmount,
       'compoundThisYear': 0,
@@ -179,7 +179,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
     // Calculate CustomWithdrawalRule only after the break period
     _customWithdrawalRule = totalAmount * (double.tryParse(_withdrawalPercentageController.text) ?? 4) / 100;
-    _customWithdrawalTax = _yearlyTotalTax(totalAmount, _yearlyValues.last['totalDeposits']!, _customWithdrawalRule);
+    _taxableWithdrawal = calculateTaxableWithdrawal(totalAmount, _customWithdrawalRule);
+    _customWithdrawalTax = _yearlyTotalTax(totalAmount, _customWithdrawalRule);
 
     // Store the total amount after the break period
     _totalAfterBreak = totalAmount;
@@ -201,9 +202,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       // Apply withdrawals and calculate tax during the withdrawal period
       withdrawal = _customWithdrawalRule;
       totalAmount -= withdrawal;  // Subtract yearly withdrawal
-      tax = _yearlyTotalTax(totalAmount, _yearlyValues.last['totalDeposits']!, withdrawal);  // Calculate tax on the withdrawal
+      tax = _yearlyTotalTax(totalAmount, withdrawal);  // Calculate tax on the withdrawal
 
-      secondTableValues.add({
+      _secondTableValues.add({
         'year': year.toDouble(),  // Keep the year count starting from 1
         'totalValue': totalAmount,
         'compoundThisYear': compoundThisYear,
@@ -213,25 +214,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       });
     }
 
-    return secondTableValues;
+    return _secondTableValues;
   }
 
-  double _yearlyTotalTax(double total, double deposits, double withdrawal) {
-    const double threshold = 61000;  // The threshold for lower tax rate
-    const double taxExemptionCard = 49700;  // The tax-free limit
+  double calculateTaxableWithdrawal(double total, double withdrawal) {
+    double deposits = _yearlyValues.last['totalDeposits']!;
+    double earnings = Utils.calculateEarnings(total, deposits);
+    double earningsPercent = Utils.calculateEarningsPercent(earnings, total);
+    double taxableWithdrawal = Utils.calculateTaxableWithdrawal(earningsPercent, withdrawal, Utils.taxExemptionCard);
+    return taxableWithdrawal;
+  }
+
+  double _yearlyTotalTax(double total, double withdrawal) {
     double tax;
-
-    // Step 1: Calculate Earnings
-    double earnings = total - deposits;
-
-    if (total <= 0) {
-      return 0;  // No tax if total is less than or equal to 0
-    }
-    // Step 2: Calculate Earnings Percent
-    double earningsPercent = earnings / total;
-
-    // Step 3: Calculate Taxable Withdrawal
-    double taxableWithdrawal = earningsPercent * withdrawal - taxExemptionCard;
+    double taxableWithdrawal = calculateTaxableWithdrawal(total, withdrawal);
 
     // Step 4: Calculate Tax
     if (taxableWithdrawal <= 0) {
@@ -244,13 +240,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       // If the custom tax rule is active, calculate tax based on the custom tax rate
       tax = taxableWithdrawal * parsedTax / 100;
     } else if (_selectedTaxOption.rate == 42.0) {
-      if (taxableWithdrawal <= threshold) {
+      if (taxableWithdrawal <= Utils.threshold) {
         // If earningsWithdrawal is less than or equal to the threshold, apply 27% tax
         tax = taxableWithdrawal * 0.27;
       } else {
         // If earningsWithdrawal is above the threshold, apply 27% on the first 61,000 kr,
         // and 42% on the remaining amount
-        tax = threshold * 0.27 + (taxableWithdrawal - threshold) * 0.42;
+        tax = Utils.threshold * 0.27 + (taxableWithdrawal - Utils.threshold) * 0.42;
       }
     } else {
       // If the selected tax option is not 15.3, apply the tax rate from the selected option
@@ -353,7 +349,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       earningsWithdrawalRatio: EarningsWithdrawalRatio(
         earnings: _earningsAfterBreak,
         earningsPercent: _earningsPercentAfterBreak,
-        taxableWithdrawal: _customWithdrawalRule,
+        taxableWithdrawal: _taxableWithdrawal,
         annualTax: _customWithdrawalTax,
       ),
     );
