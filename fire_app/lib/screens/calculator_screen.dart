@@ -1,4 +1,5 @@
 
+import 'package:fire_app/models/tax_option.dart';
 import 'package:flutter/material.dart';
 import '../widgets/formula_widget.dart';
 import '../widgets/tax_widget.dart';
@@ -8,6 +9,7 @@ import '../widgets/input_fields_widget.dart';
 import '../widgets/the4percent_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
 import '../widgets/earnings_withdrawal_ratio.dart';
+import '../widgets/switch_taxrate_widget.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -27,6 +29,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _breakController = TextEditingController(text: '0');
   final TextEditingController _withdrawalTimeController = TextEditingController(text: '30'); // Add this controller
   final TextEditingController _presettingsController = TextEditingController(text: 'None');  // Add this controller
+  final TextEditingController _customTaxController = TextEditingController(text: '0');  // Add this controller
+  late SwitchAndTaxRate _toggleSwitchWidget;  // Declare the widget without initializing it
 
   List<Map<String, double>> _yearlyValues = [];  // Initialize the list to store yearly values
   List<Map<String, double>> _secondTableValues = [];
@@ -36,20 +40,50 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   double _totalAfterBreak = 0;  // Store the total amount after the break period
   double _earningsAfterBreak = 0;  // Store the earnings after the break period
   double _earningsPercentAfterBreak = 0;  // Store the earnings percent after the break period
+  bool _isCustomTaxRule = false;  // Initially, the custom tax rule is disabled
   bool _showTaxNote = false;  // Initially, the tax note is hidden
   double compoundGatheredDuringBreak = 0; 
   String _selectedTab = 'Investment Calculator'; // Default value
+  List<TaxOption> taxOptions = [
+    TaxOption(15.3, 'Pension PAL-skat'),
+    TaxOption(17.0, 'Aktiesparekonto'),
+    TaxOption(42.0, 'Normal Aktiebeskatning*'),
+  ];
 
+  late TaxOption _selectedTaxOption = taxOptions[2];  // Default tax option
   @override
   void initState() {
     super.initState();
-    // Calculate table when the page is loaded
-    _tableTabController = TabController(length: 2, vsync: this);  // Initialize the TabController with two tabs
-    _mainTabController = TabController(length: 2, vsync: this);  // Initialize the TabController with two tabs
+    // Initialize the TabControllers
+    _tableTabController = TabController(length: 2, vsync: this);
+    _mainTabController = TabController(length: 2, vsync: this);
+
+    // Initialize the SwitchAndTaxRate widget
+    _toggleSwitchWidget = SwitchAndTaxRate(
+      customTaxController: _customTaxController,
+      selectedTaxOption: _selectedTaxOption,  // Default tax option
+      taxOptions: taxOptions,  // Pass the tax options here
+      recalculateValues: _recalculateValues, // Method to trigger recalculation
+      isCustom: _isCustomTaxRule,
+      onSwitchChanged: (bool value) {
+        setState(() {
+          _isCustomTaxRule = value;
+          _recalculateValues();
+        });
+      },
+      // Additional callback for updating the selected tax option
+      onTaxOptionChanged: (TaxOption newOption) {
+        setState(() {
+          _selectedTaxOption = newOption;  // Update the selected tax option in the parent
+        });
+        _recalculateValues();  // Recalculate values when tax option changes
+      },
+    );
+
     setState(() {
       _recalculateValues();
       updatePresetControllers('High Investment');  // Update the controllers with the preset values
-    });  
+    });
   }
 
   @override
@@ -59,8 +93,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     super.dispose();
   }
 
-  double _calculateTax(double total, double deposits, double withdrawal) {
+  double _yearlyTotalTax(double total, double deposits, double withdrawal) {
       const double threshold = 61000;  // The threshold for lower tax rate
+      const double taxExemptionCard = 49700;  // The tax-free limit
       double tax;
 
       // Step 1: Calculate Earnings
@@ -70,20 +105,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     double earningsPercent = earnings / total;
 
     // Step 3: Calculate Taxable Withdrawal
-    double taxableWithdrawal = earningsPercent * withdrawal;
+    double taxableWithdrawal = earningsPercent * withdrawal - taxExemptionCard;
 
-    // Step 4: Apply tax only if withdrawals occur (i.e., earningsWithdrawal > 0)
-    if (taxableWithdrawal > 0) {
+    // Step 4: Calculate Tax
+    if (taxableWithdrawal <= 0) {
+      return 0;  // No tax if taxableWithdrawal is less than or equal to 0
+    }
+
+    double parsedTax = double.tryParse(_customTaxController.text) ?? 0;
+
+    if (_isCustomTaxRule) {
+      // If the custom tax rule is active, calculate tax based on the custom tax rate
+      tax = taxableWithdrawal * parsedTax / 100;
+    } else if (_selectedTaxOption.rate == 42.0) {
         if (taxableWithdrawal <= threshold) {
-            // If earningsWithdrawal is less than or equal to the threshold, apply 27% tax
-            tax = taxableWithdrawal * 0.27;
-        } else {
-            // If earningsWithdrawal is above the threshold, apply 27% on the first 61,000 kr,
-            // and 42% on the remaining amount
-            tax = threshold * 0.27 + (taxableWithdrawal - threshold) * 0.42;
-        }
+          // If earningsWithdrawal is less than or equal to the threshold, apply 27% tax
+          tax = taxableWithdrawal * 0.27;
+      } else {
+          // If earningsWithdrawal is above the threshold, apply 27% on the first 61,000 kr,
+          // and 42% on the remaining amount
+          tax = threshold * 0.27 + (taxableWithdrawal - threshold) * 0.42;
+      }
     } else {
-        tax = 0;  // No tax if there are no earnings to withdraw
+      // If the selected tax option is not 15.3, apply the tax rate from the selected option
+      tax = taxableWithdrawal * _selectedTaxOption.rate / 100;
     }
 
     return tax;
@@ -155,7 +200,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
     // Calculate CustomWithdrawalRule only after the break period
     _customWithdrawalRule = totalAmount * (double.tryParse(_withdrawalPercentageController.text) ?? 4) / 100;
-    _customWithdrawalTax = _calculateTax(totalAmount, _yearlyValues.last['totalDeposits']!, _customWithdrawalRule);
+    _customWithdrawalTax = _yearlyTotalTax(totalAmount, _yearlyValues.last['totalDeposits']!, _customWithdrawalRule);
 
     // Store the total amount after the break period
     _totalAfterBreak = totalAmount;
@@ -177,7 +222,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       // Apply withdrawals and calculate tax during the withdrawal period
       withdrawal = _customWithdrawalRule;
       totalAmount -= withdrawal;  // Subtract yearly withdrawal
-      tax = _calculateTax(totalAmount, _yearlyValues.last['totalDeposits']!, withdrawal);  // Calculate tax on the withdrawal
+      tax = _yearlyTotalTax(totalAmount, _yearlyValues.last['totalDeposits']!, withdrawal);  // Calculate tax on the withdrawal
 
       secondTableValues.add({
         'year': year.toDouble(),  // Keep the year count starting from 1
@@ -334,6 +379,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
             breakController: _breakController,
             compoundGatheredDuringBreak: compoundGatheredDuringBreak,
             withdrawalTimeController: _withdrawalTimeController,
+            taxController: _customTaxController,
+            toggleSwitchWidget: _toggleSwitchWidget,
             toggleTaxNote: () {
               setState(() {
                 _showTaxNote = !_showTaxNote;

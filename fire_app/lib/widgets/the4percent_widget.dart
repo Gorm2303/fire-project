@@ -9,6 +9,8 @@ class The4PercentWidget extends StatelessWidget {
   final TextEditingController breakController;
   final double compoundGatheredDuringBreak; 
   final TextEditingController withdrawalTimeController;
+  final TextEditingController taxController;
+  final Widget toggleSwitchWidget;
 
   const The4PercentWidget({
     super.key,
@@ -19,7 +21,9 @@ class The4PercentWidget extends StatelessWidget {
     required this.toggleTaxNote,
     required this.breakController,
     required this.compoundGatheredDuringBreak,
-    required this.withdrawalTimeController,
+    required this.withdrawalTimeController, 
+    required this.taxController,
+    required this.toggleSwitchWidget,
   });
 
   @override
@@ -80,6 +84,7 @@ class The4PercentWidget extends StatelessWidget {
             ),
           ],
         ),
+        toggleSwitchWidget,
         const SizedBox(height: 10),  // Spacing between rows
         Row(
           mainAxisAlignment: MainAxisAlignment.center,

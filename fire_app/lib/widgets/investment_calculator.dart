@@ -31,8 +31,6 @@ List<Map<String, double>> calculateYearlyValues({
     }
   }
 
-
-
     // Calculate the current compound earnings
     double currentCompoundEarnings = totalAmount - totalDeposits;
 
