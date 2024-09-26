@@ -34,8 +34,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   late SwitchAndTaxRate _toggleSwitchWidget;
   
-  final List<Map<String, double>> _yearlyValues = [];
-  final List<Map<String, double>> _secondTableValues = [];
+  List<Map<String, double>> _yearlyValues = [];
+  List<Map<String, double>> _secondTableValues = [];
 
   String _contributionFrequency = 'Monthly';
   double _customWithdrawalRule = 0;
@@ -119,15 +119,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   }
 
   void _resetYearlyValues() {
-    _yearlyValues.add(
+    // Clear the list before adding new values
+    _yearlyValues = [
       {
         'year': 0.0,
         'totalValue': Utils.parseTextToDouble(_principalController.text),
         'totalDeposits': Utils.parseTextToDouble(_principalController.text),
         'compoundEarnings': 0,
         'compoundThisYear': 0,
-      },
-    );
+      }
+    ];
   }
 
   void _calculateYearlyValues() {
@@ -147,75 +148,74 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   }
 
   List<Map<String, double>> _calculateSecondTableValues() {
-    double initialValue = _yearlyValues.last['totalValue']!;
-    double rate = double.tryParse(_rateController.text) ?? 0;
-    double previousValue;  // Track the total value from the previous year
-    int breakPeriod = int.tryParse(_breakController.text) ?? 0;  // Get break period input
-    double withdrawalTime = double.tryParse(_withdrawalTimeController.text) ?? 30;  // Withdrawal time in years
-    double totalCompound = 0;  // Track total compound interest during withdrawal years
-    double withdrawal = 0;  // Initialize withdrawal amount to 0
-    double tax = 0;  // Initialize tax amount to 0
-    compoundGatheredDuringBreak = 0;  // Reset compound gathered during break
-    double totalAmount = initialValue;  // Initialize total amount to the initial value
-    
-    // Handle compounding during the break period without adding rows to the table
-    if (breakPeriod >= 1) {
-      for (int year = 1; year <= breakPeriod; year++) {
-        totalAmount *= (1 + rate / 100);  // Apply interest
-        previousValue = totalAmount;  // Update previous value after applying interest
-      }
-      compoundGatheredDuringBreak = totalAmount - initialValue;  // Track compound interest during the break period
-    }
+  // Clear the second table values before adding new ones
+  _secondTableValues = [];
 
-    // Add the current year (within break period) to the table
-    _secondTableValues.add({
-      'year': 0,
-      'totalValue': totalAmount,
-      'compoundThisYear': 0,
-      'compoundEarnings': 0,
-      'withdrawal': 0,  // No withdrawals during break period
-      'tax': 0,  // No tax during break period
-    });
+  double initialValue = _yearlyValues.last['totalValue']!;
+  double rate = Utils.parseTextToDouble(_rateController.text);
+  double previousValue;
+  int breakPeriod = Utils.parseTextToInt(_breakController.text);
+  double withdrawalTime = Utils.parseTextToDouble(_withdrawalTimeController.text);
+  double totalCompound = 0;
+  double withdrawal = 0;
+  double tax = 0;
+  compoundGatheredDuringBreak = 0;
+  double totalAmount = initialValue;
 
-    // Calculate CustomWithdrawalRule only after the break period
-    _customWithdrawalRule = totalAmount * (double.tryParse(_withdrawalPercentageController.text) ?? 4) / 100;
-    _taxableWithdrawal = calculateTaxableWithdrawal(totalAmount, _customWithdrawalRule);
-    _customWithdrawalTax = _yearlyTotalTax(totalAmount, _customWithdrawalRule);
-
-    // Store the total amount after the break period
-    _totalAfterBreak = totalAmount;
-    _earningsAfterBreak = _totalAfterBreak - _yearlyValues.last['totalDeposits']!;
-    _earningsPercentAfterBreak = _earningsAfterBreak / _totalAfterBreak;
-
-    // Now handle the withdrawal period and create table rows
-    for (int year = 1; year <= withdrawalTime; year++) {
-      // Before applying interest, store the previous year's total value
-      previousValue = totalAmount;
-
-      // Apply interest for the year
+  // Handle compounding during the break period
+  if (breakPeriod >= 1) {
+    for (int year = 1; year <= breakPeriod; year++) {
       totalAmount *= (1 + rate / 100);
-
-      // Calculate compound interest earned this year
-      double compoundThisYear = totalAmount - previousValue;
-      totalCompound += compoundThisYear;  // Accumulate only the interest from the withdrawal years
-
-      // Apply withdrawals and calculate tax during the withdrawal period
-      withdrawal = _customWithdrawalRule;
-      totalAmount -= withdrawal;  // Subtract yearly withdrawal
-      tax = _yearlyTotalTax(totalAmount, withdrawal);  // Calculate tax on the withdrawal
-
-      _secondTableValues.add({
-        'year': year.toDouble(),  // Keep the year count starting from 1
-        'totalValue': totalAmount,
-        'compoundThisYear': compoundThisYear,
-        'compoundEarnings': totalCompound,  // Track only compound interest from the withdrawal years
-        'withdrawal': withdrawal,  // Show yearly withdrawal
-        'tax': tax,  // Show tax for the year
-      });
+      previousValue = totalAmount;
     }
-
-    return _secondTableValues;
+    compoundGatheredDuringBreak = totalAmount - initialValue;
   }
+
+  // Add the first entry (for the break period)
+  _secondTableValues.add({
+    'year': 0,
+    'totalValue': totalAmount,
+    'compoundThisYear': 0,
+    'compoundEarnings': 0,
+    'withdrawal': 0,
+    'tax': 0,
+  });
+
+  // Calculate CustomWithdrawalRule after the break period
+  _customWithdrawalRule = totalAmount * (Utils.parseTextToDouble(_withdrawalPercentageController.text)) / 100;
+  _taxableWithdrawal = calculateTaxableWithdrawal(totalAmount, _customWithdrawalRule);
+  _customWithdrawalTax = _yearlyTotalTax(totalAmount, _customWithdrawalRule);
+
+  // Store values after the break period
+  _totalAfterBreak = totalAmount;
+  _earningsAfterBreak = _totalAfterBreak - _yearlyValues.last['totalDeposits']!;
+  _earningsPercentAfterBreak = _earningsAfterBreak / _totalAfterBreak;
+
+  // Handle the withdrawal period
+  for (int year = 1; year <= withdrawalTime; year++) {
+    previousValue = totalAmount;
+    totalAmount *= (1 + rate / 100);
+
+    double compoundThisYear = totalAmount - previousValue;
+    totalCompound += compoundThisYear;
+
+    // Apply withdrawals and calculate tax during the withdrawal period
+    withdrawal = _customWithdrawalRule;
+    totalAmount -= withdrawal;
+    tax = _yearlyTotalTax(totalAmount, withdrawal);
+
+    _secondTableValues.add({
+      'year': year.toDouble(),
+      'totalValue': totalAmount,
+      'compoundThisYear': compoundThisYear,
+      'compoundEarnings': totalCompound,
+      'withdrawal': withdrawal,
+      'tax': tax,
+    });
+  }
+
+  return _secondTableValues;
+}
 
   double calculateTaxableWithdrawal(double total, double withdrawal) {
     double deposits = _yearlyValues.last['totalDeposits']!;
@@ -234,7 +234,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       return 0;  // No tax if taxableWithdrawal is less than or equal to 0
     }
 
-    double parsedTax = double.tryParse(_customTaxController.text) ?? 0;
+    double parsedTax = Utils.parseTextToDouble(_customTaxController.text);
 
     if (_isCustomTaxRule) {
       // If the custom tax rule is active, calculate tax based on the custom tax rate
