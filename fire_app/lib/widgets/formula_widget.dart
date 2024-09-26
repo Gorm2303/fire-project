@@ -50,7 +50,7 @@ class FormulaWidget extends StatelessWidget {
 
       // Corrected monthly contributions with remaining months' interest over `t` years
       String monthlyContributionFormula =
-        "\\sum_{j=1}^{$time} \\sum_{k=1}^{12} $contributionText \\times \\left(1 + \\frac{$ratePart}{12} \\times \\frac{12 - k + 1}{12}\\right)";
+        "\\sum_{j=1}^{$time} \\sum_{k=1}^{12} $contributionText \\times \\left(1 + \\frac{$ratePart}{12} \\times \\frac{12 - k}{12}\\right)";
 
       if (fullFormula.isNotEmpty) {
         fullFormula += " + ";

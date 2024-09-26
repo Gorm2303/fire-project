@@ -15,19 +15,23 @@ List<Map<String, double>> calculateYearlyValues({
   int contributionFreq = contributionFrequency == 'Monthly' ? 12 : 1;
 
   for (int year = 1; year <= time; year++) {
-    totalAmount *= (1 + (rate / 100));  // Apply the interest for the year
+  // Apply the interest for the full year (without contributions) at the start of each year
+  totalAmount *= (1 + (rate / 100));  
 
-    // Apply the additional amount (if applicable) at each contribution period
-    for (int period = 1; period <= contributionFreq; period++) {
-      totalAmount += additionalAmount;  // Add the new deposit
-      totalDeposits += additionalAmount;  // Track the total deposits
+  // Apply the additional amount for each contribution period (starting from the 1st month)
+  for (int period = 1; period <= contributionFreq; period++) {
+    // Add the new deposit for the current period
+    totalAmount += additionalAmount;
+    totalDeposits += additionalAmount;
 
-      if (contributionFreq == 12) {
-        // Monthly contributions with remaining months' interest
-        int monthsLeft = 12 - (period - 1); // Months remaining in the year
-        totalAmount += additionalAmount * (rate / 100) * monthsLeft / 12; // Add the interest for the remaining months
-      }
+    if (contributionFreq == 12) {
+      // Monthly contributions: Calculate the remaining months' interest
+      int monthsLeft = 12 - period;  // Subtract current period (no more -1 since period starts from 1)
+      totalAmount += additionalAmount * (rate / 100) * monthsLeft / 12; // Add interest for the remaining months
     }
+  }
+
+
 
     // Calculate the current compound earnings
     double currentCompoundEarnings = totalAmount - totalDeposits;
