@@ -9,7 +9,8 @@ import '../widgets/the4percent_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
 import '../widgets/earnings_withdrawal_ratio.dart';
 import '../widgets/switch_taxrate_widget.dart';
-
+import '../services/presetting_service.dart';
+import '../services/utils.dart';
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
@@ -57,86 +58,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   late TaxOption _selectedTaxOption = taxOptions[2];
 
-    final Map<String, Map<String, String>> presettings = {
-  'None': {
-    'principal': '0',
-    'rate': '0',
-    'time': '0',
-    'additionalAmount': '0',
-    'breakPeriod': '0',
-  },
-  'Medium Investment': {
-    'principal': '5000',
-    'rate': '7',
-    'time': '25',
-    'additionalAmount': '5000',
-    'breakPeriod': '0',
-  },
-  'Long Light Investment': {
-    'principal': '2000',
-    'rate': '7',
-    'time': '40',
-    'additionalAmount': '2000',
-    'breakPeriod': '0',
-  }, 
-  'High Investment': {
-    'principal': '10000',
-    'rate': '7',
-    'time': '25',
-    'additionalAmount': '10000',
-    'breakPeriod': '0',
-  },
-  'Slightly Extreme Investment': {
-    'principal': '15000',
-    'rate': '7',
-    'time': '25',
-    'additionalAmount': '15000',
-    'breakPeriod': '0',
-  },
-  'Extreme Investment': {
-    'principal': '20000',
-    'rate': '7',
-    'time': '20',
-    'additionalAmount': '20000',
-    'breakPeriod': '0',
-  },
-  'High Investment with Break': {
-    'principal': '10000',
-    'rate': '7',
-    'time': '20',
-    'additionalAmount': '10000',
-    'breakPeriod': '10',
-  },
-    'Long Medium Investment': {
-    'principal': '5000',
-    'rate': '7',
-    'time': '40',
-    'additionalAmount': '5000',
-    'breakPeriod': '0',
-  },
-  'Child Savings': {
-    'principal': '5000',
-    'rate': '7',
-    'time': '21',
-    'additionalAmount': '100',
-    'breakPeriod': '0',
-  },
-  'Pension': {
-    'principal': '2000',
-    'rate': '7',
-    'time': '40',
-    'additionalAmount': '2000',
-    'breakPeriod': '0',
-  },
-  'Child Pension Savings': {
-    'principal': '5000',
-    'rate': '7',
-    'time': '10',
-    'additionalAmount': '1000',
-    'breakPeriod': '50',
-  },
-};
-
   @override
   void initState() {
     super.initState();
@@ -172,18 +93,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
+  // Load preset values using the PresettingService
   void _loadPresetValues(String presetKey) {
-    if (presettings.containsKey(presetKey)) {
-      setState(() {
-        _principalController.text = presettings[presetKey]!['principal']!;
-        _rateController.text = presettings[presetKey]!['rate']!;
-        _timeController.text = presettings[presetKey]!['time']!;
-        _additionalAmountController.text = presettings[presetKey]!['additionalAmount']!;
-        _breakController.text = presettings[presetKey]!['breakPeriod']!;
-        _presettingsController.text = presetKey;
-      });
-      _recalculateValues();
-    }
+    final presetValues = PresettingService.getPreset(presetKey);
+
+    setState(() {
+      _principalController.text = presetValues['principal']!;
+      _rateController.text = presetValues['rate']!;
+      _timeController.text = presetValues['time']!;
+      _additionalAmountController.text = presetValues['additionalAmount']!;
+      _breakController.text = presetValues['breakPeriod']!;
+      _presettingsController.text = presetKey;  // Update the dropdown text to the new selection
+    });
+
+    _recalculateValues();  // Recalculate the values after updating the controllers
   }
 
   void _recalculateValues() {
@@ -223,7 +146,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
-    List<Map<String, double>> _calculateSecondTableValues(double initialValue) {
+  List<Map<String, double>> _calculateSecondTableValues(double initialValue) {
     List<Map<String, double>> secondTableValues = [];
     double totalAmount = initialValue;
     double rate = double.tryParse(_rateController.text) ?? 0;
@@ -293,7 +216,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     return secondTableValues;
   }
 
-    double _yearlyTotalTax(double total, double deposits, double withdrawal) {
+  double _yearlyTotalTax(double total, double deposits, double withdrawal) {
     const double threshold = 61000;  // The threshold for lower tax rate
     const double taxExemptionCard = 49700;  // The tax-free limit
     double tax;
@@ -344,25 +267,39 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     super.dispose();
   }
 
+  Widget _buildFormulaWidget() {
+    return 
+    // Replace _parseTextToDouble calls with Utils.parseTextToDouble
+      FormulaWidget(
+        principal: Utils.parseTextToDouble(_principalController.text),
+        rate: Utils.parseTextToDouble(_rateController.text),
+        time: Utils.parseTextToDouble(_timeController.text),
+        additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
+        contributionFrequency: _contributionFrequency,
+      );
+  }
+
+  Widget _buildInvestmentTotalText() {
+    return Text(
+      'Investment After ${_timeController.text} Years: ${_yearlyValues.last['totalValue']!.toStringAsFixed(0)} kr.-',
+      style: const TextStyle(fontSize: 16),
+    );
+  }
+
+  Widget _buildSizedBox(double height) {
+    return SizedBox(height: height);
+  }
+
   Widget investmentCalculatorContent() {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
           _buildInputFields(),
-          const SizedBox(height: 30),
-          FormulaWidget(
-            principal: _parseTextToDouble(_principalController.text),
-            rate: _parseTextToDouble(_rateController.text),
-            time: _parseTextToDouble(_timeController.text),
-            additionalAmount: _parseTextToDouble(_additionalAmountController.text),
-            contributionFrequency: _contributionFrequency,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Investment After ${_timeController.text} Years: ${_yearlyValues.last['totalValue']!.toStringAsFixed(0)} kr.-',
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 15),
+          _buildSizedBox(20),
+          _buildFormulaWidget(),
+          _buildSizedBox(20),
+          _buildInvestmentTotalText(),
+          _buildSizedBox(15),
           _build4PercentWidget(),
           _buildTaxWidget(),
           _buildTabView(),
@@ -379,7 +316,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       additionalAmountController: _additionalAmountController,
       presettingsController: _presettingsController,
       contributionFrequency: _contributionFrequency,
-      presetValues: presettings,
+      presetValues: PresettingService.getPresetKeys(),
       onPresetSelected: _loadPresetValues,
       onInputChanged: _recalculateValues,
       onContributionFrequencyChanged: (String newFrequency) {

@@ -10,7 +10,7 @@ class InputFieldsWidget extends StatelessWidget {
   final VoidCallback onInputChanged;  // Callback for when any input changes
   final TextEditingController presettingsController;
   final ValueChanged<String> onPresetSelected;  // Accept callback to handle preset selection
-  final Map<String, Map<String, String>> presetValues;  // Accept preset values
+  final List<String> presetValues;  // Accept preset values
 
 
   const InputFieldsWidget({
@@ -50,7 +50,7 @@ class InputFieldsWidget extends StatelessWidget {
                       onPresetSelected(newValue);  // Call the callback to update the controllers
                     }
                   },
-                  items: presetValues.keys.map<DropdownMenuItem<String>>((String key) {
+                  items: presetValues.map<DropdownMenuItem<String>>((String key) {
                     return DropdownMenuItem<String>(
                       value: key,
                       child: Text(key),  // Display the preset label
