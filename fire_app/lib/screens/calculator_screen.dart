@@ -7,6 +7,7 @@ import '../widgets/investment_table_widget.dart';
 import '../widgets/input_fields_widget.dart';
 import '../widgets/the4percent_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
+import '../widgets/earnings_withdrawal_ratio.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -33,6 +34,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
   double _customWithdrawalTax = 0;  // Store the custom withdrawal tax
   double _totalAfterBreak = 0;  // Store the total amount after the break period
+  double _earningsAfterBreak = 0;  // Store the earnings after the break period
+  double _earningsPercentAfterBreak = 0;  // Store the earnings percent after the break period
   bool _showTaxNote = false;  // Initially, the tax note is hidden
   double compoundGatheredDuringBreak = 0; 
   String _selectedTab = 'Investment Calculator'; // Default value
@@ -156,6 +159,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
     // Store the total amount after the break period
     _totalAfterBreak = totalAmount;
+    _earningsAfterBreak = _totalAfterBreak - _yearlyValues.last['totalDeposits']!;
+    _earningsPercentAfterBreak = _earningsAfterBreak / _totalAfterBreak;
 
     // Now handle the withdrawal period and create table rows
     for (int year = 1; year <= withdrawalTime; year++) {
@@ -337,9 +342,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           ), // Conditionally render the note if _showTaxNote is true
           TaxWidget(
             showTaxNote: _showTaxNote,  // Pass the value to control the note visibility
-            totalAfterBreak: _totalAfterBreak,  // Assuming these are the correct controllers
-            withdrawalAmount: _customWithdrawalRule,
-            totalDeposits: _yearlyValues.last['totalDeposits'] ?? 0,
+            earningsWithdrawalRatio: EarningsWithdrawalRatio(
+              earnings: _earningsAfterBreak,
+              earningsPercent: _earningsPercentAfterBreak,
+              taxableWithdrawal: _customWithdrawalRule,
+              annualTax: _customWithdrawalTax,
+            ),
           ),
           const SizedBox(height: 20),
           // Displaying the table of yearly investments with breakdown
