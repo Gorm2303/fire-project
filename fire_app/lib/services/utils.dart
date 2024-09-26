@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class Utils {
   // Convert a String to double, returns 0 if the parsing fails
   static double parseTextToDouble(String text) {
@@ -35,4 +37,9 @@ class Utils {
     double taxableWithdrawal = (earningsPercent * withdrawalAmount) - exemption;
     return taxableWithdrawal > 0 ? taxableWithdrawal : 0.0;
   }
+
+  static double calculateCompoundInterest(double principal, double rate, double time) {
+    return principal * pow(1 + rate / 100, time) - principal;
+  }
+  
 }
