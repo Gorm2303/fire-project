@@ -31,6 +31,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   List<Map<String, double>> _secondTableValues = [];
   String _contributionFrequency = 'Monthly'; // Default contribution frequency
   double _customWithdrawalRule = 0;  // Store the custom withdrawal amount
+  double _customWithdrawalTax = 0;  // Store the custom withdrawal tax
+  double _totalAfterBreak = 0;  // Store the total amount after the break period
   bool _showTaxNote = false;  // Initially, the tax note is hidden
   double compoundGatheredDuringBreak = 0; 
   String _selectedTab = 'Investment Calculator'; // Default value
@@ -54,25 +56,34 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     super.dispose();
   }
 
-  double _calculateTax(double earningsWithdrawal) {
+  double _calculateTax(double total, double deposits, double withdrawal) {
       const double threshold = 61000;  // The threshold for lower tax rate
       double tax;
 
-      // Apply tax only if withdrawals occur (i.e., earningsWithdrawal > 0)
-      if (earningsWithdrawal > 0) {
-          if (earningsWithdrawal <= threshold) {
-              // If earningsWithdrawal is less than or equal to the threshold, apply 27% tax
-              tax = earningsWithdrawal * 0.27;
-          } else {
-              // If earningsWithdrawal is above the threshold, apply 27% on the first 61,000 kr,
-              // and 42% on the remaining amount
-              tax = threshold * 0.27 + (earningsWithdrawal - threshold) * 0.42;
-          }
-      } else {
-          tax = 0;  // No tax if there are no earnings to withdraw
-      }
+      // Step 1: Calculate Earnings
+    double earnings = total - deposits;
 
-      return tax;
+    // Step 2: Calculate Earnings Percent
+    double earningsPercent = earnings / total;
+
+    // Step 3: Calculate Taxable Withdrawal
+    double taxableWithdrawal = earningsPercent * withdrawal;
+
+    // Step 4: Apply tax only if withdrawals occur (i.e., earningsWithdrawal > 0)
+    if (taxableWithdrawal > 0) {
+        if (taxableWithdrawal <= threshold) {
+            // If earningsWithdrawal is less than or equal to the threshold, apply 27% tax
+            tax = taxableWithdrawal * 0.27;
+        } else {
+            // If earningsWithdrawal is above the threshold, apply 27% on the first 61,000 kr,
+            // and 42% on the remaining amount
+            tax = threshold * 0.27 + (taxableWithdrawal - threshold) * 0.42;
+        }
+    } else {
+        tax = 0;  // No tax if there are no earnings to withdraw
+    }
+
+    return tax;
   }
 
   void _recalculateValues() {
@@ -141,6 +152,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
     // Calculate CustomWithdrawalRule only after the break period
     _customWithdrawalRule = totalAmount * (double.tryParse(_withdrawalPercentageController.text) ?? 4) / 100;
+    _customWithdrawalTax = _calculateTax(totalAmount, _yearlyValues.last['totalDeposits']!, _customWithdrawalRule);
+
+    // Store the total amount after the break period
+    _totalAfterBreak = totalAmount;
 
     // Now handle the withdrawal period and create table rows
     for (int year = 1; year <= withdrawalTime; year++) {
@@ -157,7 +172,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       // Apply withdrawals and calculate tax during the withdrawal period
       withdrawal = _customWithdrawalRule;
       totalAmount -= withdrawal;  // Subtract yearly withdrawal
-      tax = _calculateTax(withdrawal);  // Calculate tax on the withdrawal
+      tax = _calculateTax(totalAmount, _yearlyValues.last['totalDeposits']!, withdrawal);  // Calculate tax on the withdrawal
 
       secondTableValues.add({
         'year': year.toDouble(),  // Keep the year count starting from 1
@@ -309,12 +324,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           The4PercentWidget(
             withdrawalPercentageController: _withdrawalPercentageController,
             customWithdrawalRule: _customWithdrawalRule,
-            customWithdrawalTax: _calculateTax(_customWithdrawalRule),
+            customWithdrawalTax: _customWithdrawalTax,
             recalculateValues: _recalculateValues,
-            showTaxNote: _showTaxNote,
             breakController: _breakController,
             compoundGatheredDuringBreak: compoundGatheredDuringBreak,
-            onInputChanged: _recalculateValues,  // Trigger recalculation on input change
             withdrawalTimeController: _withdrawalTimeController,
             toggleTaxNote: () {
               setState(() {
@@ -324,6 +337,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           ), // Conditionally render the note if _showTaxNote is true
           TaxWidget(
             showTaxNote: _showTaxNote,  // Pass the value to control the note visibility
+            totalAfterBreak: _totalAfterBreak,  // Assuming these are the correct controllers
+            withdrawalAmount: _customWithdrawalRule,
+            totalDeposits: _yearlyValues.last['totalDeposits'] ?? 0,
           ),
           const SizedBox(height: 20),
           // Displaying the table of yearly investments with breakdown

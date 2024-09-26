@@ -5,11 +5,9 @@ class The4PercentWidget extends StatelessWidget {
   final double customWithdrawalRule;
   final double customWithdrawalTax;
   final VoidCallback recalculateValues;
-  final bool showTaxNote;
   final VoidCallback toggleTaxNote;
   final TextEditingController breakController;
   final double compoundGatheredDuringBreak; 
-  final VoidCallback onInputChanged;  // Callback for when any input changes
   final TextEditingController withdrawalTimeController;
 
   const The4PercentWidget({
@@ -18,11 +16,9 @@ class The4PercentWidget extends StatelessWidget {
     required this.customWithdrawalRule,
     required this.customWithdrawalTax,
     required this.recalculateValues,
-    required this.showTaxNote,
     required this.toggleTaxNote,
     required this.breakController,
     required this.compoundGatheredDuringBreak,
-    required this.onInputChanged,
     required this.withdrawalTimeController,
   });
 
@@ -37,7 +33,7 @@ class The4PercentWidget extends StatelessWidget {
             controller: breakController,
             decoration: const InputDecoration(labelText: 'Break Period (No Deposits Nor Withdrawals in Years)'),
             keyboardType: TextInputType.number,
-            onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
+            onChanged: (value) => recalculateValues(),  // Trigger recalculation on change
           ),
         ),
         const SizedBox(height: 15),  // Spacing between rows
@@ -58,32 +54,32 @@ class The4PercentWidget extends StatelessWidget {
         ),
         const SizedBox(height: 15),  // Spacing between rows
         Row(
-            mainAxisAlignment: MainAxisAlignment.center,  // Center the row
-            children: <Widget>[
-              // Constrain the Withdrawal Period Input to a fixed width
-                DropdownButton<String>(
-                  value: withdrawalPercentageController.text,
-                  items: ['3', '4', '5'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text('$value%'),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      withdrawalPercentageController.text = newValue;
-                      recalculateValues();  // Trigger recalculation when value changes
-                    }
-                  },
-                ),
-              // Constrain the Withdrawal Each Month Text
-              Text(
-                'Withdrawal Each Month: ${(customWithdrawalRule / 12).toStringAsFixed(0)} kr.-',
-                style: const TextStyle(fontSize: 16),
-                softWrap: true, // Allow text wrapping
+          mainAxisAlignment: MainAxisAlignment.center,  // Center the row
+          children: <Widget>[
+            // Constrain the Withdrawal Period Input to a fixed width
+              DropdownButton<String>(
+                value: withdrawalPercentageController.text,
+                items: ['3', '4', '5'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text('$value%'),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    withdrawalPercentageController.text = newValue;
+                    recalculateValues();  // Trigger recalculation when value changes
+                  }
+                },
               ),
-            ],
-          ),
+            // Constrain the Withdrawal Each Month Text
+            Text(
+              'Withdrawal Each Month: ${(customWithdrawalRule / 12).toStringAsFixed(0)} kr.-',
+              style: const TextStyle(fontSize: 16),
+              softWrap: true, // Allow text wrapping
+            ),
+          ],
+        ),
         const SizedBox(height: 10),  // Spacing between rows
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
