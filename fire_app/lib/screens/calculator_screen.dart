@@ -35,8 +35,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   late SwitchAndTaxRate _toggleSwitchWidget;
 
-  List<Map<String, double>> _yearlyValues = [];
-  List<Map<String, double>> _secondTableValues = [];
+  List<Map<String, double>> _depositYearlyValues = [];
+  List<Map<String, double>> _withdrawalYearlyValues = [];
 
   String _contributionFrequency = 'Monthly';
   String _selectedTab = 'Investment Calculator';
@@ -59,7 +59,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _initializeTabControllers();
     _initializeToggleSwitchWidget();
     _loadPresetValues('High Investment');
-    _initializeInvestmentPlan();
+    _recalculateValues();
   }
 
   void _initializeTabControllers() {
@@ -124,8 +124,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     setState(() {
       _initializeInvestmentPlan(); // Update the investment plan with current values
       _investmentPlan.calculateInvestment();  // Calculate deposit and withdrawal values
-      _yearlyValues = _investmentPlan.depositValues!;
-      _secondTableValues = _investmentPlan.withdrawalValues!;
+      _depositYearlyValues = _investmentPlan.depositValues!;
+      _withdrawalYearlyValues = _investmentPlan.withdrawalValues!;
     });
   }
 
@@ -138,9 +138,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   Widget _buildFormulaWidget() {
     return FormulaWidget(
-      principal: Utils.parseTextToDouble(_principalController.text),
-      rate: Utils.parseTextToDouble(_rateController.text),
-      time: Utils.parseTextToDouble(_timeController.text),
+      principal: Utils.parseTextToDouble(_investmentPlan.depositPlan.principal.toString()),
+      rate: Utils.parseTextToDouble(_investmentPlan.depositPlan.interestRate.toString()),
+      time: Utils.parseTextToDouble(_investmentPlan.depositPlan.duration.toString()),
       additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
       contributionFrequency: _contributionFrequency,
     );
@@ -148,7 +148,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   Widget _buildInvestmentTotalText() {
     return Text(
-      'Investment After ${_timeController.text} Years: ${_yearlyValues.last['totalValue']!.toStringAsFixed(0)} kr.-',
+      'Investment After ${_investmentPlan.depositPlan.duration} Years: ${_investmentPlan.depositPlan.totalValue.toStringAsFixed(0)} kr.-',
       style: const TextStyle(fontSize: 16),
     );
   }
@@ -198,7 +198,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   Widget _build4PercentWidget() {
     return The4PercentWidget(
       withdrawalPercentageController: _withdrawalPercentageController,
-      customWithdrawalRule: _investmentPlan.withdrawalPlan.withdrawalPercentage,
+      customWithdrawalRule: _investmentPlan.withdrawalPlan.withdrawalYearly,
       customWithdrawalTax: _investmentPlan.withdrawalPlan.taxYearly,
       recalculateValues: _recalculateValues,
       breakController: _breakController,
@@ -218,9 +218,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     return TaxWidget(
       showTaxNote: _showTaxNote,
       earningsWithdrawalRatio: EarningsWithdrawalRatio(
-        earnings: _investmentPlan.withdrawalPlan.earnings,
-        earningsPercent: _investmentPlan.withdrawalPlan.earningsPercent,
-        taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearly,
+        earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
+        earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
+        taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
         annualTax: _investmentPlan.withdrawalPlan.taxYearly,
       ),
     );
@@ -242,12 +242,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
             controller: _tableTabController,
             children: [
               InvestmentTableWidget(
-                yearlyValues: _yearlyValues,
+                yearlyValues: _depositYearlyValues,
                 isDepositingTable: true,
                 isWithdrawingTable: false,
               ),
               InvestmentTableWidget(
-                yearlyValues: _secondTableValues,
+                yearlyValues: _withdrawalYearlyValues,
                 isDepositingTable: false,
                 isWithdrawingTable: true,
               ),

@@ -11,9 +11,9 @@ class WithdrawalPlan {
   TaxOption selectedTaxOption;
   double taxYearly = 0;
   double withdrawalAfterTax = 0;
-  double earnings = 0;
-  double earningsPercent = 0;
-  double taxableWithdrawalYearly = 0;
+  double earningsAfterBreak = 0;
+  double earningsPercentAfterBreak = 0;
+  double taxableWithdrawalYearlyAfterBreak = 0;
   double totalValue;
   double deposits;
 
@@ -49,7 +49,10 @@ class WithdrawalPlan {
       interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
     }
 
+    earningsAfterBreak = totalValue - deposits;
+    earningsPercentAfterBreak = earningsAfterBreak / totalValue;
     withdrawalYearly = totalValue * (withdrawalPercentage / 100);
+    taxableWithdrawalYearlyAfterBreak = calculateTaxableWithdrawal(totalValue, withdrawalYearly);
     double compoundInWithdrawalYears = 0;
 
     for (int year = 1; year <= duration; year++) {
@@ -59,9 +62,9 @@ class WithdrawalPlan {
       double compoundThisYear = totalValue - previousValue;
       compoundInWithdrawalYears += compoundThisYear;
 
+      double taxableWithdrawalYearly = calculateTaxableWithdrawal(totalValue, withdrawalYearly);
+      taxYearly = calculateTax(totalValue, taxableWithdrawalYearly);
       totalValue -= withdrawalYearly;
-      taxableWithdrawalYearly = calculateTaxableWithdrawal();
-      taxYearly = calculateTax();
 
       withdrawalValues.add({
         'year': year.toDouble(),
@@ -76,14 +79,14 @@ class WithdrawalPlan {
     return withdrawalValues;
   }
 
-  double calculateTaxableWithdrawal() {
-    earnings = totalValue - deposits;
-    earningsPercent = earnings / totalValue;
-    return withdrawalYearly * earningsPercent - Utils.taxExemptionCard;
+  double calculateTaxableWithdrawal(double totalValue, double withdrawal) {
+    double earnings = totalValue - deposits;
+    double earningsPercent = earnings / totalValue;
+    return withdrawal * earningsPercent - Utils.taxExemptionCard;
   }
 
-  double calculateTax() {
-    double taxableWithdrawal = calculateTaxableWithdrawal();
+  double calculateTax(double totalValue, double withdrawal) {
+    double taxableWithdrawal = calculateTaxableWithdrawal(totalValue, withdrawal);
     if (taxableWithdrawal <= 0) return 0;
 
     if (selectedTaxOption.isCustomTaxRule) {
