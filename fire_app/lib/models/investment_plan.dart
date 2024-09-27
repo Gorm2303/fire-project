@@ -5,28 +5,34 @@ class InvestmentPlan {
   String name;
   double principal;
   double rate;
-  int duration; // in years
+  int depositYears; // in years
   double additionalAmount; // additional investment each year
   String contributionFrequency; // "Monthly", "Yearly", etc.
-  double withdrawalPercentage;
-  int withdrawalTime; // duration of withdrawal period
+  double valueAfterDepositYears = 0;
   int breakPeriod; // years during which investment grows but no withdrawals are made
-  TaxOption selectedTaxOption;
+  int withdrawalPeriod; // duration of withdrawal period
   double compoundGatheredDuringBreak = 0;
-  double taxableWithdrawal = 0;
-  double tax = 0;
+  double withdrawalPercentage;
+  double withdrawalYearly = 0;
+  TaxOption selectedTaxOption;
+  double earnings = 0;
+  double earningsPercent = 0;
+  double taxableWithdrawalYearly = 0;
+  double taxYearly = 0;
+  double deposits = 0;
+  double totalValue = 0;
 
   InvestmentPlan(
     this.name,{
     required this.principal,
     required this.rate,
-    required this.duration,
+    required this.depositYears,
     required this.additionalAmount,
     required this.contributionFrequency,
     required this.selectedTaxOption,
     this.withdrawalPercentage = 4,
     this.breakPeriod = 0,
-    this.withdrawalTime = 30,
+    this.withdrawalPeriod = 30,
 
   });
 
@@ -46,48 +52,64 @@ class InvestmentPlan {
   // Mimicking _calculateYearlyValues from the original class
   List<Map<String, double>> calculateYearlyValues() {
     List<Map<String, double>> yearlyValues = resetYearlyValues();
-    double totalValue = principal;
-    double totalDeposits = principal;
+    totalValue = principal;
+    deposits = principal;
     double compoundEarnings = 0;
+    int contributionPeriods = 1; // Default is yearly contributions
 
-    for (int year = 1; year <= duration; year++) {
-      double compoundThisYear = (totalValue + (additionalAmount * year)) * (rate / 100);
+    if (contributionFrequency == 'Monthly') {
+      contributionPeriods = 12;
+    } 
+
+    for (int year = 1; year <= depositYears; year++) {
+      double compoundThisYear = 0;
+      compoundThisYear += totalValue * (rate / 100);
+
+      for (int period = 1; period <= contributionPeriods; period++) {
+        // Compounding for each period based on frequency
+        totalValue += additionalAmount;
+        deposits += additionalAmount;
+
+        // Compounding for each period
+        int periodsLeft = contributionPeriods - period; 
+        compoundThisYear += additionalAmount * (rate / 100) * periodsLeft / contributionPeriods;
+      }
       totalValue += compoundThisYear;
-      totalDeposits += additionalAmount;
+      compoundEarnings += compoundThisYear;
 
       yearlyValues.add({
         'year': year.toDouble(),
         'totalValue': totalValue,
-        'totalDeposits': totalDeposits,
-        'compoundEarnings': compoundEarnings += compoundThisYear,
+        'totalDeposits': deposits,
         'compoundThisYear': compoundThisYear,
+        'compoundEarnings': compoundEarnings,
       });
     }
 
+    valueAfterDepositYears = totalValue;
     return yearlyValues;
   }
 
   // Mimicking _calculateSecondTableValues from the original class
   List<Map<String, double>> calculateSecondTableValues(List<Map<String, double>> yearlyValues) {
     List<Map<String, double>> secondTableValues = [];
-    double totalAmount = yearlyValues.last['totalValue']!;
+    totalValue = valueAfterDepositYears;
     double previousValue;
-    double withdrawal = totalAmount * (withdrawalPercentage / 100);
     compoundGatheredDuringBreak = 0;
 
     // Handle compounding during the break period
     if (breakPeriod >= 1) {
       for (int year = 1; year <= breakPeriod; year++) {
-        totalAmount *= (1 + rate / 100);
-        previousValue = totalAmount;
+        totalValue *= (1 + rate / 100);
+        previousValue = totalValue;
       }
-      compoundGatheredDuringBreak = totalAmount - yearlyValues.last['totalValue']!;
+      compoundGatheredDuringBreak = totalValue - yearlyValues.last['totalValue']!;
     }
 
     // Add the first entry (for the break period)
     secondTableValues.add({
       'year': 0,
-      'totalValue': totalAmount,
+      'totalValue': totalValue,
       'compoundThisYear': 0,
       'compoundEarnings': 0,
       'withdrawal': 0,
@@ -95,28 +117,29 @@ class InvestmentPlan {
     });
 
     // Custom withdrawal calculation after the break period
+    withdrawalYearly = totalValue * (withdrawalPercentage / 100);
     double compoundInWithdrawalYears = 0;
 
     // Handle the withdrawal period
-    for (int year = 1; year <= withdrawalTime; year++) {
-      previousValue = totalAmount;
-      totalAmount *= (1 + rate / 100);
+    for (int year = 1; year <= withdrawalPeriod; year++) {
+      previousValue = totalValue;
+      totalValue *= (1 + rate / 100);
 
-      double compoundThisYear = totalAmount - previousValue;
+      double compoundThisYear = totalValue - previousValue;
       compoundInWithdrawalYears += compoundThisYear;
 
       // Apply withdrawals and calculate tax during the withdrawal period
-      totalAmount -= withdrawal;
-      taxableWithdrawal = calculateTaxableWithdrawal(totalAmount, withdrawal);
-      tax = calculateTax(totalAmount, taxableWithdrawal);
+      totalValue -= withdrawalYearly;
+      taxableWithdrawalYearly = calculateTaxableWithdrawal();
+      taxYearly = calculateTax();
 
       secondTableValues.add({
         'year': year.toDouble(),
-        'totalValue': totalAmount,
+        'totalValue': totalValue,
         'compoundThisYear': compoundThisYear,
         'compoundEarnings': compoundInWithdrawalYears,
-        'withdrawal': withdrawal,
-        'tax': tax,
+        'withdrawal': withdrawalYearly,
+        'tax': taxYearly,
       });
     }
 
@@ -124,16 +147,15 @@ class InvestmentPlan {
   }
 
   // Mimicking calculateTaxableWithdrawal from the original class
-  double calculateTaxableWithdrawal(double total, double withdrawal) {
-    double deposits = total - principal;
-    double earnings = total - deposits;
-    double earningsPercent = earnings / total;
-    return withdrawal * earningsPercent - Utils.taxExemptionCard;
+  double calculateTaxableWithdrawal() {
+    earnings = totalValue - deposits;
+    earningsPercent = earnings / totalValue;
+    return withdrawalYearly * earningsPercent - Utils.taxExemptionCard;
   }
 
   // Mimicking _yearlyTotalTax from the original class
-  double calculateTax(double total, double withdrawal) {
-    double taxableWithdrawal = calculateTaxableWithdrawal(total, withdrawal);
+  double calculateTax() {
+    double taxableWithdrawal = calculateTaxableWithdrawal();
     if (taxableWithdrawal <= 0) return 0;
 
     if (selectedTaxOption.isCustomTaxRule) {

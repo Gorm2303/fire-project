@@ -93,13 +93,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       "Custom Plan",
       principal: Utils.parseTextToDouble(_principalController.text),
       rate: Utils.parseTextToDouble(_rateController.text),
-      duration: Utils.parseTextToInt(_timeController.text),
+      depositYears: Utils.parseTextToInt(_timeController.text),
       additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
       contributionFrequency: _contributionFrequency,
       selectedTaxOption: _selectedTaxOption,
       withdrawalPercentage: Utils.parseTextToDouble(_withdrawalPercentageController.text),
       breakPeriod: Utils.parseTextToInt(_breakController.text),
-      withdrawalTime: Utils.parseTextToInt(_withdrawalTimeController.text),
+      withdrawalPeriod: Utils.parseTextToInt(_withdrawalTimeController.text),
     );
   }
 
@@ -125,11 +125,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       _yearlyValues = _investmentPlan.calculateYearlyValues();
       _secondTableValues = _investmentPlan.calculateSecondTableValues(_yearlyValues);
     });
-  }
-
-  // Method to calculate the tax within the screen, if necessary
-  double _calculateTax(double total, double withdrawal) {
-    return _investmentPlan.calculateTax(total, withdrawal);
   }
 
   @override
@@ -202,7 +197,7 @@ Widget _buildFormulaWidget() {
     return The4PercentWidget(
       withdrawalPercentageController: _withdrawalPercentageController,
       customWithdrawalRule: _investmentPlan.withdrawalPercentage,
-      customWithdrawalTax: _investmentPlan.tax,
+      customWithdrawalTax: _investmentPlan.taxYearly,
       recalculateValues: _recalculateValues,
       breakController: _breakController,
       compoundGatheredDuringBreak: _investmentPlan.compoundGatheredDuringBreak,
@@ -221,10 +216,10 @@ Widget _buildFormulaWidget() {
     return TaxWidget(
       showTaxNote: _showTaxNote,
       earningsWithdrawalRatio: EarningsWithdrawalRatio(
-        earnings: _investmentPlan.calculateTaxableWithdrawal(_investmentPlan.principal, _investmentPlan.withdrawalPercentage),
-        earningsPercent: (_investmentPlan.compoundGatheredDuringBreak / _investmentPlan.principal),
-        taxableWithdrawal: _investmentPlan.taxableWithdrawal,
-        annualTax: _investmentPlan.tax,
+        earnings: _investmentPlan.earnings,
+        earningsPercent: _investmentPlan.earningsPercent,
+        taxableWithdrawal: _investmentPlan.taxableWithdrawalYearly,
+        annualTax: _investmentPlan.taxYearly,
       ),
     );
   }
