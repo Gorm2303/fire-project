@@ -2,7 +2,7 @@ import 'package:fire_app/models/tax_option.dart';
 import 'package:flutter/material.dart';
 import '../widgets/formula_widget.dart';
 import '../widgets/tax_widget.dart';
-import '../services/investment_calculator.dart';
+import '../models/investment_plan.dart';
 import '../widgets/investment_table_widget.dart';
 import '../widgets/input_fields_widget.dart';
 import '../widgets/the4percent_widget.dart';
@@ -33,28 +33,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _customTaxController = TextEditingController(text: '0');
 
   late SwitchAndTaxRate _toggleSwitchWidget;
-  
+
   List<Map<String, double>> _yearlyValues = [];
   List<Map<String, double>> _secondTableValues = [];
 
   String _contributionFrequency = 'Monthly';
-  double _customWithdrawalRule = 0;
-  double _customWithdrawalTax = 0;
-  double _taxableWithdrawal = 0;
-  double _totalAfterBreak = 0;
-  double _earningsAfterBreak = 0;
-  double _earningsPercentAfterBreak = 0;
-
+  String _selectedTab = 'Investment Calculator';
   bool _isCustomTaxRule = false;
   bool _showTaxNote = false;
 
-  double compoundGatheredDuringBreak = 0;
-  String _selectedTab = 'Investment Calculator';
-
+  late InvestmentPlan _investmentPlan;
+  
   List<TaxOption> taxOptions = [
-    TaxOption(15.3, 'Pension PAL-skat'),
-    TaxOption(17.0, 'Aktiesparekonto'),
-    TaxOption(42.0, 'Normal Aktiebeskatning*'),
+    TaxOption(15.3, 'Pension PAL-skat', false),
+    TaxOption(17.0, 'Aktiesparekonto', false),
+    TaxOption(42.0, 'Normal Aktiebeskatning*', false),
   ];
 
   late TaxOption _selectedTaxOption = taxOptions[2];
@@ -65,6 +58,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _initializeTabControllers();
     _initializeToggleSwitchWidget();
     _loadPresetValues('High Investment');
+    _initializeInvestmentPlan();
   }
 
   void _initializeTabControllers() {
@@ -94,6 +88,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
+  void _initializeInvestmentPlan() {
+    _investmentPlan = InvestmentPlan(
+      "Custom Plan",
+      principal: Utils.parseTextToDouble(_principalController.text),
+      rate: Utils.parseTextToDouble(_rateController.text),
+      duration: Utils.parseTextToInt(_timeController.text),
+      additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
+      contributionFrequency: _contributionFrequency,
+      selectedTaxOption: _selectedTaxOption,
+      withdrawalPercentage: Utils.parseTextToDouble(_withdrawalPercentageController.text),
+      breakPeriod: Utils.parseTextToInt(_breakController.text),
+      withdrawalTime: Utils.parseTextToInt(_withdrawalTimeController.text),
+    );
+  }
+
   // Load preset values using the PresettingService
   void _loadPresetValues(String presetKey) {
     final presetValues = PresettingService.getPreset(presetKey);
@@ -112,148 +121,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   void _recalculateValues() {
     setState(() {
-      _resetYearlyValues();
-      _calculateYearlyValues();
-      _calculateSecondTableValues();
+      _initializeInvestmentPlan(); // Update the investment plan with current values
+      _yearlyValues = _investmentPlan.calculateYearlyValues();
+      _secondTableValues = _investmentPlan.calculateSecondTableValues(_yearlyValues);
     });
   }
 
-  void _resetYearlyValues() {
-    // Clear the list before adding new values
-    _yearlyValues = [
-      {
-        'year': 0.0,
-        'totalValue': Utils.parseTextToDouble(_principalController.text),
-        'totalDeposits': Utils.parseTextToDouble(_principalController.text),
-        'compoundEarnings': 0,
-        'compoundThisYear': 0,
-      }
-    ];
-  }
-
-  void _calculateYearlyValues() {
-    List<Map<String, double>> calculatedValues = _getYearlyValues();
-    _yearlyValues.addAll(calculatedValues);
-  }
-
-
-  List<Map<String, double>> _getYearlyValues() {
-    return calculateYearlyValues(
-      principal: Utils.parseTextToDouble(_principalController.text),
-      rate: Utils.parseTextToDouble(_rateController.text),
-      time: Utils.parseTextToDouble(_timeController.text),
-      additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
-      contributionFrequency: _contributionFrequency,
-    );
-  }
-
-  List<Map<String, double>> _calculateSecondTableValues() {
-  // Clear the second table values before adding new ones
-  _secondTableValues = [];
-
-  double initialValue = _yearlyValues.last['totalValue']!;
-  double rate = Utils.parseTextToDouble(_rateController.text);
-  double previousValue;
-  int breakPeriod = Utils.parseTextToInt(_breakController.text);
-  double withdrawalTime = Utils.parseTextToDouble(_withdrawalTimeController.text);
-  double totalCompound = 0;
-  double withdrawal = 0;
-  double tax = 0;
-  compoundGatheredDuringBreak = 0;
-  double totalAmount = initialValue;
-
-  // Handle compounding during the break period
-  if (breakPeriod >= 1) {
-    for (int year = 1; year <= breakPeriod; year++) {
-      totalAmount *= (1 + rate / 100);
-      previousValue = totalAmount;
-    }
-    compoundGatheredDuringBreak = totalAmount - initialValue;
-  }
-
-  // Add the first entry (for the break period)
-  _secondTableValues.add({
-    'year': 0,
-    'totalValue': totalAmount,
-    'compoundThisYear': 0,
-    'compoundEarnings': 0,
-    'withdrawal': 0,
-    'tax': 0,
-  });
-
-  // Calculate CustomWithdrawalRule after the break period
-  _customWithdrawalRule = totalAmount * (Utils.parseTextToDouble(_withdrawalPercentageController.text)) / 100;
-  _taxableWithdrawal = calculateTaxableWithdrawal(totalAmount, _customWithdrawalRule);
-  _customWithdrawalTax = _yearlyTotalTax(totalAmount, _customWithdrawalRule);
-
-  // Store values after the break period
-  _totalAfterBreak = totalAmount;
-  _earningsAfterBreak = _totalAfterBreak - _yearlyValues.last['totalDeposits']!;
-  _earningsPercentAfterBreak = _earningsAfterBreak / _totalAfterBreak;
-
-  // Handle the withdrawal period
-  for (int year = 1; year <= withdrawalTime; year++) {
-    previousValue = totalAmount;
-    totalAmount *= (1 + rate / 100);
-
-    double compoundThisYear = totalAmount - previousValue;
-    totalCompound += compoundThisYear;
-
-    // Apply withdrawals and calculate tax during the withdrawal period
-    withdrawal = _customWithdrawalRule;
-    totalAmount -= withdrawal;
-    tax = _yearlyTotalTax(totalAmount, withdrawal);
-
-    _secondTableValues.add({
-      'year': year.toDouble(),
-      'totalValue': totalAmount,
-      'compoundThisYear': compoundThisYear,
-      'compoundEarnings': totalCompound,
-      'withdrawal': withdrawal,
-      'tax': tax,
-    });
-  }
-
-  return _secondTableValues;
-}
-
-  double calculateTaxableWithdrawal(double total, double withdrawal) {
-    double deposits = _yearlyValues.last['totalDeposits']!;
-    double earnings = Utils.calculateEarnings(total, deposits);
-    double earningsPercent = Utils.calculateEarningsPercent(earnings, total);
-    double taxableWithdrawal = Utils.calculateTaxableWithdrawal(earningsPercent, withdrawal, Utils.taxExemptionCard);
-    return taxableWithdrawal;
-  }
-
-  double _yearlyTotalTax(double total, double withdrawal) {
-    double tax;
-    double taxableWithdrawal = calculateTaxableWithdrawal(total, withdrawal);
-
-    // Step 4: Calculate Tax
-    if (taxableWithdrawal <= 0) {
-      return 0;  // No tax if taxableWithdrawal is less than or equal to 0
-    }
-
-    double parsedTax = Utils.parseTextToDouble(_customTaxController.text);
-
-    if (_isCustomTaxRule) {
-      // If the custom tax rule is active, calculate tax based on the custom tax rate
-      tax = taxableWithdrawal * parsedTax / 100;
-    } else if (_selectedTaxOption.rate == 42.0) {
-      if (taxableWithdrawal <= Utils.threshold) {
-        // If earningsWithdrawal is less than or equal to the threshold, apply 27% tax
-        tax = taxableWithdrawal * 0.27;
-      } else {
-        // If earningsWithdrawal is above the threshold, apply 27% on the first 61,000 kr,
-        // and 42% on the remaining amount
-        tax = Utils.threshold * 0.27 + (taxableWithdrawal - Utils.threshold) * 0.42;
-      }
-    } else {
-      // If the selected tax option is not 15.3, apply the tax rate from the selected option
-      tax = taxableWithdrawal * _selectedTaxOption.rate / 100;
-    }
-
-    return tax;
+  // Method to calculate the tax within the screen, if necessary
+  double _calculateTax(double total, double withdrawal) {
+    return _investmentPlan.calculateTax(total, withdrawal);
   }
 
   @override
@@ -263,16 +139,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     super.dispose();
   }
 
-  Widget _buildFormulaWidget() {
-    return 
-    // Replace _parseTextToDouble calls with Utils.parseTextToDouble
-      FormulaWidget(
-        principal: Utils.parseTextToDouble(_principalController.text),
-        rate: Utils.parseTextToDouble(_rateController.text),
-        time: Utils.parseTextToDouble(_timeController.text),
-        additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
-        contributionFrequency: _contributionFrequency,
-      );
+Widget _buildFormulaWidget() {
+    return FormulaWidget(
+      principal: Utils.parseTextToDouble(_principalController.text),
+      rate: Utils.parseTextToDouble(_rateController.text),
+      time: Utils.parseTextToDouble(_timeController.text),
+      additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
+      contributionFrequency: _contributionFrequency,
+    );
   }
 
   Widget _buildInvestmentTotalText() {
@@ -327,11 +201,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   Widget _build4PercentWidget() {
     return The4PercentWidget(
       withdrawalPercentageController: _withdrawalPercentageController,
-      customWithdrawalRule: _customWithdrawalRule,
-      customWithdrawalTax: _customWithdrawalTax,
+      customWithdrawalRule: _investmentPlan.withdrawalPercentage,
+      customWithdrawalTax: _investmentPlan.tax,
       recalculateValues: _recalculateValues,
       breakController: _breakController,
-      compoundGatheredDuringBreak: compoundGatheredDuringBreak,
+      compoundGatheredDuringBreak: _investmentPlan.compoundGatheredDuringBreak,
       withdrawalTimeController: _withdrawalTimeController,
       taxController: _customTaxController,
       toggleSwitchWidget: _toggleSwitchWidget,
@@ -347,10 +221,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     return TaxWidget(
       showTaxNote: _showTaxNote,
       earningsWithdrawalRatio: EarningsWithdrawalRatio(
-        earnings: _earningsAfterBreak,
-        earningsPercent: _earningsPercentAfterBreak,
-        taxableWithdrawal: _taxableWithdrawal,
-        annualTax: _customWithdrawalTax,
+        earnings: _investmentPlan.calculateTaxableWithdrawal(_investmentPlan.principal, _investmentPlan.withdrawalPercentage),
+        earningsPercent: (_investmentPlan.compoundGatheredDuringBreak / _investmentPlan.principal),
+        taxableWithdrawal: _investmentPlan.taxableWithdrawal,
+        annualTax: _investmentPlan.tax,
       ),
     );
   }
