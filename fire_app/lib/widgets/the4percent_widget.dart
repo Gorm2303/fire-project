@@ -7,7 +7,7 @@ class The4PercentWidget extends StatelessWidget {
   final VoidCallback recalculateValues;
   final VoidCallback toggleTaxNote;
   final TextEditingController breakController;
-  final double compoundGatheredDuringBreak; 
+  final double interestGatheredDuringBreak; 
   final TextEditingController withdrawalTimeController;
   final TextEditingController taxController;
   final Widget toggleSwitchWidget;
@@ -20,7 +20,7 @@ class The4PercentWidget extends StatelessWidget {
     required this.recalculateValues,
     required this.toggleTaxNote,
     required this.breakController,
-    required this.compoundGatheredDuringBreak,
+    required this.interestGatheredDuringBreak,
     required this.withdrawalTimeController, 
     required this.taxController,
     required this.toggleSwitchWidget,
@@ -41,9 +41,9 @@ class The4PercentWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 15),  // Spacing between rows
-        // Constrain the Compound Gathered Text
+        // Constrain the Interest Gathered Text
         Text(
-            'Interest Gathered During Break: ${compoundGatheredDuringBreak.toStringAsFixed(0)} kr.-',
+            'Interest Gathered During Break: ${interestGatheredDuringBreak.toStringAsFixed(0)} kr.-',
             style: const TextStyle(fontSize: 16),
           ),
         const SizedBox(height: 15),  // Spacing between rows

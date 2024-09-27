@@ -28,7 +28,16 @@ class WithdrawalPlan {
   });
 
   List<Map<String, double>> calculateWithdrawalValues(double valueAfterDepositYears) {
-    List<Map<String, double>> withdrawalValues = [];
+    List<Map<String, double>> withdrawalValues = [
+      {
+        'year': 0.0,
+        'totalValue': valueAfterDepositYears,
+        'compoundThisYear': 0,
+        'compoundEarnings': 0,
+        'withdrawal': 0,
+        'tax': 0,
+      }
+    ];
     totalValue = valueAfterDepositYears;
     double previousValue;
     interestGatheredDuringBreak = 0;

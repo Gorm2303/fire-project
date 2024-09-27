@@ -11,6 +11,7 @@ import '../widgets/earnings_withdrawal_ratio.dart';
 import '../widgets/switch_taxrate_widget.dart';
 import '../services/presetting_service.dart';
 import '../services/utils.dart';
+
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
@@ -90,7 +91,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   void _initializeInvestmentPlan() {
     _investmentPlan = InvestmentPlan(
-      "Custom Plan",
+      name: "Custom Plan",
       principal: Utils.parseTextToDouble(_principalController.text),
       rate: Utils.parseTextToDouble(_rateController.text),
       depositYears: Utils.parseTextToInt(_timeController.text),
@@ -122,8 +123,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   void _recalculateValues() {
     setState(() {
       _initializeInvestmentPlan(); // Update the investment plan with current values
-      _yearlyValues = _investmentPlan.calculateYearlyValues();
-      _secondTableValues = _investmentPlan.calculateSecondTableValues(_yearlyValues);
+      _investmentPlan.calculateInvestment();  // Calculate deposit and withdrawal values
+      _yearlyValues = _investmentPlan.depositValues!;
+      _secondTableValues = _investmentPlan.withdrawalValues!;
     });
   }
 
@@ -134,7 +136,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     super.dispose();
   }
 
-Widget _buildFormulaWidget() {
+  Widget _buildFormulaWidget() {
     return FormulaWidget(
       principal: Utils.parseTextToDouble(_principalController.text),
       rate: Utils.parseTextToDouble(_rateController.text),
@@ -196,11 +198,11 @@ Widget _buildFormulaWidget() {
   Widget _build4PercentWidget() {
     return The4PercentWidget(
       withdrawalPercentageController: _withdrawalPercentageController,
-      customWithdrawalRule: _investmentPlan.withdrawalPercentage,
-      customWithdrawalTax: _investmentPlan.taxYearly,
+      customWithdrawalRule: _investmentPlan.withdrawalPlan.withdrawalPercentage,
+      customWithdrawalTax: _investmentPlan.withdrawalPlan.taxYearly,
       recalculateValues: _recalculateValues,
       breakController: _breakController,
-      compoundGatheredDuringBreak: _investmentPlan.compoundGatheredDuringBreak,
+      interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
       withdrawalTimeController: _withdrawalTimeController,
       taxController: _customTaxController,
       toggleSwitchWidget: _toggleSwitchWidget,
@@ -216,10 +218,10 @@ Widget _buildFormulaWidget() {
     return TaxWidget(
       showTaxNote: _showTaxNote,
       earningsWithdrawalRatio: EarningsWithdrawalRatio(
-        earnings: _investmentPlan.earnings,
-        earningsPercent: _investmentPlan.earningsPercent,
-        taxableWithdrawal: _investmentPlan.taxableWithdrawalYearly,
-        annualTax: _investmentPlan.taxYearly,
+        earnings: _investmentPlan.withdrawalPlan.earnings,
+        earningsPercent: _investmentPlan.withdrawalPlan.earningsPercent,
+        taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearly,
+        annualTax: _investmentPlan.withdrawalPlan.taxYearly,
       ),
     );
   }
