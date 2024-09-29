@@ -198,8 +198,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   Widget _build4PercentWidget() {
     return The4PercentWidget(
       withdrawalPercentageController: _withdrawalPercentageController,
-      customWithdrawalRule: _investmentPlan.withdrawalPlan.withdrawalYearly,
-      customWithdrawalTax: _investmentPlan.withdrawalPlan.taxYearly,
+      withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearly,
+      taxYearlyAfterBreak: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
       recalculateValues: _recalculateValues,
       breakController: _breakController,
       interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
@@ -221,7 +221,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
         earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
         earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
         taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
-        annualTax: _investmentPlan.withdrawalPlan.taxYearly,
+        annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
       ),
     );
   }

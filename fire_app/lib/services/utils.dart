@@ -1,8 +1,6 @@
 import 'dart:math';
 
 class Utils {
-  static const double threshold = 61000;  // The threshold for lower tax rate
-  static const double taxExemptionCard = 49700;  // The tax-free limit
 
   // Convert a String to double, returns 0 if the parsing fails
   static double parseTextToDouble(String text) {
@@ -35,14 +33,8 @@ class Utils {
     return earnings / totalValue;
   }
 
-  // Utility function to calculate taxable withdrawal
-  static double calculateTaxableWithdrawal(double earningsPercent, double withdrawalAmount, double exemption) {
-    double taxableWithdrawal = (earningsPercent * withdrawalAmount) - exemption;
-    return taxableWithdrawal > 0 ? taxableWithdrawal : 0.0;
-  }
-
   static double calculateCompoundInterest(double principal, double rate, double time) {
     return principal * pow(1 + rate / 100, time) - principal;
   }
-  
+
 }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class The4PercentWidget extends StatelessWidget {
   final TextEditingController withdrawalPercentageController;
-  final double customWithdrawalRule;
-  final double customWithdrawalTax;
+  final double withdrawalYearlyAfterBreak;
+  final double taxYearlyAfterBreak;
   final VoidCallback recalculateValues;
   final VoidCallback toggleTaxNote;
   final TextEditingController breakController;
@@ -15,8 +15,8 @@ class The4PercentWidget extends StatelessWidget {
   const The4PercentWidget({
     super.key,
     required this.withdrawalPercentageController,
-    required this.customWithdrawalRule,
-    required this.customWithdrawalTax,
+    required this.withdrawalYearlyAfterBreak,
+    required this.taxYearlyAfterBreak,
     required this.recalculateValues,
     required this.toggleTaxNote,
     required this.breakController,
@@ -78,7 +78,7 @@ class The4PercentWidget extends StatelessWidget {
               ),
             // Constrain the Withdrawal Each Month Text
             Text(
-              'Withdrawal Each Month: ${(customWithdrawalRule / 12).toStringAsFixed(0)} kr.-',
+              'Withdrawal Each Month: ${(withdrawalYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
               style: const TextStyle(fontSize: 16),
               softWrap: true, // Allow text wrapping
             ),
@@ -103,14 +103,14 @@ class The4PercentWidget extends StatelessWidget {
               ),
             ),
             Text(
-              ' on Monthly Withdrawal: ${(customWithdrawalTax / 12).toStringAsFixed(0)} kr.-',
+              ' on Monthly Withdrawal: ${(taxYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
               style: const TextStyle(fontSize: 16),
             ),
           ],
         ),
         const SizedBox(height: 15),  // Spacing between rows
         Text(
-              'Monthly Withdrawal After Tax: ${((customWithdrawalRule / 12) - customWithdrawalTax / 12).toStringAsFixed(0)} kr.-',
+              'Monthly Withdrawal After Tax: ${((withdrawalYearlyAfterBreak / 12) - taxYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
               style: const TextStyle(fontSize: 16),
             ),
       ],

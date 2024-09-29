@@ -1,5 +1,4 @@
 import 'package:fire_app/models/tax_option.dart';
-import 'package:fire_app/services/utils.dart';
 
 class WithdrawalPlan {
   double interestRate;
@@ -14,6 +13,7 @@ class WithdrawalPlan {
   double earningsAfterBreak = 0;
   double earningsPercentAfterBreak = 0;
   double taxableWithdrawalYearlyAfterBreak = 0;
+  double taxYearlyAfterBreak = 0;
   double totalValue;
   double deposits;
 
@@ -52,7 +52,8 @@ class WithdrawalPlan {
     earningsAfterBreak = totalValue - deposits;
     earningsPercentAfterBreak = earningsAfterBreak / totalValue;
     withdrawalYearly = totalValue * (withdrawalPercentage / 100);
-    taxableWithdrawalYearlyAfterBreak = calculateTaxableWithdrawal(totalValue, withdrawalYearly);
+    taxableWithdrawalYearlyAfterBreak = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
+    taxYearlyAfterBreak = selectedTaxOption.calculateTax(taxableWithdrawalYearlyAfterBreak);
     double compoundInWithdrawalYears = 0;
 
     for (int year = 1; year <= duration; year++) {
@@ -62,8 +63,8 @@ class WithdrawalPlan {
       double compoundThisYear = totalValue - previousValue;
       compoundInWithdrawalYears += compoundThisYear;
 
-      double taxableWithdrawalYearly = calculateTaxableWithdrawal(totalValue, withdrawalYearly);
-      taxYearly = calculateTax(totalValue, taxableWithdrawalYearly);
+      double taxableWithdrawalYearly = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
+      taxYearly = selectedTaxOption.calculateTax(taxableWithdrawalYearly);
       totalValue -= withdrawalYearly;
 
       withdrawalValues.add({
@@ -79,24 +80,5 @@ class WithdrawalPlan {
     return withdrawalValues;
   }
 
-  double calculateTaxableWithdrawal(double totalValue, double withdrawal) {
-    double earnings = totalValue - deposits;
-    double earningsPercent = earnings / totalValue;
-    return withdrawal * earningsPercent - Utils.taxExemptionCard;
-  }
-
-  double calculateTax(double totalValue, double withdrawal) {
-    double taxableWithdrawal = calculateTaxableWithdrawal(totalValue, withdrawal);
-    if (taxableWithdrawal <= 0) return 0;
-
-    if (selectedTaxOption.rate == 42.0) {
-      if (taxableWithdrawal <= Utils.threshold) {
-        return taxableWithdrawal * 0.27;
-      } else {
-        return (Utils.threshold * 0.27) + ((taxableWithdrawal - Utils.threshold) * 0.42);
-      }
-    } else {
-      return taxableWithdrawal * selectedTaxOption.rate / 100;
-    }
-  }
+  
 }
