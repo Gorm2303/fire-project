@@ -28,10 +28,10 @@ class EarningsWithdrawalRatio extends StatelessWidget {
         const SizedBox(height: 8),
         Text('Earnings (Total): ${earnings.toStringAsFixed(0)}'),
         Text('Earnings (Percent): ${(earningsPercent * 100).toStringAsFixed(2)}%'),
-        Text('Taxable Withdrawal (Annual): ${taxableWithdrawal.toStringAsFixed(0)}'),
+        Text('Taxable Withdrawal (Yearly): ${taxableWithdrawal.toStringAsFixed(0)}'),
         const SizedBox(width: 8), // Add some spacing between the texts
         Text('Taxable Withdrawal (Monthly): ${(taxableWithdrawal / 12).toStringAsFixed(0)}'),
-        Text('Tax (Annual): ${annualTax.toStringAsFixed(0)}'),
+        Text('Tax (Yearly): ${annualTax.toStringAsFixed(0)}'),
         const SizedBox(width: 8), // Add some spacing between the texts
         Text('Tax (Monthly): ${(annualTax / 12).toStringAsFixed(0)}'),
       ],

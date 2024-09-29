@@ -8,7 +8,7 @@ class SwitchAndTaxRate extends StatefulWidget {
   final VoidCallback recalculateValues;
   final bool isCustom;
   final ValueChanged<bool> onSwitchChanged;
-  final ValueChanged<TaxOption> onTaxOptionChanged;  // Add this callback
+  final ValueChanged<TaxOption> onTaxOptionChanged;  // Callback for custom or predefined tax option
 
   const SwitchAndTaxRate({
     super.key,
@@ -18,7 +18,7 @@ class SwitchAndTaxRate extends StatefulWidget {
     required this.recalculateValues,
     required this.isCustom,
     required this.onSwitchChanged,
-    required this.onTaxOptionChanged,  // Initialize the new callback in the constructor
+    required this.onTaxOptionChanged,
   });
 
   @override
@@ -43,11 +43,10 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Custom Tax Rate: ${_isActive ? 'Active' : 'Inactive'}',
-              style: const TextStyle(fontSize: 16),
+            const Text(
+              'Custom Tax Rate: ',
+              style: TextStyle(fontSize: 16),
             ),
-            const SizedBox(width: 20),
             Transform.scale(
               scale: 0.6,
               child: Switch(
@@ -55,8 +54,19 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
                 onChanged: (value) {
                   setState(() {
                     _isActive = value;
+                    if (_isActive) {
+                      // If custom is active, create a new custom tax option
+                      double customTaxRate = double.tryParse(widget.customTaxController.text) ?? 0;
+                      _currentTaxOption = TaxOption(customTaxRate, 'Custom Tax Rate', true, false, true);
+                      widget.onTaxOptionChanged(_currentTaxOption);
+                    } else {
+                      // If custom is inactive, reset to selected dropdown option
+                      _currentTaxOption = widget.taxOptions.first;
+                      widget.onTaxOptionChanged(_currentTaxOption);
+                    }
                   });
                   widget.onSwitchChanged(value);
+                  widget.recalculateValues();
                 },
               ),
             ),
@@ -69,7 +79,17 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
                   controller: widget.customTaxController,
                   decoration: const InputDecoration(labelText: 'Tax Rate (%)'),
                   keyboardType: TextInputType.number,
-                  onChanged: (value) => widget.recalculateValues(),
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      // Update custom tax option when input changes
+                      double customTaxRate = double.tryParse(value) ?? 0;
+                      setState(() {
+                        _currentTaxOption = TaxOption(customTaxRate, 'Custom Tax Rate', true, false, true);
+                      });
+                      widget.onTaxOptionChanged(_currentTaxOption);
+                      widget.recalculateValues();
+                    }
+                  },
                 ),
               )
             : DropdownButton<TaxOption>(
@@ -85,7 +105,8 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
                     setState(() {
                       _currentTaxOption = newValue;
                     });
-                    widget.onTaxOptionChanged(newValue);  // Call the new callback here
+                    widget.onTaxOptionChanged(newValue);  // Notify parent of change
+                    widget.recalculateValues();
                   }
                 },
               ),

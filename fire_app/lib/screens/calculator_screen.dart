@@ -1,4 +1,6 @@
 import 'package:fire_app/models/tax_option.dart';
+import 'package:fire_app/widgets/notional_gains_tax_widget.dart';
+import 'package:fire_app/widgets/tax_exemption_switch.dart';
 import 'package:flutter/material.dart';
 import '../widgets/formula_widget.dart';
 import '../widgets/tax_widget.dart';
@@ -11,6 +13,7 @@ import '../widgets/earnings_withdrawal_ratio.dart';
 import '../widgets/switch_taxrate_widget.dart';
 import '../services/presetting_service.dart';
 import '../services/utils.dart';
+import '../widgets/tax_exemption_switch.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -34,6 +37,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _customTaxController = TextEditingController(text: '0');
 
   late SwitchAndTaxRate _toggleSwitchWidget;
+  late NotionalGainsTaxWidget _notionalGainsTaxWidget;
+  late TaxExemptionSwitch _taxExemptionSwitch;
 
   List<Map<String, double>> _depositYearlyValues = [];
   List<Map<String, double>> _withdrawalYearlyValues = [];
@@ -46,12 +51,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   late InvestmentPlan _investmentPlan;
   
   List<TaxOption> taxOptions = [
-    TaxOption(15.3, 'Pension PAL-skat', false),
-    TaxOption(17.0, 'Aktiesparekonto', false),
-    TaxOption(42.0, 'Normal Aktiebeskatning*', false),
+    TaxOption(42.0, 'Normal Aktiebeskatning*', false, false, true),
+    TaxOption(17.0, 'Aktiesparekonto', false, true, false),
+    TaxOption(15.3, 'Pension PAL-skat', false, true, false),
   ];
 
-  late TaxOption _selectedTaxOption = taxOptions[2];
+  late TaxOption _selectedTaxOption = taxOptions[0];
 
   @override
   void initState() {
@@ -59,12 +64,57 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _initializeTabControllers();
     _initializeToggleSwitchWidget();
     _loadPresetValues('High Investment');
+    _initializeNotionalGainsTaxWidget();
     _recalculateValues();
+    initializeTaxExemptionSwitch();
   }
 
   void _initializeTabControllers() {
     _tableTabController = TabController(length: 2, vsync: this);
     _mainTabController = TabController(length: 2, vsync: this);
+  }
+
+  void _initializeNotionalGainsTaxWidget() {
+    _notionalGainsTaxWidget = NotionalGainsTaxWidget(
+      selectedTaxOption: _selectedTaxOption,
+      recalculateValues: _recalculateValues,
+      onTaxTypeChanged: (String selectedTaxType) {  // Now accepting a String
+        setState(() {
+          // Update `isNotionallyTaxed` based on the selected tax type from the dropdown
+          bool isNotionallyTaxed = (selectedTaxType == 'Notional Gains Tax');
+
+          // Create a new instance of TaxOption with the updated `isNotionallyTaxed` value
+          _selectedTaxOption = TaxOption(
+            _selectedTaxOption.rate,
+            _selectedTaxOption.description,
+            _selectedTaxOption.isCustomTaxRule,
+            isNotionallyTaxed,
+            _selectedTaxOption.useTaxExemptionCardAndThreshold,  // Use the boolean based on the selected tax type
+          );
+          _recalculateValues();
+        });
+      },
+    );
+  }
+
+  void initializeTaxExemptionSwitch() {
+    _taxExemptionSwitch = TaxExemptionSwitch(
+      selectedTaxOption: _selectedTaxOption,
+      recalculateValues: _recalculateValues,
+      onSwitchChanged: (bool value) {
+        setState(() {
+          _selectedTaxOption = TaxOption(
+            _selectedTaxOption.rate,
+            _selectedTaxOption.description,
+            _selectedTaxOption.isCustomTaxRule,
+            _selectedTaxOption.isNotionallyTaxed,
+            value,  // Update the `useTaxExemptionCardAndThreshold` value
+          );
+          _recalculateValues();
+        });
+      },
+      onTaxOptionChanged: (value) => _selectedTaxOption = value,
+    );
   }
 
   void _initializeToggleSwitchWidget() {
@@ -83,8 +133,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       onTaxOptionChanged: (TaxOption newOption) {
         setState(() {
           _selectedTaxOption = newOption;
+          _recalculateValues();
         });
-        _recalculateValues();
       },
     );
   }
@@ -206,6 +256,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       withdrawalTimeController: _withdrawalTimeController,
       taxController: _customTaxController,
       toggleSwitchWidget: _toggleSwitchWidget,
+      notionalGainsTaxWidget: _notionalGainsTaxWidget,
+      taxExemptionSwitch: _taxExemptionSwitch,
       toggleTaxNote: () {
         setState(() {
           _showTaxNote = !_showTaxNote;

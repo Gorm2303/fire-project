@@ -28,7 +28,7 @@ class TaxWidget extends StatelessWidget {
                   maxWidth: 760, // Set the maximum width constraint
                 ),
                 child: const Text(
-                  'Note: The tax is calculated on an annually basis, tax is only calculated on the earnings which means deposits are not taxed. The first earned 61,000 kr is taxed at 27%, and any amount above that is taxed at 42%. The displayed amount is the monthly tax, calculated based on the following formulas:',
+                  'Note: The tax is calculated on an annually basis, tax is only calculated on the earnings which means deposits are not taxed. Every person in Denmark has a tax exemption card of 49700 kr (in 2024) every year. The first earned 61,000 kr (in 2024) is taxed at 27%, and any amount above that is taxed at 42%. The displayed amount is the monthly tax, calculated based on the following formulas:',
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
@@ -55,7 +55,7 @@ class TaxWidget extends StatelessWidget {
                     const SizedBox(height: 8),
                     Math.tex(
                       r"""
-                      \text{Taxable Withdrawal} = \text{Earnings Percent} \times \text{Withdrawal Amount}
+                      \text{Taxable Withdrawal} = \text{Earnings Percent} \times \text{Withdrawal Amount} - 49700, \ \ \text{Tax Exemption Card} = 49700
                       """,
                       textStyle: const TextStyle(fontSize: 16),
                     ),
@@ -64,8 +64,8 @@ class TaxWidget extends StatelessWidget {
                       r"""
                       \text{Annual Tax} = 
                       \begin{cases} 
-                      0.27 \times \text{Taxable Withdrawal}, & \text{if } \text{Taxable Withdrawal} \leq 61,000 \\ 
-                      0.27 \times 61,000 + 0.42 \times (\text{Taxable Withdrawal} - 61,000), & \text{if } \text{Taxable Withdrawal} > 61,000
+                      0.27 \times \text{Taxable Withdrawal}, & \text{if } \text{Taxable Withdrawal} \leq 61000 \\ 
+                      0.27 \times 61000 + 0.42 \times (\text{Taxable Withdrawal} - 61000), & \text{if } \text{Taxable Withdrawal} > 61000
                       \end{cases}
                       """,
                       textStyle: const TextStyle(fontSize: 16),
