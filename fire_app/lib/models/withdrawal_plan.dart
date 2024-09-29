@@ -89,9 +89,7 @@ class WithdrawalPlan {
     double taxableWithdrawal = calculateTaxableWithdrawal(totalValue, withdrawal);
     if (taxableWithdrawal <= 0) return 0;
 
-    if (selectedTaxOption.isCustomTaxRule) {
-      return taxableWithdrawal * selectedTaxOption.rate / 100;
-    } else if (selectedTaxOption.rate == 42.0) {
+    if (selectedTaxOption.rate == 42.0) {
       if (taxableWithdrawal <= Utils.threshold) {
         return taxableWithdrawal * 0.27;
       } else {
