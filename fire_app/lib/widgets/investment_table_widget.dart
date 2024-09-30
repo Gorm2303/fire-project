@@ -68,6 +68,14 @@ class InvestmentTableWidget extends StatelessWidget {
                   ),
                   size: ColumnSize.M,
                 ),
+                DataColumn2(
+                  label: Text(
+                    'Annual Tax',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    softWrap: true, // Allow text wrapping
+                  ),
+                  size: ColumnSize.M,
+                ),
               ]
             : const [
                 DataColumn2(
@@ -136,7 +144,7 @@ class InvestmentTableWidget extends StatelessWidget {
             DataCell(Text(value['compoundEarnings']!.toStringAsFixed(0))),
             if (isWithdrawingTable) DataCell(Text((value['withdrawal']! / 12).toStringAsFixed(0))),  // Monthly Withdrawal
             if (isWithdrawingTable) DataCell(Text(value['withdrawal']?.toStringAsFixed(0) ?? '0')),  // Annual Withdrawal
-            if (isWithdrawingTable) DataCell(Text(value['tax']?.toStringAsFixed(0) ?? '0')),  // Tax column
+            DataCell(Text(value['tax']?.toStringAsFixed(0) ?? '0')),  // Tax column
           ]);
         }).toList(),
         headingRowHeight: 56,  // Height for the sticky header row

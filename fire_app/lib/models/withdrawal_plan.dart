@@ -2,7 +2,7 @@ import 'package:fire_app/models/tax_option.dart';
 
 class WithdrawalPlan {
   double interestRate;
-  int breakPeriod; // years during which investment grows but no withdrawals are made
+  int breakPeriod; // Years during which investment grows but no withdrawals are made
   int duration;
   double interestGatheredDuringBreak = 0;
   double withdrawalPercentage;
@@ -19,7 +19,7 @@ class WithdrawalPlan {
 
   WithdrawalPlan({
     required this.interestRate,
-    this.breakPeriod = 0,    
+    this.breakPeriod = 0,
     required this.duration,
     required this.withdrawalPercentage,
     required this.selectedTaxOption,
@@ -42,6 +42,7 @@ class WithdrawalPlan {
     double previousValue;
     interestGatheredDuringBreak = 0;
 
+    // Apply interest growth during the break period
     if (breakPeriod >= 1) {
       for (int year = 1; year <= breakPeriod; year++) {
         totalValue *= (1 + interestRate / 100);
@@ -49,24 +50,42 @@ class WithdrawalPlan {
       interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
     }
 
+    // Calculate earnings and withdrawal details after the break
     earningsAfterBreak = totalValue - deposits;
     earningsPercentAfterBreak = earningsAfterBreak / totalValue;
     withdrawalYearly = totalValue * (withdrawalPercentage / 100);
-    taxableWithdrawalYearlyAfterBreak = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
-    taxYearlyAfterBreak = selectedTaxOption.calculateTax(taxableWithdrawalYearlyAfterBreak);
+
+    // If it's not notionally taxed, apply capital gains tax logic
+    if (!selectedTaxOption.isNotionallyTaxed) {
+      taxableWithdrawalYearlyAfterBreak = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
+      taxYearlyAfterBreak = selectedTaxOption.calculateTaxWithdrawalYears(taxableWithdrawalYearlyAfterBreak);
+    }
+
     double compoundInWithdrawalYears = 0;
 
+    // Loop through each withdrawal year and apply compound interest, tax, and withdrawals
     for (int year = 1; year <= duration; year++) {
       previousValue = totalValue;
-      totalValue *= (1 + interestRate / 100);
-
+      totalValue *= (1 + interestRate / 100);  // Apply compound interest for the year
       double compoundThisYear = totalValue - previousValue;
+
+      if (selectedTaxOption.isNotionallyTaxed) {
+        // For notional gains tax, apply tax on compounded earnings
+        double earnings = compoundThisYear * (1 - selectedTaxOption.rate / 100);
+        taxYearly = compoundThisYear - earnings;  // Tax on notional gains
+        compoundThisYear = earnings;
+      } else {
+        // For capital gains tax, calculate taxable withdrawal and apply tax
+        double taxableWithdrawalYearly = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
+        taxYearly = selectedTaxOption.calculateTaxWithdrawalYears(taxableWithdrawalYearly);
+      }
+
       compoundInWithdrawalYears += compoundThisYear;
 
-      double taxableWithdrawalYearly = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
-      taxYearly = selectedTaxOption.calculateTax(taxableWithdrawalYearly);
+      // Subtract yearly withdrawal from total value after tax is applied
       totalValue -= withdrawalYearly;
 
+      // Store yearly values for reporting
       withdrawalValues.add({
         'year': year.toDouble(),
         'totalValue': totalValue,
@@ -79,6 +98,6 @@ class WithdrawalPlan {
 
     return withdrawalValues;
   }
-
-  
 }
+
+

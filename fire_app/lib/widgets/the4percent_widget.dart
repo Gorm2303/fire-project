@@ -1,4 +1,3 @@
-import 'package:fire_app/widgets/tax_exemption_switch.dart';
 import 'package:flutter/material.dart';
 
 class The4PercentWidget extends StatelessWidget {
@@ -12,8 +11,6 @@ class The4PercentWidget extends StatelessWidget {
   final TextEditingController withdrawalTimeController;
   final TextEditingController taxController;
   final Widget toggleSwitchWidget;
-  final Widget notionalGainsTaxWidget;
-  final TaxExemptionSwitch taxExemptionSwitch;
 
   const The4PercentWidget({
     super.key,
@@ -27,8 +24,6 @@ class The4PercentWidget extends StatelessWidget {
     required this.withdrawalTimeController, 
     required this.taxController,
     required this.toggleSwitchWidget,
-    required this.notionalGainsTaxWidget,
-    required this.taxExemptionSwitch,
   });
 
   @override
@@ -90,8 +85,6 @@ class The4PercentWidget extends StatelessWidget {
           ],
         ),
         toggleSwitchWidget,
-        notionalGainsTaxWidget,
-        taxExemptionSwitch,
         const SizedBox(height: 10),  // Spacing between rows
         Row(
           mainAxisAlignment: MainAxisAlignment.center,

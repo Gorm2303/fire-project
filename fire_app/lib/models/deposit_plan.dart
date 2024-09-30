@@ -1,12 +1,16 @@
+import 'package:fire_app/models/tax_option.dart';
+
 class DepositPlan {
   double principal;
   double interestRate;
   int duration;
   double additionalAmount;
   String contributionFrequency;
+  TaxOption selectedTaxOption;
   double totalValue = 0;
   double deposits = 0;
   double compoundEarnings = 0;
+  double tax = 0;
   
   DepositPlan({
     required this.principal,
@@ -14,6 +18,7 @@ class DepositPlan {
     required this.duration,
     required this.additionalAmount,
     required this.contributionFrequency,
+    required this.selectedTaxOption,
   });
 
   List<Map<String, double>> calculateYearlyValues() {
@@ -47,6 +52,10 @@ class DepositPlan {
         compoundThisYear += additionalAmount * (interestRate / 100) * periodsLeft / contributionPeriods;
       }
 
+      if (selectedTaxOption.isNotionallyTaxed) {
+        tax = selectedTaxOption.calculateTaxDepositingYears(compoundThisYear);
+        compoundThisYear = compoundThisYear - tax;
+      }
       totalValue += compoundThisYear;
       compoundEarnings += compoundThisYear;
 
@@ -56,6 +65,7 @@ class DepositPlan {
         'totalDeposits': deposits,
         'compoundThisYear': compoundThisYear,
         'compoundEarnings': compoundEarnings,
+        'tax': tax,
       });
     }
 

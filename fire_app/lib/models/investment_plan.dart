@@ -27,6 +27,7 @@ class InvestmentPlan {
           duration: depositYears,
           additionalAmount: additionalAmount,
           contributionFrequency: contributionFrequency,
+          selectedTaxOption: selectedTaxOption,
         ),
         withdrawalPlan = WithdrawalPlan(
           interestRate: rate,

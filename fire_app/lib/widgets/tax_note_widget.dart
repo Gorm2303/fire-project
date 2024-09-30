@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
-class TaxWidget extends StatelessWidget {
+class TaxNoteWidget extends StatelessWidget {
   final bool showTaxNote;   // Whether to show the tax note
   final Widget earningsWithdrawalRatio;
 
 
   // Constructor with default values for totalAfterBreak and withdrawalAmount
-  const TaxWidget({
+  const TaxNoteWidget({
     super.key, 
     required this.showTaxNote, 
     required this.earningsWithdrawalRatio,
