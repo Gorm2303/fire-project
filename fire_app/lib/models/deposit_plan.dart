@@ -11,7 +11,7 @@ class DepositPlan {
   double deposits = 0;
   double compoundEarnings = 0;
   double tax = 0;
-  
+
   DepositPlan({
     required this.principal,
     required this.interestRate,
@@ -21,6 +21,7 @@ class DepositPlan {
     required this.selectedTaxOption,
   });
 
+  /// Main method to calculate yearly values including deposits, compounding, and tax
   List<Map<String, double>> calculateYearlyValues() {
     List<Map<String, double>> yearlyValues = [
       {
@@ -29,33 +30,23 @@ class DepositPlan {
         'totalDeposits': principal,
         'compoundEarnings': 0,
         'compoundThisYear': 0,
+        'tax': 0,
       }
     ];
 
     totalValue = principal;
     deposits = principal;
-    int contributionPeriods = 1; // Default is yearly contributions
-
-    if (contributionFrequency == 'Monthly') {
-      contributionPeriods = 12;
-    }
+    int contributionPeriods = _getContributionPeriods(); // Monthly or Yearly contributions
 
     for (int year = 1; year <= duration; year++) {
-      double compoundThisYear = 0;
-      compoundThisYear += totalValue * (interestRate / 100);
-
-      for (int period = 1; period <= contributionPeriods; period++) {
-        totalValue += additionalAmount;
-        deposits += additionalAmount;
-
-        int periodsLeft = contributionPeriods - period;
-        compoundThisYear += additionalAmount * (interestRate / 100) * periodsLeft / contributionPeriods;
-      }
-
+      double compoundThisYear = _calculateCompounding(contributionPeriods);
+      
+      // Handle tax directly in DepositPlan
       if (selectedTaxOption.isNotionallyTaxed) {
-        tax = selectedTaxOption.calculateTaxDepositingYears(compoundThisYear);
-        compoundThisYear = compoundThisYear - tax;
+        tax = _calculateTaxOnEarnings(compoundThisYear);
+        compoundThisYear -= tax;
       }
+
       totalValue += compoundThisYear;
       compoundEarnings += compoundThisYear;
 
@@ -70,5 +61,44 @@ class DepositPlan {
     }
 
     return yearlyValues;
+  }
+
+  /// Determines the number of contribution periods based on frequency
+  int _getContributionPeriods() {
+    return (contributionFrequency == 'Monthly') ? 12 : 1;
+  }
+
+  /// Calculates compounding for the year based on interest rate and contributions
+  double _calculateCompounding(int contributionPeriods) {
+    double compoundThisYear = totalValue * (interestRate / 100);
+    for (int period = 1; period <= contributionPeriods; period++) {
+      totalValue += additionalAmount;
+      deposits += additionalAmount;
+
+      int periodsLeft = contributionPeriods - period;
+      compoundThisYear += additionalAmount * (interestRate / 100) * periodsLeft / contributionPeriods;
+    }
+    return compoundThisYear;
+  }
+
+  /// Calculates tax on earnings for the year based on the current tax option
+  double _calculateTaxOnEarnings(double earnings) {
+    if (earnings <= 0) return 0;
+
+    double tax = 0;
+    double taxableEarnings = earnings;
+    if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
+      taxableEarnings -= TaxOption.taxExemptionCard; // Apply exemption card
+    }
+
+    if (taxableEarnings <= 0) return 0; // No tax if taxable earnings are negative or zero
+
+    if (selectedTaxOption.isNotionallyTaxed && taxableEarnings <= TaxOption.threshold) {
+      tax = taxableEarnings * 0.27; // Apply lower tax rate for threshold
+    } else {
+      tax = taxableEarnings * selectedTaxOption.rate / 100; // Apply regular tax rate
+    }
+
+    return tax;
   }
 }

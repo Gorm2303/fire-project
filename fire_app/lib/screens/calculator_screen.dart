@@ -47,7 +47,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   
   List<TaxOption> taxOptions = [
     TaxOption(42.0, 'Tax On Sale', false, false, true),
-    TaxOption(42.0, 'Tax Every Year', false, true, true),
+    TaxOption(42.0, 'Tax Every Year', false, true, false),
     TaxOption(17.0, 'Aktiesparekonto', false, true, false),
     TaxOption(15.3, 'Pension PAL-skat', false, true, false),
   ];

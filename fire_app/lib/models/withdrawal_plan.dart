@@ -7,6 +7,7 @@ class WithdrawalPlan {
   double interestGatheredDuringBreak = 0;
   double withdrawalPercentage;
   double withdrawalYearly = 0;
+  double taxableWithdrawalYearly = 0;
   TaxOption selectedTaxOption;
   double taxYearly = 0;
   double withdrawalAfterTax = 0;
@@ -55,10 +56,10 @@ class WithdrawalPlan {
     earningsPercentAfterBreak = earningsAfterBreak / totalValue;
     withdrawalYearly = totalValue * (withdrawalPercentage / 100);
 
-    // If it's not notionally taxed, apply capital gains tax logic
+        // If it's not notionally taxed, apply capital gains tax logic
     if (!selectedTaxOption.isNotionallyTaxed) {
-      taxableWithdrawalYearlyAfterBreak = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
-      taxYearlyAfterBreak = selectedTaxOption.calculateTaxWithdrawalYears(taxableWithdrawalYearlyAfterBreak);
+      taxableWithdrawalYearlyAfterBreak = _calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
+      taxYearlyAfterBreak = _applyCapitalGainsTax(taxableWithdrawalYearlyAfterBreak);
     }
 
     double compoundInWithdrawalYears = 0;
@@ -69,15 +70,14 @@ class WithdrawalPlan {
       totalValue *= (1 + interestRate / 100);  // Apply compound interest for the year
       double compoundThisYear = totalValue - previousValue;
 
+      // Calculate tax and withdrawal based on the selected tax option
       if (selectedTaxOption.isNotionallyTaxed) {
-        // For notional gains tax, apply tax on compounded earnings
-        double earnings = compoundThisYear * (1 - selectedTaxOption.rate / 100);
-        taxYearly = compoundThisYear - earnings;  // Tax on notional gains
-        compoundThisYear = earnings;
+        // Notional gains tax applies only to yearly earnings (not the withdrawal)
+        taxYearly = _applyNotionalGainsTax(compoundThisYear);
       } else {
-        // For capital gains tax, calculate taxable withdrawal and apply tax
-        double taxableWithdrawalYearly = selectedTaxOption.calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
-        taxYearly = selectedTaxOption.calculateTaxWithdrawalYears(taxableWithdrawalYearly);
+        // Capital gains tax applies to the earnings portion of the withdrawal
+        taxableWithdrawalYearly = _calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
+        taxYearly = _applyCapitalGainsTax(taxableWithdrawalYearly);
       }
 
       compoundInWithdrawalYears += compoundThisYear;
@@ -98,6 +98,55 @@ class WithdrawalPlan {
 
     return withdrawalValues;
   }
-}
 
+  // Helper function to calculate taxable withdrawal (portion of the withdrawal that is taxed)
+  double _calculateTaxableWithdrawal(double totalValue, double deposits, double withdrawal) {
+    double earnings = totalValue - deposits;
+    if (earnings <= 0) return 0;
+    
+    // Calculate the earnings portion of the withdrawal
+    double earningsPercent = earnings / totalValue;
+    double taxableWithdrawal = withdrawal * earningsPercent;
+
+    // Apply tax exemption if enabled
+    if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
+      taxableWithdrawal -= TaxOption.taxExemptionCard;
+    }
+
+    return taxableWithdrawal < 0 ? 0 : taxableWithdrawal;
+  }
+
+  // Helper function to apply capital gains tax
+  double _applyCapitalGainsTax(double taxableWithdrawal) {
+    if (taxableWithdrawal <= 0) return 0;
+
+    double tax = 0;
+    // Apply the capital gains tax rate, with consideration for the threshold and exemption
+    if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
+      if (taxableWithdrawal <= TaxOption.threshold) {
+        tax = taxableWithdrawal * 0.27;  // Apply lower tax rate under the threshold
+      } else {
+        tax = (TaxOption.threshold * 0.27) + ((taxableWithdrawal - TaxOption.threshold) * selectedTaxOption.rate / 100);
+      }
+    } else {
+      tax = taxableWithdrawal * selectedTaxOption.rate / 100;
+    }
+
+    return tax < 0 ? 0 : tax;
+  }
+
+  // Helper function to apply notional gains tax
+  double _applyNotionalGainsTax(double earnings) {
+    double tax = 0;
+
+    // Apply notional gains tax only on the yearly compound earnings
+    if (earnings <= TaxOption.threshold) {
+      tax = (earnings - TaxOption.taxExemptionCard) * 0.27;
+    } else {
+      tax = (earnings - TaxOption.taxExemptionCard) * selectedTaxOption.rate / 100;
+    }
+
+    return tax < 0 ? 0 : tax;
+  }
+}
 
