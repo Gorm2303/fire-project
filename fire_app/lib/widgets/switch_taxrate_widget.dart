@@ -81,7 +81,7 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
                 _selectedTaxType = newValue;
                 bool isNotionallyTaxed = newValue == 'Notional Gains Tax';
                 _currentTaxOption = TaxOption(
-                  _currentTaxOption.rate,
+                  _currentTaxOption.ratePercentage,
                   _currentTaxOption.description,
                   _currentTaxOption.isCustomTaxRule,
                   isNotionallyTaxed,
@@ -152,7 +152,7 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
             items: widget.taxOptions.map((TaxOption option) {
               return DropdownMenuItem<TaxOption>(
                 value: option,
-                child: Text('${option.rate}% - ${option.description}'),
+                child: Text('${option.ratePercentage}% - ${option.description}'),
               );
             }).toList(),
             onChanged: (TaxOption? newValue) {
@@ -194,7 +194,7 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
               setState(() {
                 _useTaxExemptionCard = value;
                 _currentTaxOption = TaxOption(
-                  _currentTaxOption.rate,
+                  _currentTaxOption.ratePercentage,
                   _currentTaxOption.description,
                   _currentTaxOption.isCustomTaxRule,
                   _currentTaxOption.isNotionallyTaxed,

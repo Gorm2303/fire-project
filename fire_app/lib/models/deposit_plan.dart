@@ -86,20 +86,16 @@ class DepositPlan {
     double tax = 0;
     double taxableEarnings = earnings;
 
-    if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
+    if (selectedTaxOption.useTaxExemptionCardAndThreshold 
+    && taxableEarnings <= TaxOption.threshold 
+    && selectedTaxOption.ratePercentage > TaxOption.lowerTaxRate) {
+      tax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
       taxableEarnings -= TaxOption.taxExemptionCard; // Apply exemption card
+    } else {
+      tax = taxableEarnings * selectedTaxOption.ratePercentage / 100; // Apply regular tax rate
     }
 
     if (taxableEarnings <= 0) return 0; // No tax if taxable earnings are negative or zero
-
-    if (selectedTaxOption.isNotionallyTaxed && 
-        taxableEarnings <= TaxOption.threshold && 
-        selectedTaxOption.rate > 27) {
-      tax = taxableEarnings * 0.27; // Apply lower tax rate for threshold
-    } else {
-      tax = taxableEarnings * selectedTaxOption.rate / 100; // Apply regular tax rate
-    }
-
     return tax;
   }
 }

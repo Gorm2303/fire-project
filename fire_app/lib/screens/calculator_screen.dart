@@ -93,7 +93,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       onTaxExemptionChanged: (bool useExemption) {
         setState(() {
           _selectedTaxOption = TaxOption(
-            _selectedTaxOption.rate,
+            _selectedTaxOption.ratePercentage,
             _selectedTaxOption.description,
             _selectedTaxOption.isCustomTaxRule,
             _selectedTaxOption.isNotionallyTaxed,
