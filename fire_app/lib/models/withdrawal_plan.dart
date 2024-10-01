@@ -59,7 +59,7 @@ class WithdrawalPlan {
         // If it's not notionally taxed, apply capital gains tax logic
     if (!selectedTaxOption.isNotionallyTaxed) {
       taxableWithdrawalYearlyAfterBreak = _calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
-      taxYearlyAfterBreak = _applyCapitalGainsTax(taxableWithdrawalYearlyAfterBreak);
+      taxYearlyAfterBreak = _capitalGainsTax(taxableWithdrawalYearlyAfterBreak);
     }
 
     double compoundInWithdrawalYears = 0;
@@ -73,11 +73,11 @@ class WithdrawalPlan {
       // Calculate tax and withdrawal based on the selected tax option
       if (selectedTaxOption.isNotionallyTaxed) {
         // Notional gains tax applies only to yearly earnings (not the withdrawal)
-        taxYearly = _applyNotionalGainsTax(compoundThisYear);
+        taxYearly = _notionalGainsTax(compoundThisYear);
       } else {
         // Capital gains tax applies to the earnings portion of the withdrawal
         taxableWithdrawalYearly = _calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
-        taxYearly = _applyCapitalGainsTax(taxableWithdrawalYearly);
+        taxYearly = _capitalGainsTax(taxableWithdrawalYearly);
       }
 
       compoundInWithdrawalYears += compoundThisYear;
@@ -117,8 +117,8 @@ class WithdrawalPlan {
   }
 
   // Helper function to apply capital gains tax
-  double _applyCapitalGainsTax(double taxableWithdrawal) {
-    if (taxableWithdrawal <= 0) return 0;
+  double _capitalGainsTax(double taxableWithdrawal) {
+    if (taxableWithdrawal <= 0 || selectedTaxOption.rate == 0) return 0;
 
     double tax = 0;
     // Apply the capital gains tax rate, with consideration for the threshold and exemption
@@ -136,7 +136,8 @@ class WithdrawalPlan {
   }
 
   // Helper function to apply notional gains tax
-  double _applyNotionalGainsTax(double earnings) {
+  double _notionalGainsTax(double earnings) {
+    if (earnings <= 0 || selectedTaxOption.rate == 0) return 0;
     double tax = 0;
 
     // Apply notional gains tax only on the yearly compound earnings

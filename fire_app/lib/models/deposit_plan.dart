@@ -83,17 +83,18 @@ class DepositPlan {
 
   /// Calculates tax on earnings for the year based on the current tax option
   double _calculateTaxOnEarnings(double earnings) {
-    if (earnings <= 0) return 0;
-
     double tax = 0;
     double taxableEarnings = earnings;
+
     if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
       taxableEarnings -= TaxOption.taxExemptionCard; // Apply exemption card
     }
 
     if (taxableEarnings <= 0) return 0; // No tax if taxable earnings are negative or zero
 
-    if (selectedTaxOption.isNotionallyTaxed && taxableEarnings <= TaxOption.threshold) {
+    if (selectedTaxOption.isNotionallyTaxed && 
+        taxableEarnings <= TaxOption.threshold && 
+        selectedTaxOption.rate > 27) {
       tax = taxableEarnings * 0.27; // Apply lower tax rate for threshold
     } else {
       tax = taxableEarnings * selectedTaxOption.rate / 100; // Apply regular tax rate
