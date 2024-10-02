@@ -33,31 +33,39 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
   late String _selectedTaxType; // Tax Type (Capital Gains vs Notional Gains)
   late bool _useTaxExemptionCard; // To track the state of tax exemption switch
   late TaxOption _originalTaxOption; // To preserve the non-custom tax option when switching
+  late bool _originalUseTaxExemptionCard; // Preserve the original tax exemption state when switching
+  late String _originalTaxType; // Preserve the original tax type when switching
 
   @override
   void initState() {
     super.initState();
     _isActive = widget.isCustom;
     _currentTaxOption = widget.selectedTaxOption;
-    _originalTaxOption = widget.selectedTaxOption; // Store the original non-custom option
-    _selectedTaxType = widget.selectedTaxOption.isNotionallyTaxed ? 'Notional Gains Tax' : 'Capital Gains Tax';
+
+    // Initialize the tax exemption card state with the selected tax option's value
     _useTaxExemptionCard = widget.selectedTaxOption.useTaxExemptionCardAndThreshold;
+    _originalTaxOption = widget.selectedTaxOption; // Store the original non-custom option
+    _originalUseTaxExemptionCard = _useTaxExemptionCard; // Store the original tax exemption state
+    _selectedTaxType = widget.selectedTaxOption.isNotionallyTaxed ? 'Notional Gains Tax' : 'Capital Gains Tax';
+    _originalTaxType = _selectedTaxType;
   }
 
   @override
   Widget build(BuildContext context) {
+    bool disableTaxTypeAndExemption = _currentTaxOption.ratePercentage != 42.0 && !_currentTaxOption.isCustomTaxRule;
+
     return Column(
       children: <Widget>[
         _buildCustomTaxSwitch(),
         _buildTaxInputOrDropdown(),
-        _buildTaxTypeDropdown(),
-        _buildTaxExemptionSwitch(),
+        _buildTaxTypeDropdown(disableTaxTypeAndExemption),
+        _buildTaxExemptionSwitch(disableTaxTypeAndExemption),
       ],
     );
   }
 
   // Build Dropdown for selecting tax type (Notional vs. Capital)
-  Widget _buildTaxTypeDropdown() {
+  Widget _buildTaxTypeDropdown(bool disableTaxType) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -75,17 +83,16 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
               child: Text('Notional Gains Tax'),
             ),
           ],
-          onChanged: (String? newValue) {
+          onChanged: disableTaxType ? null : (String? newValue) {
             if (newValue != null) {
               setState(() {
                 _selectedTaxType = newValue;
-                bool isNotionallyTaxed = newValue == 'Notional Gains Tax';
                 _currentTaxOption = TaxOption(
                   _currentTaxOption.ratePercentage,
                   _currentTaxOption.description,
                   _currentTaxOption.isCustomTaxRule,
-                  isNotionallyTaxed,
-                  _useTaxExemptionCard,
+                  newValue == 'Notional Gains Tax', // Update tax type
+                  _currentTaxOption.useTaxExemptionCardAndThreshold,
                 );
               });
               widget.onTaxOptionChanged(_currentTaxOption);
@@ -160,10 +167,16 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
                 setState(() {
                   _currentTaxOption = newValue;
 
-                  // Automatically update Tax Type and Tax Exemption based on the preset
+                  // Automatically update Tax Type and Tax Exemption based on the selected predefined option
                   _selectedTaxType = _currentTaxOption.isNotionallyTaxed ? 'Notional Gains Tax' : 'Capital Gains Tax';
                   _useTaxExemptionCard = _currentTaxOption.useTaxExemptionCardAndThreshold;
+
+                  // Update original states for when custom is turned off
+                  _originalTaxOption = newValue;
+                  _originalUseTaxExemptionCard = _useTaxExemptionCard;
+                  _originalTaxType = _selectedTaxType;
                 });
+
                 widget.onTaxOptionChanged(_currentTaxOption); // Notify parent of the change
                 widget.recalculateValues();
               }
@@ -181,16 +194,17 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
   }
 
   // Build Switch for Tax Exemption
-  Widget _buildTaxExemptionSwitch() {
+  Widget _buildTaxExemptionSwitch(bool disableExemption) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('Use Tax Exemption and progression limit: ', style: TextStyle(fontSize: 16)),
+        const Text('Use Tax Exemption:', style: TextStyle(fontSize: 16)),
+        const SizedBox(width: 10),
         Transform.scale(
           scale: 0.6,
           child: Switch(
             value: _useTaxExemptionCard,
-            onChanged: (value) {
+            onChanged: disableExemption ? null : (value) {
               setState(() {
                 _useTaxExemptionCard = value;
                 _currentTaxOption = TaxOption(
@@ -198,10 +212,10 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
                   _currentTaxOption.description,
                   _currentTaxOption.isCustomTaxRule,
                   _currentTaxOption.isNotionallyTaxed,
-                  _useTaxExemptionCard,
+                  _useTaxExemptionCard, // Update the tax exemption state
                 );
               });
-              widget.onTaxExemptionChanged(_useTaxExemptionCard); // Notify parent
+              widget.onTaxExemptionChanged(_useTaxExemptionCard);
               widget.recalculateValues();
             },
           ),
@@ -213,20 +227,26 @@ class _SwitchAndTaxRateState extends State<SwitchAndTaxRate> {
   // Update the method that handles the custom tax switch change
   void _handleCustomTaxSwitch(bool isCustom) {
     if (isCustom) {
+      // When switching to custom tax rate, reset the settings
       double customTaxRate = double.tryParse(widget.customTaxController.text) ?? 0;
       _currentTaxOption = TaxOption(
-        customTaxRate, 
-        'Custom Tax Rate', 
-        true, 
-        _selectedTaxType == 'Notional Gains Tax', 
-        _useTaxExemptionCard,
+        customTaxRate,
+        'Custom Tax Rate',
+        true,
+        _selectedTaxType == 'Notional Gains Tax', // Use the current tax type
+        _useTaxExemptionCard, // Use the current tax exemption state
       );
     } else {
-      // Switch back to the preserved original tax option
+      // When switching back to predefined tax rate, restore the original settings
       _currentTaxOption = _originalTaxOption;
+      _useTaxExemptionCard = _originalUseTaxExemptionCard;
+      _selectedTaxType = _originalTaxType;
     }
+
+    // Notify the parent widget and trigger recalculation
     widget.onTaxOptionChanged(_currentTaxOption);
     widget.recalculateValues();
   }
 
 }
+
