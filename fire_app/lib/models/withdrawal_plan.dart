@@ -121,46 +121,37 @@ class WithdrawalPlan {
     if (taxableWithdrawal <= 0 || selectedTaxOption.ratePercentage == 0) return 0;
     double tax = 0;
     
-    // Apply the capital gains tax rate, with consideration for the threshold and exemption
-    if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
-      if (selectedTaxOption.ratePercentage > TaxOption.lowerTaxRate) {
-        if (taxableWithdrawal <= TaxOption.threshold) {
-        tax = taxableWithdrawal * TaxOption.lowerTaxRate / 100;  // Apply lower tax rate under the threshold
-        } else {
-          tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableWithdrawal - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
-        }
-      } else {
-        tax = taxableWithdrawal * selectedTaxOption.ratePercentage / 100;
-      }
-    } else {
-      tax = taxableWithdrawal * selectedTaxOption.ratePercentage / 100;
+    if (!selectedTaxOption.useTaxExemptionCardAndThreshold ||
+        selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
+        return tax < 0 ? 0 : tax = taxableWithdrawal * selectedTaxOption.ratePercentage / 100;
     }
 
-    return tax < 0 ? 0 : tax;
+    if (taxableWithdrawal <= TaxOption.threshold) {
+      return tax < 0 ? 0 : tax = taxableWithdrawal * TaxOption.lowerTaxRate / 100;  // Apply lower tax rate under the threshold
+    } else {
+      return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableWithdrawal - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+    }
   }
 
   // Helper function to apply notional gains tax
   double _notionalGainsTax(double earnings) {
-    if (earnings <= 0) return 0;
     double tax = 0;
 
     // Apply notional gains tax only on the yearly compound earnings
-    if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
-      earnings -= TaxOption.taxExemptionCard;
-      if (selectedTaxOption.ratePercentage > TaxOption.lowerTaxRate) {
-        if (earnings <= TaxOption.threshold) {
-          tax = earnings * TaxOption.lowerTaxRate / 100;
-        } else {
-          tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((earnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
-        } 
-      } else if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
-        tax = earnings * selectedTaxOption.ratePercentage / 100;
-      }
-    } else {
-      tax = earnings * selectedTaxOption.ratePercentage / 100;
+    if (!selectedTaxOption.useTaxExemptionCardAndThreshold) {
+      return tax < 0 ? 0 : tax = earnings * selectedTaxOption.ratePercentage / 100;
     }
+      earnings -= TaxOption.taxExemptionCard;
 
-    return tax < 0 ? 0 : tax;
+      if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
+        return tax < 0 ? 0 : tax = earnings * selectedTaxOption.ratePercentage / 100;
+      }
+
+      if (earnings <= TaxOption.threshold) {
+        return tax < 0 ? 0 : tax = earnings * TaxOption.lowerTaxRate / 100;
+      } else {
+        return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + (earnings * selectedTaxOption.ratePercentage / 100);
+      } 
   }
 }
 

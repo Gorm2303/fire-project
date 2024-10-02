@@ -83,19 +83,25 @@ class DepositPlan {
 
   /// Calculates tax on earnings for the year based on the current tax option
   double _calculateTaxOnEarnings(double earnings) {
-    double tax = 0;
-    double taxableEarnings = earnings;
+    if (earnings <= 0) return 0;
 
-    if (selectedTaxOption.useTaxExemptionCardAndThreshold 
-    && taxableEarnings <= TaxOption.threshold 
-    && selectedTaxOption.ratePercentage > TaxOption.lowerTaxRate) {
-      tax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
-      taxableEarnings -= TaxOption.taxExemptionCard; // Apply exemption card
-    } else {
-      tax = taxableEarnings * selectedTaxOption.ratePercentage / 100; // Apply regular tax rate
+    if (!selectedTaxOption.useTaxExemptionCardAndThreshold) {
+      tax = earnings * selectedTaxOption.ratePercentage / 100;
+      return tax < 0 ? 0 : tax;
     }
 
-    if (taxableEarnings <= 0) return 0; // No tax if taxable earnings are negative or zero
-    return tax;
+    double taxableEarnings = earnings - TaxOption.taxExemptionCard;
+    if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
+      tax = earnings * selectedTaxOption.ratePercentage / 100;
+      return tax < 0 ? 0 : tax;
+    }
+    
+    if (taxableEarnings <= TaxOption.threshold) {
+      tax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
+      return tax < 0 ? 0 : tax;
+    } else {
+      tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+      return tax < 0 ? 0 : tax;
+    }
   }
 }
