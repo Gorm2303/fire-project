@@ -1,7 +1,7 @@
 // lib/widgets/tax_rate_dropdown.dart
 
 import 'package:flutter/material.dart';
-import '../models/tax_option.dart';
+import '../../models/tax_option.dart';
 
 class TaxRateDropdown extends StatelessWidget {
   final TaxOption selectedTaxOption;

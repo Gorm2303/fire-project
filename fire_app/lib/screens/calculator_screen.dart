@@ -2,14 +2,14 @@ import 'package:fire_app/models/tax_option.dart';
 import 'package:flutter/material.dart';
 import '../services/tax_option_manager.dart';
 import '../widgets/formula_widget.dart';
-import '../widgets/tax_note_widget.dart';
+import '../widgets/tax_widgets/tax_note_widget.dart';
 import '../models/investment_plan.dart';
 import '../widgets/investment_table_widget.dart';
 import '../widgets/input_fields_widget.dart';
 import '../widgets/the4percent_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
 import '../widgets/earnings_withdrawal_ratio.dart';
-import '../widgets/switch_taxrate_widget.dart';
+import '../widgets/tax_widgets/switch_taxrate_widget.dart';
 import '../services/presetting_service.dart';
 import '../services/utils.dart';
 
@@ -34,7 +34,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _presettingsController = TextEditingController(text: 'None');
   final TextEditingController _customTaxController = TextEditingController(text: '0');
 
-
   List<Map<String, double>> _depositYearlyValues = [];
   List<Map<String, double>> _withdrawalYearlyValues = [];
 
@@ -42,15 +41,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   String _selectedTab = 'Investment Calculator';
   bool _showTaxNote = false;
 
-
-
   final List<TaxOption> _taxOptions = [
     TaxOption(42.0, 'Tax On Sale', false, true),
     TaxOption(42.0, 'Tax Every Year', true, false),
     TaxOption(17.0, 'Aktiesparekonto', true, false),
     TaxOption(15.3, 'Pension PAL-skat', true, false),
-    TaxOption(42.0, 'Tax On Sale*', false, false),
-    TaxOption(42.0, 'Tax Every Year*', true, true),
   ];
 
   late InvestmentPlan _investmentPlan;
@@ -72,7 +67,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _loadPresetValues('High Investment');
     _recalculateValues();  // Now this will recalculate properly using the manager
   }
-
 
   void _initializeTabControllers() {
     _tableTabController = TabController(length: 2, vsync: this);
@@ -102,7 +96,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
-
   // Load preset values using the PresettingService
   void _loadPresetValues(String presetKey) {
     final presetValues = PresettingService.getPreset(presetKey);
@@ -128,7 +121,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       _taxOptionManager.currentOption;  // Ensure tax options are correctly synced
     });
   }
-
 
   @override
   void dispose() {

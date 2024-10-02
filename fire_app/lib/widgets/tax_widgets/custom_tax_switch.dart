@@ -18,9 +18,12 @@ class CustomTaxSwitch extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text('Custom Tax Rate: ', style: TextStyle(fontSize: 16)),
-        Switch(
-          value: isCustom,
-          onChanged: onSwitchChanged,
+          Transform.scale(
+            scale: 0.6,
+            child: Switch(
+              value: isCustom,
+              onChanged: onSwitchChanged,
+          ),
         ),
       ],
     );

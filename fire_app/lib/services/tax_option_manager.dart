@@ -80,7 +80,7 @@ class TaxOptionManager {
     _isCustomPredefined = true;
     _currentTaxOption = TaxOption(
       _currentTaxOption.ratePercentage, // Keep predefined rate
-      'Custom (${_currentTaxOption.ratePercentage}%)',
+      'Custom',
       isNotionallyTaxed,
       useExemption,
     );
