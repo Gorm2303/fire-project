@@ -1,7 +1,6 @@
 class TaxOption {
   final double ratePercentage;  // The numeric tax rate
   final String description;  // The description for the rate
-  final bool isCustomTaxRule;
   final bool isNotionallyTaxed;
   final bool useTaxExemptionCardAndThreshold;
   static const double threshold = 61000;  // The threshold for lower tax rate
@@ -11,7 +10,6 @@ class TaxOption {
   TaxOption(
     this.ratePercentage, 
     this.description, 
-    this.isCustomTaxRule,
     this.isNotionallyTaxed,
     this.useTaxExemptionCardAndThreshold);
 
@@ -23,7 +21,6 @@ class TaxOption {
     return other is TaxOption &&
         other.ratePercentage == ratePercentage &&
         other.description == description &&
-        other.isCustomTaxRule == isCustomTaxRule &&
         other.isNotionallyTaxed == isNotionallyTaxed &&
         other.useTaxExemptionCardAndThreshold == useTaxExemptionCardAndThreshold;
   }
@@ -33,7 +30,6 @@ class TaxOption {
   int get hashCode {
     return ratePercentage.hashCode ^
         description.hashCode ^
-        isCustomTaxRule.hashCode ^
         isNotionallyTaxed.hashCode ^
         useTaxExemptionCardAndThreshold.hashCode;
   }

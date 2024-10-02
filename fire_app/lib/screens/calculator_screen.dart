@@ -1,5 +1,6 @@
 import 'package:fire_app/models/tax_option.dart';
 import 'package:flutter/material.dart';
+import '../services/tax_option_manager.dart';
 import '../widgets/formula_widget.dart';
 import '../widgets/tax_note_widget.dart';
 import '../models/investment_plan.dart';
@@ -33,37 +34,45 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _presettingsController = TextEditingController(text: 'None');
   final TextEditingController _customTaxController = TextEditingController(text: '0');
 
-  late SwitchAndTaxRate _toggleSwitchWidget;
 
   List<Map<String, double>> _depositYearlyValues = [];
   List<Map<String, double>> _withdrawalYearlyValues = [];
 
   String _contributionFrequency = 'Monthly';
   String _selectedTab = 'Investment Calculator';
-  bool _isCustomTaxRule = false;
   bool _showTaxNote = false;
 
-  late InvestmentPlan _investmentPlan;
-  
-  List<TaxOption> taxOptions = [
-    TaxOption(42.0, 'Tax On Sale', false, false, true),
-    TaxOption(42.0, 'Tax Every Year', false, true, false),
-    TaxOption(17.0, 'Aktiesparekonto', false, true, false),
-    TaxOption(15.3, 'Pension PAL-skat', false, true, false),
-    TaxOption(42.0, 'Tax On Sale*', false, false, false),
-    TaxOption(42.0, 'Tax Every Year*', false, true, true),
+
+
+  final List<TaxOption> _taxOptions = [
+    TaxOption(42.0, 'Tax On Sale', false, true),
+    TaxOption(42.0, 'Tax Every Year', true, false),
+    TaxOption(17.0, 'Aktiesparekonto', true, false),
+    TaxOption(15.3, 'Pension PAL-skat', true, false),
+    TaxOption(42.0, 'Tax On Sale*', false, false),
+    TaxOption(42.0, 'Tax Every Year*', true, true),
   ];
 
-  late TaxOption _selectedTaxOption = taxOptions[0];
+  late InvestmentPlan _investmentPlan;
+  late TaxOptionManager _taxOptionManager;
+  late SwitchAndTaxRate _toggleSwitchWidget;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialize tax manager first
+    _taxOptionManager = TaxOptionManager(
+      initialOption: _taxOptions[0],
+      taxOptions: _taxOptions,
+    );
+
     _initializeTabControllers();
     _initializeToggleSwitchWidget();
     _loadPresetValues('High Investment');
-    _recalculateValues();
+    _recalculateValues();  // Now this will recalculate properly using the manager
   }
+
 
   void _initializeTabControllers() {
     _tableTabController = TabController(length: 2, vsync: this);
@@ -73,37 +82,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   void _initializeToggleSwitchWidget() {
     _toggleSwitchWidget = SwitchAndTaxRate(
       customTaxController: _customTaxController,
-      selectedTaxOption: _selectedTaxOption,
-      taxOptions: taxOptions,
-      recalculateValues: _recalculateValues,
-      isCustom: _isCustomTaxRule,
-
-      onSwitchChanged: (bool value) {
-        setState(() {
-          _isCustomTaxRule = value;
-          _recalculateValues();
-        });
-      },
-
-      onTaxOptionChanged: (TaxOption newOption) {
-        setState(() {
-          _selectedTaxOption = newOption;
-          _recalculateValues();
-        });
-      },
-
-      onTaxExemptionChanged: (bool useExemption) {
-        setState(() {
-          _selectedTaxOption = TaxOption(
-            _selectedTaxOption.ratePercentage,
-            _selectedTaxOption.description,
-            _selectedTaxOption.isCustomTaxRule,
-            _selectedTaxOption.isNotionallyTaxed,
-            useExemption, // Update tax exemption status
-          );
-          _recalculateValues();
-        });
-      },
+      taxOptionManager: _taxOptionManager,  // Pass manager here
+      recalculateValues: _recalculateValues,  // Trigger recalculation after tax changes
     );
   }
 
@@ -115,12 +95,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       depositYears: Utils.parseTextToInt(_timeController.text),
       additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
       contributionFrequency: _contributionFrequency,
-      selectedTaxOption: _selectedTaxOption,
+      selectedTaxOption: _taxOptionManager.currentOption,  // Use manager's current option
       withdrawalPercentage: Utils.parseTextToDouble(_withdrawalPercentageController.text),
       breakPeriod: Utils.parseTextToInt(_breakController.text),
       withdrawalPeriod: Utils.parseTextToInt(_withdrawalTimeController.text),
     );
   }
+
 
   // Load preset values using the PresettingService
   void _loadPresetValues(String presetKey) {
@@ -144,8 +125,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       _investmentPlan.calculateInvestment();  // Trigger calculations based on the current plan
       _depositYearlyValues = _investmentPlan.depositValues ?? [];
       _withdrawalYearlyValues = _investmentPlan.withdrawalValues ?? [];
+      _taxOptionManager.currentOption;  // Ensure tax options are correctly synced
     });
   }
+
 
   @override
   void dispose() {
