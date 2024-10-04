@@ -65,8 +65,8 @@ class TaxOptionManager {
     _currentTaxOption = TaxOption(
       customRate,
       'Custom ($customRate%)',
-      isNotionallyTaxed,
-      useExemption,
+      isNotionallyTaxed: isNotionallyTaxed,
+      useTaxExemptionCardAndThreshold: useExemption,
     );
   }
 
@@ -81,8 +81,8 @@ class TaxOptionManager {
     _currentTaxOption = TaxOption(
       _currentTaxOption.ratePercentage, // Keep predefined rate
       'Custom',
-      isNotionallyTaxed,
-      useExemption,
+      isNotionallyTaxed: isNotionallyTaxed,
+      useTaxExemptionCardAndThreshold: useExemption,
     );
   }
 

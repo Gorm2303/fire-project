@@ -42,10 +42,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   bool _showTaxNote = false;
 
   final List<TaxOption> _taxOptions = [
-    TaxOption(42.0, 'Tax On Sale', false, true),
-    TaxOption(42.0, 'Tax Every Year', true, false),
-    TaxOption(17.0, 'Aktiesparekonto', true, false),
-    TaxOption(15.3, 'Pension PAL-skat', true, false),
+    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: true),
+    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+    TaxOption(17.0, 'Aktiesparekonto', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+    TaxOption(15.3, 'Pension PAL-skat', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
   ];
 
   late InvestmentPlan _investmentPlan;

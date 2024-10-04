@@ -10,8 +10,10 @@ class TaxOption {
   TaxOption(
     this.ratePercentage, 
     this.description, 
-    this.isNotionallyTaxed,
-    this.useTaxExemptionCardAndThreshold);
+    {
+      required this.isNotionallyTaxed, 
+      required this.useTaxExemptionCardAndThreshold
+      });
 
   // Override the == operator to compare instances
   @override

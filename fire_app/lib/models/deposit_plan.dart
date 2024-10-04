@@ -39,11 +39,11 @@ class DepositPlan {
     int contributionPeriods = _getContributionPeriods(); // Monthly or Yearly contributions
 
     for (int year = 1; year <= duration; year++) {
-      double compoundThisYear = _calculateCompounding(contributionPeriods);
+      double compoundThisYear = calculateCompounding(contributionPeriods);
       
       // Handle tax directly in DepositPlan
       if (selectedTaxOption.isNotionallyTaxed) {
-        tax = _calculateTaxOnEarnings(compoundThisYear);
+        tax = calculateTaxOnEarnings(compoundThisYear);
         compoundThisYear -= tax;
       }
 
@@ -69,20 +69,27 @@ class DepositPlan {
   }
 
   /// Calculates compounding for the year based on interest rate and contributions
-  double _calculateCompounding(int contributionPeriods) {
-    double compoundThisYear = totalValue * (interestRate / 100);
+  double calculateCompounding(int contributionPeriods) {
+    if (totalValue == 0) { // Ensure totalValue is initialized
+      totalValue = principal;
+    }
+
+    double compoundThisYear = totalValue * (interestRate / 100); // Compounding on the current total value
+
+    // Now handle contributions and their compounding
     for (int period = 1; period <= contributionPeriods; period++) {
-      totalValue += additionalAmount;
+      totalValue += additionalAmount; // Add contributions
       deposits += additionalAmount;
 
       int periodsLeft = contributionPeriods - period;
-      compoundThisYear += additionalAmount * (interestRate / 100) * periodsLeft / contributionPeriods;
+      compoundThisYear += additionalAmount * (interestRate / 100) * periodsLeft / contributionPeriods; // Compound contributions for remaining periods
     }
+
     return compoundThisYear;
   }
 
   /// Calculates tax on earnings for the year based on the current tax option
-  double _calculateTaxOnEarnings(double earnings) {
+  double calculateTaxOnEarnings(double earnings) {
     if (earnings <= 0) return 0;
 
     if (!selectedTaxOption.useTaxExemptionCardAndThreshold) {
