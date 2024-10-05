@@ -1,7 +1,6 @@
 import 'package:fire_app/models/tax_option.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fire_app/models/deposit_plan.dart'; // Import your model here
-import 'dart:math';
 
 void main() {
   final List<TaxOption> taxOptions = [
@@ -20,7 +19,7 @@ void main() {
         principal: 10000.0,
         interestRate: 7,
         duration: 25,
-        additionalAmount: 10000.0,
+        additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
         selectedTaxOption: taxOptions[i],
       ),
@@ -107,11 +106,11 @@ group('Compounding Tests', () {
       principal: 10000.0,
       interestRate: 0.0, // No interest
       duration: 25,
-      additionalAmount: 10000.0, // No contributions
+      additionalContribution: 10000.0, // No contributions
       contributionFrequency: 'Monthly',
       selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
     );
-    final result = depositPlan.calculateCompounding(12); // 12 periods (monthly)
+    final result = depositPlan.calculateInterest(12); // 12 periods (monthly)
     expect(result, 0.0);
   });
 
@@ -120,13 +119,13 @@ group('Compounding Tests', () {
       principal: 10000.0,
       interestRate: 7.0, // No interest
       duration: 25,
-      additionalAmount: 0.0,
+      additionalContribution: 0.0,
       contributionFrequency: 'Monthly',
       selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
     );
     
     const contributionPeriods = 1;
-    final result = depositPlan.calculateCompounding(contributionPeriods); // 12 periods (monthly)
+    final result = depositPlan.calculateInterest(contributionPeriods); // 12 periods (monthly)
 
     // Initialize expected compounding for the principal
     double expectedCompounding = 0;
@@ -137,7 +136,7 @@ group('Compounding Tests', () {
   test('Basic compounding with contributions should return correct amount', () {
     final depositPlan = depositPlans[0]; // Use the first deposit plan
     const contributionPeriods = 12;
-    final result = depositPlan.calculateCompounding(contributionPeriods); // 12 periods (monthly)
+    final result = depositPlan.calculateInterest(contributionPeriods); // 12 periods (monthly)
 
     // Initialize expected compounding for the principal
     double expectedCompounding = depositPlan.principal * (depositPlan.interestRate / 100);
@@ -148,7 +147,7 @@ group('Compounding Tests', () {
       int periodsLeft = contributionPeriods - period;
       
       // Only compound the contribution for the periods left
-      expectedCompounding += depositPlan.additionalAmount * (depositPlan.interestRate / 100) * periodsLeft / contributionPeriods;
+      expectedCompounding += depositPlan.additionalContribution * (depositPlan.interestRate / 100) * periodsLeft / contributionPeriods;
     }
 
     expect(result, expectedCompounding);
@@ -159,11 +158,11 @@ group('Compounding Tests', () {
         principal: 10000.0,
         interestRate: 7.0, // 7% interest
         duration: 25,
-        additionalAmount: 0.0, // No contributions
+        additionalContribution: 0.0, // No contributions
         contributionFrequency: 'Monthly',
         selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
       );
-      final result = depositPlan.calculateCompounding(12); // 12 periods
+      final result = depositPlan.calculateInterest(12); // 12 periods
       final expectedCompounding = depositPlan.principal * 0.07; // Interest on principal only
       expect(result, expectedCompounding);
     });

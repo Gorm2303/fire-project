@@ -25,7 +25,7 @@ class InvestmentPlan {
           principal: principal,
           interestRate: rate,
           duration: depositYears,
-          additionalAmount: additionalAmount,
+          additionalContribution: additionalAmount,
           contributionFrequency: contributionFrequency,
           selectedTaxOption: selectedTaxOption,
         ),

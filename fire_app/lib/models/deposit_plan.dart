@@ -1,22 +1,26 @@
+import 'dart:math';
+
 import 'package:fire_app/models/tax_option.dart';
 
 class DepositPlan {
   double principal;
   double interestRate;
   int duration;
-  double additionalAmount;
+  double additionalContribution;
   String contributionFrequency;
   TaxOption selectedTaxOption;
   double totalValue = 0;
   double deposits = 0;
   double compoundEarnings = 0;
   double tax = 0;
+  double totalInterestFromPrincipal = 0;
+  double totalInterestFromContributions = 0;
 
   DepositPlan({
     required this.principal,
     required this.interestRate,
     required this.duration,
-    required this.additionalAmount,
+    required this.additionalContribution,
     required this.contributionFrequency,
     required this.selectedTaxOption,
   });
@@ -39,7 +43,7 @@ class DepositPlan {
     int contributionPeriods = _getContributionPeriods(); // Monthly or Yearly contributions
 
     for (int year = 1; year <= duration; year++) {
-      double compoundThisYear = calculateCompounding(contributionPeriods);
+      double compoundThisYear = calculateInterest(contributionPeriods);
       
       // Handle tax directly in DepositPlan
       if (selectedTaxOption.isNotionallyTaxed) {
@@ -59,6 +63,7 @@ class DepositPlan {
         'tax': tax,
       });
     }
+    calculateTotalInterest();
 
     return yearlyValues;
   }
@@ -69,7 +74,7 @@ class DepositPlan {
   }
 
   /// Calculates compounding for the year based on interest rate and contributions
-  double calculateCompounding(int contributionPeriods) {
+  double calculateInterest(int contributionPeriods) {
     if (totalValue == 0) { // Ensure totalValue is initialized
       totalValue = principal;
     }
@@ -78,11 +83,11 @@ class DepositPlan {
 
     // Now handle contributions and their compounding
     for (int period = 1; period <= contributionPeriods; period++) {
-      totalValue += additionalAmount; // Add contributions
-      deposits += additionalAmount;
+      totalValue += additionalContribution; // Add contributions
+      deposits += additionalContribution;
 
       int periodsLeft = contributionPeriods - period;
-      compoundThisYear += additionalAmount * (interestRate / 100) * periodsLeft / contributionPeriods; // Compound contributions for remaining periods
+      compoundThisYear += additionalContribution * (interestRate / 100) * periodsLeft / contributionPeriods; // Compound contributions for remaining periods
     }
 
     return compoundThisYear;
@@ -110,5 +115,19 @@ class DepositPlan {
       tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
       return tax < 0 ? 0 : tax;
     }
+  }
+
+  /// Calculates the total interest from principal and contributions
+  void calculateTotalInterest() {
+    totalInterestFromPrincipal = principal * pow(1 +(interestRate / 100), duration) - principal;
+    totalInterestFromContributions = totalValue - deposits - totalInterestFromPrincipal;
+
+    double taxOnPrincipalInterest = 0;
+    if (compoundEarnings != 0) {
+      taxOnPrincipalInterest = totalInterestFromPrincipal / compoundEarnings * tax;
+    }
+
+    totalInterestFromPrincipal -= taxOnPrincipalInterest;
+    totalInterestFromContributions += taxOnPrincipalInterest;
   }
 }

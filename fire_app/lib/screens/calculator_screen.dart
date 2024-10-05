@@ -1,14 +1,16 @@
 import 'package:fire_app/models/tax_option.dart';
+import 'package:fire_app/widgets/investment_widgets/investment_compounding_results_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/investment_note_widget.dart';
 import 'package:flutter/material.dart';
 import '../services/tax_option_manager.dart';
-import '../widgets/formula_widget.dart';
+import '../widgets/investment_widgets/formula_widget.dart';
 import '../widgets/tax_widgets/tax_note_widget.dart';
 import '../models/investment_plan.dart';
 import '../widgets/investment_table_widget.dart';
-import '../widgets/input_fields_widget.dart';
+import '../widgets/investment_widgets/input_fields_widget.dart';
 import '../widgets/the4percent_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
-import '../widgets/earnings_withdrawal_ratio.dart';
+import '../widgets/tax_widgets/tax_calculation_results_widget.dart';
 import '../widgets/tax_widgets/switch_taxrate_widget.dart';
 import '../services/presetting_service.dart';
 import '../services/utils.dart';
@@ -40,6 +42,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   String _contributionFrequency = 'Monthly';
   String _selectedTab = 'Investment Calculator';
   bool _showTaxNote = false;
+  bool showInvestmentNote = false;
 
   final List<TaxOption> _taxOptions = [
     TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: true),
@@ -65,7 +68,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _initializeTabControllers();
     _initializeToggleSwitchWidget();
     _loadPresetValues('High Investment');
-    _recalculateValues();  // Now this will recalculate properly using the manager
+    _recalculateValues();  // Recalculate the values after updating the controllers
   }
 
   void _initializeTabControllers() {
@@ -108,8 +111,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       _breakController.text = presetValues['breakPeriod']!;
       _presettingsController.text = presetKey;  // Update the dropdown text to the new selection
     });
-
-    _recalculateValues();  // Recalculate the values after updating the controllers
   }
 
   void _recalculateValues() {
@@ -129,6 +130,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     super.dispose();
   }
 
+  // Toggle investment note visibility
+  void toggleInvestmentNote() {
+    setState(() {
+      showInvestmentNote = !showInvestmentNote;
+    });
+  }
+
   Widget _buildFormulaWidget() {
     return FormulaWidget(
       principal: Utils.parseTextToDouble(_investmentPlan.depositPlan.principal.toString()),
@@ -139,11 +147,43 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
-  Widget _buildInvestmentTotalText() {
-    return Text(
-      'Investment After ${_investmentPlan.depositPlan.duration} Years: ${_investmentPlan.depositPlan.totalValue.toStringAsFixed(0)} kr.-',
-      style: const TextStyle(fontSize: 16),
-    );
+  Widget _buildInvestmentNoteWidget() {
+    return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: toggleInvestmentNote,  // Toggle the investment note
+                child: const Text(
+                  'Investment',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+              Text(
+                ' After ${_investmentPlan.depositPlan.duration} Years: ${_investmentPlan.depositPlan.totalValue.toStringAsFixed(0)} kr.-',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+          // Investment note section
+          InvestmentNoteWidget(
+            showInvestmentNote: showInvestmentNote,
+            investmentCompoundingResults: InvestmentCompoundingResults(
+              totalDeposits: _investmentPlan.depositPlan.deposits,
+              totalValue: _investmentPlan.depositPlan.totalValue,
+              totalInterestFromPrincipal: _investmentPlan.depositPlan.totalInterestFromPrincipal,
+              totalInterestFromContributions: _investmentPlan.depositPlan.totalInterestFromContributions,
+              compoundEarnings: _investmentPlan.depositPlan.compoundEarnings,
+            ),
+          ),
+        ],
+      );
   }
 
   Widget _buildSizedBox(double height) {
@@ -158,8 +198,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           _buildSizedBox(20),
           _buildFormulaWidget(),
           _buildSizedBox(20),
-          _buildInvestmentTotalText(),
-          _buildSizedBox(15),
+          _buildInvestmentNoteWidget(),
+          _buildSizedBox(20),
           _build4PercentWidget(),
           _buildTaxNoteWidget(),
           _buildTabView(),
@@ -210,7 +250,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   Widget _buildTaxNoteWidget() {
     return TaxNoteWidget(
       showTaxNote: _showTaxNote,
-      earningsWithdrawalRatio: EarningsWithdrawalRatio(
+      earningsWithdrawalRatio: TaxCalculationResults(
         earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
         earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
         taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,

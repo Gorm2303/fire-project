@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class EarningsWithdrawalRatio extends StatelessWidget {
+class TaxCalculationResults extends StatelessWidget {
   final double earnings;
   final double earningsPercent;
   final double taxableWithdrawal;
   final double annualTax;
 
 
-  const EarningsWithdrawalRatio({
+  const TaxCalculationResults({
     super.key, 
     required this.earnings, 
     required this.earningsPercent, 
@@ -29,11 +29,10 @@ class EarningsWithdrawalRatio extends StatelessWidget {
         Text('Earnings (Total): ${earnings.toStringAsFixed(0)}'),
         Text('Earnings (Percent): ${(earningsPercent * 100).toStringAsFixed(2)}%'),
         Text('Taxable Withdrawal (Yearly): ${taxableWithdrawal.toStringAsFixed(0)}'),
-        const SizedBox(width: 8), // Add some spacing between the texts
         Text('Taxable Withdrawal (Monthly): ${(taxableWithdrawal / 12).toStringAsFixed(0)}'),
         Text('Tax (Yearly): ${annualTax.toStringAsFixed(0)}'),
-        const SizedBox(width: 8), // Add some spacing between the texts
         Text('Tax (Monthly): ${(annualTax / 12).toStringAsFixed(0)}'),
+        Text('Actual Tax Rate: ${(annualTax / taxableWithdrawal * 100).toStringAsFixed(2)}%'),
       ],
     );
   }

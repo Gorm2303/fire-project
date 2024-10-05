@@ -54,7 +54,7 @@ class InvestmentTableWidget extends StatelessWidget {
                 ),
                 DataColumn2(
                   label: Text(
-                    'Annual Compound',
+                    'Annual Interest',
                     style: TextStyle(fontWeight: FontWeight.bold),
                     softWrap: true, // Allow text wrapping
                   ),
@@ -62,7 +62,7 @@ class InvestmentTableWidget extends StatelessWidget {
                 ),
                 DataColumn2(
                   label: Text(
-                    'Total Compound',
+                    'Total Interest',
                     style: TextStyle(fontWeight: FontWeight.bold),
                     softWrap: true, // Allow text wrapping
                   ),
@@ -96,7 +96,7 @@ class InvestmentTableWidget extends StatelessWidget {
                 ),
                 DataColumn2(
                   label: Text(
-                    'Annual Compound',
+                    'Annual Interest',
                     style: TextStyle(fontWeight: FontWeight.bold),
                     softWrap: true, // Allow text wrapping
                   ),
@@ -104,7 +104,7 @@ class InvestmentTableWidget extends StatelessWidget {
                 ),
                 DataColumn2(
                   label: Text(
-                    'Total Compound',
+                    'Total Interest',
                     style: TextStyle(fontWeight: FontWeight.bold),
                     softWrap: true, // Allow text wrapping
                   ),
