@@ -117,17 +117,83 @@ class DepositPlan {
     }
   }
 
-  /// Calculates the total interest from principal and contributions
+  /// Calculates the total interest from principal and contributions, and applies tax on each part
   void calculateTotalInterest() {
-    totalInterestFromPrincipal = principal * pow(1 +(interestRate / 100), duration) - principal;
-    totalInterestFromContributions = totalValue - deposits - totalInterestFromPrincipal;
+    // Reset the total interest values
+    totalInterestFromPrincipal = 0;
+    totalInterestFromContributions = 0;
 
-    double taxOnPrincipalInterest = 0;
-    if (compoundEarnings != 0) {
-      taxOnPrincipalInterest = totalInterestFromPrincipal / compoundEarnings * tax;
+    // Variables for tracking previous interest on principal and contributions
+    double previousPrincipalInterest = 0;
+    double previousContributionInterest = 0;
+
+    // Variables for tracking contributions and total contributions
+    double contributions = 0;
+    int contributionPeriods = _getContributionPeriods();
+
+    // Loop over each year to calculate the interest and tax for both principal and contributions
+    for (int year = 1; year <= duration; year++) {
+      // Step 1: Calculate interest on the principal
+      double principalInterest = (principal + previousPrincipalInterest) * (interestRate / 100);
+      totalInterestFromPrincipal += principalInterest;
+
+      // Step 2: Calculate interest on contributions
+      double contributionsInterest = (previousContributionInterest + contributions) * (interestRate / 100);
+      
+      // Step 3: Now handle contributions and their compounding
+      for (int period = 1; period <= contributionPeriods; period++) {
+        contributions += additionalContribution; // Add contributions
+
+        int periodsLeft = contributionPeriods - period;
+        contributionsInterest += additionalContribution * (interestRate / 100) * periodsLeft / contributionPeriods; // Compound contributions for remaining periods
+      }
+
+      totalInterestFromContributions += contributionsInterest;
+
+      // Step 4: Apply tax on the interest if notionally taxed
+      if (selectedTaxOption.isNotionallyTaxed) {
+        // Calculate tax on the principal interest
+        double principalTax = calculateTaxOnEarnings(principalInterest);
+        totalInterestFromPrincipal -= principalTax;  // Subtract tax on principal interest
+
+        // Calculate tax on the contributions interest
+        double contributionsTax = calculateTaxOnEarnings(contributionsInterest);
+        totalInterestFromContributions -= contributionsTax;  // Subtract tax on contributions interest
+      }
+
+      // Update the previous interest for the next year
+      previousPrincipalInterest = totalInterestFromPrincipal;
+      previousContributionInterest = totalInterestFromContributions;
     }
-
-    totalInterestFromPrincipal -= taxOnPrincipalInterest;
-    totalInterestFromContributions += taxOnPrincipalInterest;
   }
+
+  void prettyPrint() {
+    // Format the main details
+    print('--- Deposit Plan Summary ---');
+    print('Principal: ${principal.toStringAsFixed(2)}');
+    print('Interest Rate: ${interestRate.toStringAsFixed(2)}%');
+    print('Duration: $duration years');
+    print('Contribution Frequency: $contributionFrequency');
+    print('Additional Contribution: ${additionalContribution.toStringAsFixed(2)}');
+    print('Selected Tax Option: ${selectedTaxOption.description}');
+    print('Total Deposits: ${deposits.toStringAsFixed(2)}');
+    
+    // Format the interest and total value
+    print('Total Value (after $duration years): ${totalValue.toStringAsFixed(2)}');
+    print('Total Compound Earnings: ${compoundEarnings.toStringAsFixed(2)}');
+    
+    // Interest breakdown
+    print('Total Interest from Principal: ${totalInterestFromPrincipal.toStringAsFixed(2)}');
+    print('Total Interest from Contributions: ${totalInterestFromContributions.toStringAsFixed(2)}');
+    
+    // Tax information if applicable
+    if (tax > 0) {
+      print('Total Tax Paid: ${tax.toStringAsFixed(2)}');
+    } else {
+      print('No Tax Applied');
+    }
+    
+    print('---------------------------');
+  }
+
 }
