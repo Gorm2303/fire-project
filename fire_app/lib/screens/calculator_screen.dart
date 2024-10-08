@@ -181,6 +181,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
               totalInterestFromPrincipal: _investmentPlan.depositPlan.totalInterestFromPrincipal,
               totalInterestFromContributions: _investmentPlan.depositPlan.totalInterestFromContributions,
               compoundEarnings: _investmentPlan.depositPlan.compoundEarnings,
+              tax: _investmentPlan.depositPlan.totalTax,
             ),
           ),
         ],

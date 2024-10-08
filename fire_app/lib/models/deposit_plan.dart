@@ -11,7 +11,7 @@ class DepositPlan {
   double totalValue = 0;
   double deposits = 0;
   double compoundEarnings = 0;
-  double tax = 0;
+  double totalTax = 0;
   double totalInterestFromPrincipal = 0;
   double totalInterestFromContributions = 0;
 
@@ -43,10 +43,11 @@ class DepositPlan {
 
     for (int year = 1; year <= duration; year++) {
       double compoundThisYear = calculateInterest(contributionPeriods);
-      
+      double tax = 0;
+
       // Handle tax directly in DepositPlan
       if (selectedTaxOption.isNotionallyTaxed) {
-        tax = calculateTaxOnEarnings(compoundThisYear);
+        totalTax += tax = calculateTaxOnEarnings(compoundThisYear);
         compoundThisYear -= tax;
       }
 
@@ -95,6 +96,7 @@ class DepositPlan {
   /// Calculates tax on earnings for the year based on the current tax option
   double calculateTaxOnEarnings(double earnings) {
     if (earnings <= 0) return 0;
+    double tax = 0;
 
     if (!selectedTaxOption.useTaxExemptionCardAndThreshold) {
       tax = earnings * selectedTaxOption.ratePercentage / 100;
@@ -102,8 +104,13 @@ class DepositPlan {
     }
 
     double taxableEarnings = earnings - TaxOption.taxExemptionCard;
+
+    if (taxableEarnings <= 0) {
+      return 0; // No tax if taxable earnings are below or equal to 0
+    }
+
     if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
-      tax = earnings * selectedTaxOption.ratePercentage / 100;
+      tax = taxableEarnings * selectedTaxOption.ratePercentage / 100;
       return tax < 0 ? 0 : tax;
     }
     
@@ -118,53 +125,63 @@ class DepositPlan {
 
   /// Calculates the total interest from principal and contributions, and applies tax on each part
   void calculateTotalInterest() {
-    // Reset the total interest values
-    totalInterestFromPrincipal = 0;
-    totalInterestFromContributions = 0;
+  totalInterestFromPrincipal = 0;
+  totalInterestFromContributions = 0;
 
-    // Variables for tracking previous interest on principal and contributions
-    double previousPrincipalInterest = 0;
-    double previousContributionInterest = 0;
+  double previousPrincipalInterest = 0;
+  double previousContributionInterest = 0;
 
-    // Variables for tracking contributions and total contributions
-    double contributions = 0;
-    int contributionPeriods = _getContributionPeriods();
+  double contributions = 0;
+  int contributionPeriods = _getContributionPeriods();
 
-    // Loop over each year to calculate the interest and tax for both principal and contributions
-    for (int year = 1; year <= duration; year++) {
-      // Step 1: Calculate interest on the principal
-      double principalInterest = (principal + previousPrincipalInterest) * (interestRate / 100);
-      totalInterestFromPrincipal += principalInterest;
+  for (int year = 1; year <= duration; year++) {
+    // Calculate principal interest
+    double principalInterest = (principal + previousPrincipalInterest) * (interestRate / 100);
+    totalInterestFromPrincipal += principalInterest;
 
-      // Step 2: Calculate interest on contributions
-      double contributionsInterest = (previousContributionInterest + contributions) * (interestRate / 100);
-      
-      // Step 3: Now handle contributions and their compounding
-      for (int period = 1; period <= contributionPeriods; period++) {
-        contributions += additionalContribution; // Add contributions
-
-        int periodsLeft = contributionPeriods - period;
-        contributionsInterest += additionalContribution * (interestRate / 100) * periodsLeft / contributionPeriods; // Compound contributions for remaining periods
-      }
-
-      totalInterestFromContributions += contributionsInterest;
-
-      // Step 4: Apply tax on the interest if notionally taxed
-      if (selectedTaxOption.isNotionallyTaxed) {
-        // Calculate tax on the principal interest
-        double principalTax = calculateTaxOnEarnings(principalInterest);
-        totalInterestFromPrincipal -= principalTax;  // Subtract tax on principal interest
-
-        // Calculate tax on the contributions interest
-        double contributionsTax = calculateTaxOnEarnings(contributionsInterest);
-        totalInterestFromContributions -= contributionsTax;  // Subtract tax on contributions interest
-      }
-
-      // Update the previous interest for the next year
-      previousPrincipalInterest = totalInterestFromPrincipal;
-      previousContributionInterest = totalInterestFromContributions;
+    // Calculate contribution interest
+    double contributionsInterest = (previousContributionInterest + contributions) * (interestRate / 100);
+    
+    // Handle contributions compounding
+    for (int period = 1; period <= contributionPeriods; period++) {
+      contributions += additionalContribution; // Add contributions
+      int periodsLeft = contributionPeriods - period;
+      contributionsInterest += additionalContribution * (interestRate / 100) * periodsLeft / contributionPeriods;
     }
+
+    totalInterestFromContributions += contributionsInterest;
+
+    // Apply tax if notionally taxed
+    if (selectedTaxOption.isNotionallyTaxed) {
+      // Step 1: Calculate total taxable earnings (principal + contributions)
+      double totalEarnings = principalInterest + contributionsInterest;
+      print('Year: $year, Principal Interest: $principalInterest, Contributions Interest: $contributionsInterest, Total Earnings: $totalEarnings');
+
+      // Step 2: Apply the tax calculation on total earnings
+      double totalTax = calculateTaxOnEarnings(totalEarnings);
+      print('Year: $year, Total Taxable Earnings: $totalEarnings, Total Tax: $totalTax');
+
+      // Step 3: Calculate the ratio of principal to total earnings and contributions to total earnings
+      double principalRatio = (principalInterest / totalEarnings).clamp(0, 1);
+      double contributionRatio = (contributionsInterest / totalEarnings).clamp(0, 1);
+      print('Year: $year, Principal Ratio: $principalRatio, Contribution Ratio: $contributionRatio');
+
+      // Step 4: Proportionally allocate tax between principal and contributions
+      double principalTax = totalTax * principalRatio;
+      double contributionsTax = totalTax * contributionRatio;
+      print('Year: $year, Principal Tax: $principalTax, Contributions Tax: $contributionsTax');
+
+      // Step 5: Subtract the respective tax amounts from principal and contributions interest
+      totalInterestFromPrincipal = (totalInterestFromPrincipal - principalTax).clamp(0, double.infinity);
+      totalInterestFromContributions = (totalInterestFromContributions - contributionsTax).clamp(0, double.infinity);
+      print('Year: $year, Post-Tax Principal Interest: $totalInterestFromPrincipal, Post-Tax Contributions Interest: $totalInterestFromContributions');
+    }
+
+
+    previousPrincipalInterest = totalInterestFromPrincipal;
+    previousContributionInterest = totalInterestFromContributions;
   }
+}
 
   void prettyPrint() {
     // Format the main details
@@ -186,8 +203,8 @@ class DepositPlan {
     print('Total Interest from Contributions: ${totalInterestFromContributions.toStringAsFixed(2)}');
     
     // Tax information if applicable
-    if (tax > 0) {
-      print('Total Tax Paid: ${tax.toStringAsFixed(2)}');
+    if (totalTax > 0) {
+      print('Total Tax Paid: ${totalTax.toStringAsFixed(2)}');
     } else {
       print('No Tax Applied');
     }

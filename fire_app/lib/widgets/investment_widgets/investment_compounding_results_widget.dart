@@ -6,6 +6,7 @@ class InvestmentCompoundingResults extends StatelessWidget {
   final double totalInterestFromPrincipal;
   final double totalInterestFromContributions;
   final double compoundEarnings;
+  final double tax;
 
   const InvestmentCompoundingResults({
     super.key, 
@@ -14,6 +15,7 @@ class InvestmentCompoundingResults extends StatelessWidget {
     required this.totalInterestFromPrincipal, 
     required this.totalInterestFromContributions,
     required this.compoundEarnings,
+    required this.tax,
   });
 
   @override
@@ -29,7 +31,8 @@ class InvestmentCompoundingResults extends StatelessWidget {
         Text('Total Deposits: ${totalDeposits.toStringAsFixed(0)}'),
         Text('Compound Interest from Principal: ${totalInterestFromPrincipal.toStringAsFixed(0)}'),
         Text('Compound Interest from Contributions: ${totalInterestFromContributions.toStringAsFixed(0)}'),
-        Text('Total Taxed Compound Interest: ${compoundEarnings.toStringAsFixed(0)}'),
+        Text('Tax on Compound Interest: ${tax.toStringAsFixed(2)}'),
+        Text('Total Compound Interest: ${compoundEarnings.toStringAsFixed(0)}'),
         Text('Total Investment Value: ${totalValue.toStringAsFixed(0)}'),
       ],
     );
