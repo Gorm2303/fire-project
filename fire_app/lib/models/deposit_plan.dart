@@ -155,26 +155,21 @@ class DepositPlan {
     if (selectedTaxOption.isNotionallyTaxed) {
       // Step 1: Calculate total taxable earnings (principal + contributions)
       double totalEarnings = principalInterest + contributionsInterest;
-      print('Year: $year, Principal Interest: $principalInterest, Contributions Interest: $contributionsInterest, Total Earnings: $totalEarnings');
 
       // Step 2: Apply the tax calculation on total earnings
       double totalTax = calculateTaxOnEarnings(totalEarnings);
-      print('Year: $year, Total Taxable Earnings: $totalEarnings, Total Tax: $totalTax');
 
       // Step 3: Calculate the ratio of principal to total earnings and contributions to total earnings
       double principalRatio = (principalInterest / totalEarnings).clamp(0, 1);
       double contributionRatio = (contributionsInterest / totalEarnings).clamp(0, 1);
-      print('Year: $year, Principal Ratio: $principalRatio, Contribution Ratio: $contributionRatio');
 
       // Step 4: Proportionally allocate tax between principal and contributions
       double principalTax = totalTax * principalRatio;
       double contributionsTax = totalTax * contributionRatio;
-      print('Year: $year, Principal Tax: $principalTax, Contributions Tax: $contributionsTax');
 
       // Step 5: Subtract the respective tax amounts from principal and contributions interest
       totalInterestFromPrincipal = (totalInterestFromPrincipal - principalTax).clamp(0, double.infinity);
       totalInterestFromContributions = (totalInterestFromContributions - contributionsTax).clamp(0, double.infinity);
-      print('Year: $year, Post-Tax Principal Interest: $totalInterestFromPrincipal, Post-Tax Contributions Interest: $totalInterestFromContributions');
     }
 
 

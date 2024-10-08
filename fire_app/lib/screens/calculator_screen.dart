@@ -2,6 +2,7 @@ import 'package:fire_app/models/tax_option.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_compounding_results_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_note_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/tax_option_manager.dart';
 import '../widgets/investment_widgets/formula_widget.dart';
 import '../widgets/tax_widgets/tax_note_widget.dart';
@@ -53,35 +54,29 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   late InvestmentPlan _investmentPlan;
   late TaxOptionManager _taxOptionManager;
-  late SwitchAndTaxRate _toggleSwitchWidget;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize tax manager first
+    _initializeTaxOptionManager();
+    _initializeTabControllers();
+    _initializeInvestmentPlan();  // Call this during initialization to ensure it's set up
+
+    // Optionally load a preset if needed after everything is initialized
+    _loadPresetValues('High Investment');
+  }
+
+  void _initializeTaxOptionManager() {
     _taxOptionManager = TaxOptionManager(
       initialOption: _taxOptions[0],
       taxOptions: _taxOptions,
     );
-
-    _initializeTabControllers();
-    _initializeToggleSwitchWidget();
-    _loadPresetValues('High Investment');
-    _recalculateValues();  // Recalculate the values after updating the controllers
   }
 
   void _initializeTabControllers() {
     _tableTabController = TabController(length: 2, vsync: this);
     _mainTabController = TabController(length: 2, vsync: this);
-  }
-
-  void _initializeToggleSwitchWidget() {
-    _toggleSwitchWidget = SwitchAndTaxRate(
-      customTaxController: _customTaxController,
-      taxOptionManager: _taxOptionManager,  // Pass manager here
-      recalculateValues: _recalculateValues,  // Trigger recalculation after tax changes
-    );
   }
 
   void _initializeInvestmentPlan() {
@@ -102,6 +97,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   // Load preset values using the PresettingService
   void _loadPresetValues(String presetKey) {
     final presetValues = PresettingService.getPreset(presetKey);
+    TaxOption? predefinedOption = _taxOptionManager.findOptionByDescription(presetValues['taxOption'] ?? 'None');
 
     setState(() {
       _principalController.text = presetValues['principal']!;
@@ -109,8 +105,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       _timeController.text = presetValues['time']!;
       _additionalAmountController.text = presetValues['additionalAmount']!;
       _breakController.text = presetValues['breakPeriod']!;
-      _presettingsController.text = presetKey;  // Update the dropdown text to the new selection
+
+      // Switch to the new predefined option and trigger a rebuild of SwitchAndTaxRate
+      _taxOptionManager.switchToPredefined(predefinedOption ?? _taxOptions[0]);
+      _presettingsController.text = presetKey;
     });
+
+    _recalculateValues();
   }
 
   void _recalculateValues() {
@@ -119,12 +120,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       _investmentPlan.calculateInvestment();  // Trigger calculations based on the current plan
       _depositYearlyValues = _investmentPlan.depositValues ?? [];
       _withdrawalYearlyValues = _investmentPlan.withdrawalValues ?? [];
-      _taxOptionManager.currentOption;  // Ensure tax options are correctly synced
     });
   }
 
   @override
   void dispose() {
+    _tableTabController.dispose();
+    _mainTabController.dispose();
+    _principalController.dispose();
+    _rateController.dispose();
+    _timeController.dispose();
+    _additionalAmountController.dispose();
+    _withdrawalPercentageController.dispose();
+    _breakController.dispose();
+    _withdrawalTimeController.dispose();
+    _presettingsController.dispose();
+    _customTaxController.dispose();
     _tableTabController.dispose();
     _mainTabController.dispose();
     super.dispose();
@@ -230,6 +241,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
+  Widget _buildSwitchTaxRateWidget() {
+    return SwitchAndTaxRate(
+      customTaxController: _customTaxController,
+      recalculateValues: _recalculateValues, // Callback for recalculating
+    );
+  }
+
   Widget _build4PercentWidget() {
     return The4PercentWidget(
       withdrawalPercentageController: _withdrawalPercentageController,
@@ -240,7 +258,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
       withdrawalTimeController: _withdrawalTimeController,
       taxController: _customTaxController,
-      toggleSwitchWidget: _toggleSwitchWidget,
+      toggleSwitchWidget: _buildSwitchTaxRateWidget(),
       totalDeposits: _investmentPlan.depositPlan.deposits,
       totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak+ _investmentPlan.depositPlan.deposits,
       toggleTaxNote: () {
@@ -309,24 +327,27 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Compound Interest Calculators'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48.0),
-          child: TabDropdownWidget(
-            selectedOption: _selectedTab,
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedTab = newValue!;
-              });
-            },
+    return ChangeNotifierProvider(
+      create: (context) => _taxOptionManager,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Compound Interest Calculators'),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(48.0),
+            child: TabDropdownWidget(
+              selectedOption: _selectedTab,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedTab = newValue!;
+                });
+              },
+            ),
           ),
         ),
+        body: _selectedTab == 'Investment Calculator'
+            ? investmentCalculatorContent()
+            : expensesCalculatorContent(),
       ),
-      body: _selectedTab == 'Investment Calculator'
-          ? investmentCalculatorContent()
-          : expensesCalculatorContent(),
     );
   }
 }

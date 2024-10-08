@@ -1,19 +1,18 @@
+import 'package:flutter/foundation.dart';
 import '../models/tax_option.dart';
 
-class TaxOptionManager {
+class TaxOptionManager extends ChangeNotifier {
   late TaxOption _currentTaxOption;
-  bool _isCustomTaxRate = false; // For a truly custom tax rate
-  bool _isCustomPredefined = false; // For a custom version of a predefined tax option (without changing the rate)
+  bool _isCustomTaxRate = false;
+  bool _isCustomPredefined = false;
   final List<TaxOption> _taxOptions;
-  TaxOption? _lastPredefinedOption; // Store the last predefined option before custom rate switch
+  TaxOption? _lastPredefinedOption;
 
   TaxOptionManager({
     required TaxOption initialOption,
     required List<TaxOption> taxOptions,
   })  : _currentTaxOption = initialOption,
-        _taxOptions = taxOptions,
-        _isCustomPredefined = false {
-    // Initialize the last predefined option with the initial one
+        _taxOptions = taxOptions {
     _lastPredefinedOption = initialOption;
   }
 
@@ -30,32 +29,13 @@ class TaxOptionManager {
     return _taxOptions;
   }
 
-  /// Checks if a predefined tax option exists with the given criteria
-  bool existsPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption) {
-    return _taxOptions.any((option) =>
-        option.ratePercentage == ratePercentage &&
-        option.isNotionallyTaxed == isNotionallyTaxed &&
-        option.useTaxExemptionCardAndThreshold == useExemption);
-  }
-
-  /// Finds a predefined tax option matching the given criteria
-  TaxOption? findPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption) {
-    try {
-      return _taxOptions.firstWhere((option) =>
-          option.ratePercentage == ratePercentage &&
-          option.isNotionallyTaxed == isNotionallyTaxed &&
-          option.useTaxExemptionCardAndThreshold == useExemption);
-    } catch (e) {
-      return null;
-    }
-  }
-
   /// Switches to a predefined tax option and stores it as the last known predefined option
   void switchToPredefined(TaxOption newOption) {
     _isCustomTaxRate = false;
     _isCustomPredefined = false;
     _currentTaxOption = newOption;
-    _lastPredefinedOption = newOption; // Remember the last predefined option
+    _lastPredefinedOption = newOption;  // Remember the last predefined option
+    notifyListeners();  // Notify listeners to update UI
   }
 
   /// Switches to a custom tax rate
@@ -68,22 +48,20 @@ class TaxOptionManager {
       isNotionallyTaxed: isNotionallyTaxed,
       useTaxExemptionCardAndThreshold: useExemption,
     );
+    notifyListeners();  // Notify listeners to update UI
   }
 
-  /// Switches to a custom predefined tax option (only when the rate is not custom)
+  /// Switches to a custom predefined tax option
   void switchToCustomPredefined(bool isNotionallyTaxed, bool useExemption) {
-    if (_isCustomTaxRate) {
-      // Prevent custom predefined option when a custom rate is active
-      return;
-    }
-
+    if (_isCustomTaxRate) return;  // Prevent custom predefined option when a custom rate is active
     _isCustomPredefined = true;
     _currentTaxOption = TaxOption(
-      _currentTaxOption.ratePercentage, // Keep predefined rate
+      _currentTaxOption.ratePercentage,  // Keep predefined rate
       'Custom',
       isNotionallyTaxed: isNotionallyTaxed,
       useTaxExemptionCardAndThreshold: useExemption,
     );
+    notifyListeners();  // Notify listeners to update UI
   }
 
   /// Switches back to the last known predefined option
@@ -92,44 +70,67 @@ class TaxOptionManager {
       _isCustomTaxRate = false;
       _isCustomPredefined = false;
       _currentTaxOption = _lastPredefinedOption!;
+      notifyListeners();  // Notify listeners to update UI
     }
   }
 
-  /// Toggles tax exemption and switches to predefined or custom accordingly
+  /// Toggles tax exemption
   void toggleTaxExemption(bool useExemption) {
     if (_isCustomTaxRate) {
-      // If using a custom tax rate, allow changing the exemption but keep the rate custom
       switchToCustomRate(
         _currentTaxOption.ratePercentage,
         _currentTaxOption.isNotionallyTaxed,
         useExemption,
       );
-    } else if (existsPredefinedOption(
-        _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption)) {
+    } else if (existsPredefinedOption(_currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption)) {
       TaxOption matchedOption = findPredefinedOption(
-          _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption)!;
+        _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption)!;
       switchToPredefined(matchedOption);
     } else {
       switchToCustomPredefined(_currentTaxOption.isNotionallyTaxed, useExemption);
     }
   }
 
-  /// Toggles tax type and switches to predefined or custom accordingly
+  /// Toggles tax type
   void toggleTaxType(bool isNotionallyTaxed) {
     if (_isCustomTaxRate) {
-      // If using a custom tax rate, allow changing the tax type but keep the rate custom
       switchToCustomRate(
         _currentTaxOption.ratePercentage,
         isNotionallyTaxed,
         _currentTaxOption.useTaxExemptionCardAndThreshold,
       );
-    } else if (existsPredefinedOption(
-        _currentTaxOption.ratePercentage, isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold)) {
+    } else if (existsPredefinedOption(_currentTaxOption.ratePercentage, isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold)) {
       TaxOption matchedOption = findPredefinedOption(
-          _currentTaxOption.ratePercentage, isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold)!;
+        _currentTaxOption.ratePercentage, isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold)!;
       switchToPredefined(matchedOption);
     } else {
       switchToCustomPredefined(isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold);
+    }
+  }
+
+  bool existsPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption) {
+    return _taxOptions.any((option) =>
+        option.ratePercentage == ratePercentage &&
+        option.isNotionallyTaxed == isNotionallyTaxed &&
+        option.useTaxExemptionCardAndThreshold == useExemption);
+  }
+
+  TaxOption? findPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption) {
+    try {
+      return _taxOptions.firstWhere((option) =>
+          option.ratePercentage == ratePercentage &&
+          option.isNotionallyTaxed == isNotionallyTaxed &&
+          option.useTaxExemptionCardAndThreshold == useExemption);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  TaxOption? findOptionByDescription(String description) {
+    try {
+      return _taxOptions.firstWhere((option) => option.description == description);
+    } catch (e) {
+      return null;
     }
   }
 }

@@ -56,6 +56,14 @@ class PresettingService {
       'additionalAmount': '5000',
       'breakPeriod': '0',
     },
+    'Aktiesparekonto': {
+      'principal': '10000',
+      'rate': '7',
+      'time': '1',
+      'additionalAmount': '10000',
+      'breakPeriod': '24',
+      'taxOption': 'Aktiesparekonto',
+    },
     'Child Savings': {
       'principal': '5000',
       'rate': '7',

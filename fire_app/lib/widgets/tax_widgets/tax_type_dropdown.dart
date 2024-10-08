@@ -1,18 +1,38 @@
-// lib/widgets/tax_type_dropdown.dart
-
 import 'package:flutter/material.dart';
 
-class TaxTypeDropdown extends StatelessWidget {
+class TaxTypeDropdown extends StatefulWidget {
   final String selectedTaxType;
   final ValueChanged<String?> onTaxTypeChanged;
-  final bool isDisabled;
 
   const TaxTypeDropdown({
     super.key,
     required this.selectedTaxType,
     required this.onTaxTypeChanged,
-    this.isDisabled = false,
   });
+
+  @override
+  _TaxTypeDropdownState createState() => _TaxTypeDropdownState();
+}
+
+class _TaxTypeDropdownState extends State<TaxTypeDropdown> {
+  late String _selectedTaxType;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTaxType = widget.selectedTaxType;
+  }
+
+  @override
+  void didUpdateWidget(covariant TaxTypeDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Check if the selected tax type has changed and update the state
+    if (oldWidget.selectedTaxType != widget.selectedTaxType) {
+      setState(() {
+        _selectedTaxType = widget.selectedTaxType;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +42,7 @@ class TaxTypeDropdown extends StatelessWidget {
         const Text('Select Tax Type:', style: TextStyle(fontSize: 16)),
         const SizedBox(width: 10),
         DropdownButton<String>(
-          value: selectedTaxType,
+          value: _selectedTaxType,
           items: const [
             DropdownMenuItem(
               value: 'Capital Gains Tax',
@@ -33,13 +53,14 @@ class TaxTypeDropdown extends StatelessWidget {
               child: Text('Notional Gains Tax'),
             ),
           ],
-          onChanged: isDisabled
-              ? null
-              : (String? newValue) {
-                  if (newValue != null) {
-                    onTaxTypeChanged(newValue);
-                  }
-                },
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _selectedTaxType = newValue;
+              });
+              widget.onTaxTypeChanged(newValue);
+            }
+          },
         ),
       ],
     );
