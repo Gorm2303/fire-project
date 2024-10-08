@@ -30,7 +30,6 @@ class InvestmentCompoundingResults extends StatelessWidget {
         Text('Compound Interest from Principal: ${totalInterestFromPrincipal.toStringAsFixed(0)}'),
         Text('Compound Interest from Contributions: ${totalInterestFromContributions.toStringAsFixed(0)}'),
         Text('Total Taxed Compound Interest: ${compoundEarnings.toStringAsFixed(0)}'),
-        Text('Percentage your money have Increased in Value: ${((totalInterestFromPrincipal + totalInterestFromContributions) / totalDeposits * 100).toStringAsFixed(2)}%'),
         Text('Total Investment Value: ${totalValue.toStringAsFixed(0)}'),
       ],
     );

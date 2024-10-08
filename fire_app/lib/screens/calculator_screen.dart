@@ -171,6 +171,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
               ),
             ],
           ),
+          Text('Earnings compared to deposits: ${(_investmentPlan.depositPlan.compoundEarnings / _investmentPlan.depositPlan.deposits * 100).toStringAsFixed(2)}%'),
           // Investment note section
           InvestmentNoteWidget(
             showInvestmentNote: showInvestmentNote,
@@ -239,6 +240,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       withdrawalTimeController: _withdrawalTimeController,
       taxController: _customTaxController,
       toggleSwitchWidget: _toggleSwitchWidget,
+      totalDeposits: _investmentPlan.depositPlan.deposits,
+      totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak+ _investmentPlan.depositPlan.deposits,
       toggleTaxNote: () {
         setState(() {
           _showTaxNote = !_showTaxNote;

@@ -4,6 +4,8 @@ class The4PercentWidget extends StatelessWidget {
   final TextEditingController withdrawalPercentageController;
   final double withdrawalYearlyAfterBreak;
   final double taxYearlyAfterBreak;
+  final double totalDeposits;
+  final double totalValue;
   final VoidCallback recalculateValues;
   final VoidCallback toggleTaxNote;
   final TextEditingController breakController;
@@ -24,6 +26,8 @@ class The4PercentWidget extends StatelessWidget {
     required this.withdrawalTimeController, 
     required this.taxController,
     required this.toggleSwitchWidget,
+    required this.totalDeposits,
+    required this.totalValue,
   });
 
   @override
@@ -46,6 +50,8 @@ class The4PercentWidget extends StatelessWidget {
             'Interest Gathered During Break: ${interestGatheredDuringBreak.toStringAsFixed(0)} kr.-',
             style: const TextStyle(fontSize: 16),
           ),
+          Text('Compared to deposits: ${(interestGatheredDuringBreak / totalDeposits * 100).toStringAsFixed(2)}%'),
+            Text('Compared to total value: ${(interestGatheredDuringBreak / (totalValue - interestGatheredDuringBreak) * 100).toStringAsFixed(2)}%'),
         const SizedBox(height: 15),  // Spacing between rows
         SizedBox(
           width: 305,  // Set the fixed width for the TextField
