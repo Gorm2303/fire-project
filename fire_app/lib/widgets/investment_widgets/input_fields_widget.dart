@@ -37,7 +37,7 @@ class InputFieldsWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,  // Center the row
             children: <Widget>[
               const Text(
-                'Presettings: ',
+                'Preset: ',
                 style: TextStyle(fontSize: 16),
                 softWrap: true, // Allow text wrapping
               ),

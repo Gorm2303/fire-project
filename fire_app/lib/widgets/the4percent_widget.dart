@@ -62,7 +62,7 @@ class The4PercentWidget extends StatelessWidget {
             onChanged: (value) => recalculateValues(),  // Trigger recalculation on change
           ),
         ),
-        const SizedBox(height: 15),  // Spacing between rows
+        const SizedBox(height: 5),  // Spacing between rows
         Row(
           mainAxisAlignment: MainAxisAlignment.center,  // Center the row
           children: <Widget>[
@@ -90,8 +90,9 @@ class The4PercentWidget extends StatelessWidget {
             ),
           ],
         ),
-        toggleSwitchWidget,
         const SizedBox(height: 10),  // Spacing between rows
+        toggleSwitchWidget,
+        const SizedBox(height: 20),  // Spacing between rows
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -114,7 +115,6 @@ class The4PercentWidget extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 15),  // Spacing between rows
         Text(
               'Monthly Withdrawal After Tax: ${((withdrawalYearlyAfterBreak / 12) - taxYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
               style: const TextStyle(fontSize: 16),

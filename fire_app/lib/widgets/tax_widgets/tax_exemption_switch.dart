@@ -1,5 +1,3 @@
-// lib/widgets/tax_exemption_switch.dart
-
 import 'package:flutter/material.dart';
 
 class TaxExemptionSwitch extends StatelessWidget {
@@ -14,18 +12,26 @@ class TaxExemptionSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('Use Tax Exemption And Progression Limit:', style: TextStyle(fontSize: 16)),
-        Transform.scale(
-          scale: 0.6,
-          child: Switch(
-            value: useTaxExemptionCard,
-            onChanged: onSwitchChanged,
+    return SizedBox(
+      height: 28, // Set an explicit height to reduce vertical space
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center, // Ensure centering
+        children: [
+          const Text(
+            'Tax Exemption And Progression Limit:', 
+            style: TextStyle(fontSize: 14), // Smaller font size for compactness
           ),
-        ),
-      ],
+          const SizedBox(width: 5), // Reduce the space between text and switch
+          Transform.scale(
+            scale: 0.6,  // Adjust scale to make Switch smaller
+            child: Switch(
+              value: useTaxExemptionCard,
+              onChanged: onSwitchChanged,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

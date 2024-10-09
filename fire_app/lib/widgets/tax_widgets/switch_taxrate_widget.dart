@@ -95,6 +95,7 @@ class SwitchAndTaxRate extends StatelessWidget {
       onTaxTypeChanged: (String? newTaxType) {
         if (newTaxType != null) {
           taxOptionManager.toggleTaxType(newTaxType == 'Notional Gains Tax'); // Toggle tax type
+          recalculateValues(); // Recalculate after tax type change
         }
       },
     );

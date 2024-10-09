@@ -26,7 +26,6 @@ class _TaxTypeDropdownState extends State<TaxTypeDropdown> {
   @override
   void didUpdateWidget(covariant TaxTypeDropdown oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Check if the selected tax type has changed and update the state
     if (oldWidget.selectedTaxType != widget.selectedTaxType) {
       setState(() {
         _selectedTaxType = widget.selectedTaxType;
@@ -38,29 +37,35 @@ class _TaxTypeDropdownState extends State<TaxTypeDropdown> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text('Select Tax Type:', style: TextStyle(fontSize: 16)),
-        const SizedBox(width: 10),
-        DropdownButton<String>(
-          value: _selectedTaxType,
-          items: const [
-            DropdownMenuItem(
-              value: 'Capital Gains Tax',
-              child: Text('Capital Gains Tax'),
-            ),
-            DropdownMenuItem(
-              value: 'Notional Gains Tax',
-              child: Text('Notional Gains Tax'),
-            ),
-          ],
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedTaxType = newValue;
-              });
-              widget.onTaxTypeChanged(newValue);
-            }
-          },
+        const Text('Select Tax Type:', style: TextStyle(fontSize: 14)),
+        const SizedBox(width: 10), // Reduce horizontal space
+        SizedBox(
+          height: 38, // Adjust height to reduce vertical space
+          child: DropdownButton<String>(
+            value: _selectedTaxType,
+            iconSize: 16,  // Reduce the dropdown icon size
+            style: const TextStyle(fontSize: 14),  // Control text style
+            items: const [
+              DropdownMenuItem(
+                value: 'Capital Gains Tax',
+                child: Text('Capital Gains Tax', style: TextStyle(fontSize: 14)),
+              ),
+              DropdownMenuItem(
+                value: 'Notional Gains Tax',
+                child: Text('Notional Gains Tax', style: TextStyle(fontSize: 14)),
+              ),
+            ],
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  _selectedTaxType = newValue;
+                });
+                widget.onTaxTypeChanged(newValue);
+              }
+            },
+          ),
         ),
       ],
     );

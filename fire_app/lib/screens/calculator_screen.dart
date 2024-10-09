@@ -31,9 +31,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _interestRateController = TextEditingController(text: '0');
   final TextEditingController _durationController = TextEditingController(text: '0');
   final TextEditingController _additionalAmountController = TextEditingController(text: '0');
-  final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');
+  final TextEditingController _withdrawalPercentageController = TextEditingController(text: '0');
   final TextEditingController _breakController = TextEditingController(text: '0');
-  final TextEditingController _withdrawalDurationController = TextEditingController(text: '30');
+  final TextEditingController _withdrawalDurationController = TextEditingController(text: '0');
   final TextEditingController _presettingsController = TextEditingController(text: 'None');
   final TextEditingController _customTaxController = TextEditingController(text: '0');
 
@@ -50,6 +50,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
     TaxOption(17.0, 'Aktiesparekonto', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
     TaxOption(15.3, 'Pension PAL-skat', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+    TaxOption(42.0, 'Tax On Sale*', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
   ];
 
   late InvestmentPlan _investmentPlan;
@@ -98,13 +99,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   void _loadPresetValues(String presetKey) {
     final presetValues = PresettingService.getPreset(presetKey);
     TaxOption? predefinedOption = _taxOptionManager.findOptionByDescription(presetValues['taxOption'] ?? 'None');
+    _contributionFrequency = presetValues['contributionFrequency'] ?? 'Monthly';
 
     setState(() {
-      _principalController.text = presetValues['principal']!;
-      _interestRateController.text = presetValues['interestRate']!;
-      _durationController.text = presetValues['duration']!;
-      _additionalAmountController.text = presetValues['additionalAmount']!;
-      _breakController.text = presetValues['breakPeriod']!;
+      _principalController.text = presetValues['principal'] ?? '5000';  // Default to 5000 if not provided
+      _interestRateController.text = presetValues['interestRate'] ?? '7';  // Default to 7% if not provided
+      _durationController.text = presetValues['duration'] ?? '25';  // Default to 25 years if not provided
+      _additionalAmountController.text = presetValues['additionalAmount'] ?? '5000';  // Default to 5000 if not provided
+      _breakController.text = presetValues['breakPeriod'] ?? '0';
+      _withdrawalDurationController.text = presetValues['withdrawalPeriod'] ?? '30';
+      _withdrawalPercentageController.text = presetValues['withdrawalPercentage'] ?? '4'; // Min 3% and Max 5%
 
       // Switch to the new predefined option and trigger a rebuild of SwitchAndTaxRate
       _taxOptionManager.switchToPredefined(predefinedOption ?? _taxOptions[0]);

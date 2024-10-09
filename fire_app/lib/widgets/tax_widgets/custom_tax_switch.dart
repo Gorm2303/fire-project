@@ -1,5 +1,3 @@
-// lib/widgets/custom_tax_switch.dart
-
 import 'package:flutter/material.dart';
 
 class CustomTaxSwitch extends StatelessWidget {
@@ -14,18 +12,25 @@ class CustomTaxSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('Custom Tax Rate: ', style: TextStyle(fontSize: 16)),
+    return SizedBox(
+      height: 24, // Set an explicit height to reduce vertical space
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center, // Ensure vertical centering
+        children: [
+          const Text(
+            'Custom Tax Rate: ', 
+            style: TextStyle(fontSize: 16), // Adjust font size for compactness
+          ),
           Transform.scale(
-            scale: 0.6,
+            scale: 0.6,  // Adjust the scale to reduce the size of the Switch
             child: Switch(
               value: isCustom,
               onChanged: onSwitchChanged,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
