@@ -3,7 +3,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 
 class FormulaWidget extends StatelessWidget {
   final double principal;
-  final double rate;
+  final double interestRate;
   final double duration;
   final double additionalAmount;
   final String contributionFrequency;
@@ -11,7 +11,7 @@ class FormulaWidget extends StatelessWidget {
   const FormulaWidget({
     super.key,
     required this.principal,
-    required this.rate,
+    required this.interestRate,
     required this.duration,
     required this.additionalAmount,
     required this.contributionFrequency,
@@ -37,7 +37,7 @@ class FormulaWidget extends StatelessWidget {
     // Step 1: Add principal part if principal > 0
     if (principal > 0) {
       String principalPart = principal.toStringAsFixed(0);
-      String ratePart = (rate / 100).toStringAsFixed(3);
+      String ratePart = (interestRate / 100).toStringAsFixed(3);
       String exponentPart = "^{$duration}";
       String mainFormula = "$principalPart \\times (1 + $ratePart)$exponentPart";
       fullFormula += "A = $mainFormula";
@@ -46,7 +46,7 @@ class FormulaWidget extends StatelessWidget {
     // Step 2: Add contribution part if additionalAmount > 0
     if (additionalAmount > 0 && contributionFrequency == 'Monthly') {
       String contributionText = additionalAmount.toStringAsFixed(0);
-      String ratePart = (rate / 100).toStringAsFixed(3);
+      String ratePart = (interestRate / 100).toStringAsFixed(3);
 
       // Corrected monthly contributions with remaining months' interest over `t` years
       String monthlyContributionFormula =
@@ -61,7 +61,7 @@ class FormulaWidget extends StatelessWidget {
     } else if (additionalAmount > 0 && contributionFrequency == 'Yearly') {
       // Handle yearly contributions (unchanged)
       String contributionText = additionalAmount.toStringAsFixed(0);
-      String ratePart = (rate / 100).toStringAsFixed(3);
+      String ratePart = (interestRate / 100).toStringAsFixed(3);
       String exponentPart = "^{$duration}";
 
       String contributionFormula =

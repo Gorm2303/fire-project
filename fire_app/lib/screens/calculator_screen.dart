@@ -28,7 +28,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   late TabController _mainTabController;
 
   final TextEditingController _principalController = TextEditingController(text: '0');
-  final TextEditingController _rateController = TextEditingController(text: '0');
+  final TextEditingController _interestRateController = TextEditingController(text: '0');
   final TextEditingController _durationController = TextEditingController(text: '0');
   final TextEditingController _additionalAmountController = TextEditingController(text: '0');
   final TextEditingController _withdrawalPercentageController = TextEditingController(text: '4');
@@ -83,7 +83,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _investmentPlan = InvestmentPlan(
       name: "Custom Plan",
       principal: Utils.parseTextToDouble(_principalController.text),
-      rate: Utils.parseTextToDouble(_rateController.text),
+      interestRate: Utils.parseTextToDouble(_interestRateController.text),
       depositYears: Utils.parseTextToInt(_durationController.text),
       additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
       contributionFrequency: _contributionFrequency,
@@ -101,7 +101,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
     setState(() {
       _principalController.text = presetValues['principal']!;
-      _rateController.text = presetValues['rate']!;
+      _interestRateController.text = presetValues['interestRate']!;
       _durationController.text = presetValues['duration']!;
       _additionalAmountController.text = presetValues['additionalAmount']!;
       _breakController.text = presetValues['breakPeriod']!;
@@ -128,7 +128,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _tableTabController.dispose();
     _mainTabController.dispose();
     _principalController.dispose();
-    _rateController.dispose();
+    _interestRateController.dispose();
     _durationController.dispose();
     _additionalAmountController.dispose();
     _withdrawalPercentageController.dispose();
@@ -151,7 +151,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   Widget _buildFormulaWidget() {
     return FormulaWidget(
       principal: Utils.parseTextToDouble(_investmentPlan.depositPlan.principal.toString()),
-      rate: Utils.parseTextToDouble(_investmentPlan.depositPlan.interestRate.toString()),
+      interestRate: Utils.parseTextToDouble(_investmentPlan.depositPlan.interestRate.toString()),
       duration: Utils.parseTextToDouble(_investmentPlan.depositPlan.duration.toString()),
       additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
       contributionFrequency: _contributionFrequency,
@@ -224,7 +224,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   Widget _buildInputFields() {
     return InputFieldsWidget(
       principalController: _principalController,
-      rateController: _rateController,
+      interestRateController: _interestRateController,
       durationController: _durationController,
       additionalAmountController: _additionalAmountController,
       presettingsController: _presettingsController,

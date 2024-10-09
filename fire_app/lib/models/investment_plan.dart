@@ -13,7 +13,7 @@ class InvestmentPlan {
   InvestmentPlan({
     required this.name,
     required double principal,
-    required double rate,
+    required double interestRate,
     required int depositYears,
     required double additionalAmount,
     required String contributionFrequency,
@@ -23,14 +23,14 @@ class InvestmentPlan {
     int withdrawalPeriod = 30,
   })  : depositPlan = DepositPlan(
           principal: principal,
-          interestRate: rate,
+          interestRate: interestRate,
           duration: depositYears,
           additionalContribution: additionalAmount,
           contributionFrequency: contributionFrequency,
           selectedTaxOption: selectedTaxOption,
         ),
         withdrawalPlan = WithdrawalPlan(
-          interestRate: rate,
+          interestRate: interestRate,
           duration: withdrawalPeriod,
           withdrawalPercentage: withdrawalPercentage,
           selectedTaxOption: selectedTaxOption,

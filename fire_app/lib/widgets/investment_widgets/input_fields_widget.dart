@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class InputFieldsWidget extends StatelessWidget {
   final TextEditingController principalController;
-  final TextEditingController rateController;
+  final TextEditingController interestRateController;
   final TextEditingController durationController;
   final TextEditingController additionalAmountController;
   final String contributionFrequency;
@@ -16,7 +16,7 @@ class InputFieldsWidget extends StatelessWidget {
   const InputFieldsWidget({
     super.key,
     required this.principalController,
-    required this.rateController,
+    required this.interestRateController,
     required this.durationController,
     required this.additionalAmountController,
     required this.contributionFrequency,
@@ -72,7 +72,7 @@ class InputFieldsWidget extends StatelessWidget {
           SizedBox(
             width: 305,
             child: TextField(
-              controller: rateController,
+              controller: interestRateController,
               decoration: const InputDecoration(labelText: 'Rate of Interest (%)'),
               keyboardType: TextInputType.number,
               onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
