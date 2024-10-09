@@ -40,7 +40,7 @@ class _TaxRateDropdownState extends State<TaxRateDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox( height: 34, // Set an explicit height to reduce vertical space
+    return SizedBox( height: 38, // Set an explicit height to reduce vertical space
       child: DropdownButton<TaxOption>(
         value: _selectedOption,
         items: widget.taxOptions.map((TaxOption option) {

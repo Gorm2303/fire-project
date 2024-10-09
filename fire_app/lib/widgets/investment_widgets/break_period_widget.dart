@@ -6,7 +6,6 @@ class BreakPeriodWidget extends StatelessWidget {
   final double totalDeposits;
   final double totalValue;
   final VoidCallback recalculateValues;
-  final Widget toggleSwitchWidget;
 
   const BreakPeriodWidget({
     super.key,
@@ -15,10 +14,10 @@ class BreakPeriodWidget extends StatelessWidget {
     required this.totalDeposits,
     required this.totalValue,
     required this.recalculateValues,
-    required this.toggleSwitchWidget,
   });
 
-  Widget _buildBreakPeriodWidget() {
+  @override
+  Widget build(BuildContext context) {
     double interestOverDeposits = totalDeposits != 0 ? (interestGatheredDuringBreak / totalDeposits * 100) : 0;
     double interestOverTotalValue = totalValue != 0 ? (interestGatheredDuringBreak / (totalValue - interestGatheredDuringBreak) * 100) : 0;
 
@@ -40,15 +39,7 @@ class BreakPeriodWidget extends StatelessWidget {
         ),
         Text('Compared to deposits: ${interestOverDeposits.toStringAsFixed(2)}%'),
         Text('Compared to total value: ${interestOverTotalValue.toStringAsFixed(2)}%'),
-        const SizedBox(height: 20),
-        toggleSwitchWidget,
-        const SizedBox(height: 20),
       ],
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildBreakPeriodWidget();
   }
 }

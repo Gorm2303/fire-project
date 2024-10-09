@@ -1,6 +1,8 @@
 import 'package:fire_app/models/tax_option.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_compounding_results_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_note_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/break_period_widget.dart';
+import 'package:fire_app/widgets/withdrawal_tax_widgets/withdrawal_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/tax_option_manager.dart';
@@ -9,7 +11,6 @@ import '../widgets/withdrawal_tax_widgets/tax_note_widget.dart';
 import '../models/investment_plan.dart';
 import '../widgets/investment_table_widget.dart';
 import '../widgets/investment_widgets/input_fields_widget.dart';
-import '../widgets/the4percent_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
 import '../widgets/withdrawal_tax_widgets/tax_calculation_results_widget.dart';
 import '../widgets/withdrawal_tax_widgets/switch_taxrate_widget.dart';
@@ -247,31 +248,35 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
-  Widget _buildSwitchTaxRateWidget() {
-    return SwitchAndTaxRate(
-      customTaxController: _customTaxController,
-      recalculateValues: _recalculateValues, // Callback for recalculating
-    );
-  }
-
   Widget _build4PercentWidget() {
-    return The4PercentWidget(
-      withdrawalPercentageController: _withdrawalPercentageController,
-      withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearly,
-      taxYearlyAfterBreak: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
-      recalculateValues: _recalculateValues,
-      breakController: _breakController,
-      interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
-      withdrawalDurationController: _withdrawalDurationController,
-      taxController: _customTaxController,
-      toggleSwitchWidget: _buildSwitchTaxRateWidget(),
-      totalDeposits: _investmentPlan.depositPlan.deposits,
-      totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak+ _investmentPlan.depositPlan.deposits,
-      toggleTaxNote: () {
-        setState(() {
-          _showTaxNote = !_showTaxNote;
-        });
-      },
+    return Column(
+      children: <Widget>[
+        BreakPeriodWidget(
+          breakController: _breakController,
+          interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
+          totalDeposits: _investmentPlan.depositPlan.deposits,
+          totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak + _investmentPlan.depositPlan.deposits,
+          recalculateValues: _recalculateValues,
+        ),
+        const SizedBox(height: 20),
+        SwitchAndTaxRate(
+          customTaxController: _customTaxController,
+          recalculateValues: _recalculateValues, // Callback for recalculating
+        ),
+        const SizedBox(height: 20),
+        WithdrawalWidget(
+          withdrawalPercentageController: _withdrawalPercentageController,
+          withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearly,
+          taxYearlyAfterBreak: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
+          recalculateValues: _recalculateValues,
+          toggleTaxNote: () {
+            setState(() {
+              _showTaxNote = !_showTaxNote;
+            });
+          },
+          withdrawalDurationController: _withdrawalDurationController,
+        ),
+      ],
     );
   }
 

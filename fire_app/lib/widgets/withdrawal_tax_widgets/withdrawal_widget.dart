@@ -18,7 +18,8 @@ class WithdrawalWidget extends StatelessWidget {
     required this.withdrawalDurationController,
   });
 
-  Widget _buildWithdrawalWidget() {
+  @override
+  Widget build(BuildContext context) {    
     return Column(
       children: <Widget>[
         SizedBox(
@@ -86,10 +87,5 @@ class WithdrawalWidget extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildWithdrawalWidget();
   }
 }

@@ -39,22 +39,22 @@ class _TaxTypeDropdownState extends State<TaxTypeDropdown> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text('Select Tax Type:', style: TextStyle(fontSize: 14)),
+        const Text('Select Tax Type:', style: TextStyle(fontSize: 16)),
         const SizedBox(width: 10), // Reduce horizontal space
         SizedBox(
-          height: 34, // Adjust height to reduce vertical space
+          height: 38, // Adjust height to reduce vertical space
           child: DropdownButton<String>(
             value: _selectedTaxType,
             iconSize: 16,  // Reduce the dropdown icon size
-            style: const TextStyle(fontSize: 14),  // Control text style
+            style: const TextStyle(fontSize: 16),  // Control text style
             items: const [
               DropdownMenuItem(
                 value: 'Capital Gains Tax',
-                child: Text('Capital Gains Tax', style: TextStyle(fontSize: 14)),
+                child: Text('Capital Gains Tax', style: TextStyle(fontSize: 16)),
               ),
               DropdownMenuItem(
                 value: 'Notional Gains Tax',
-                child: Text('Notional Gains Tax', style: TextStyle(fontSize: 14)),
+                child: Text('Notional Gains Tax', style: TextStyle(fontSize: 16)),
               ),
             ],
             onChanged: (String? newValue) {
