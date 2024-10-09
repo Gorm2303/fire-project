@@ -13,7 +13,7 @@ import '../widgets/investment_table_widget.dart';
 import '../widgets/investment_widgets/input_fields_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
 import '../widgets/withdrawal_tax_widgets/tax_calculation_results_widget.dart';
-import '../widgets/withdrawal_tax_widgets/switch_taxrate_widget.dart';
+import '../widgets/withdrawal_tax_widgets/tax_rate_widget.dart';
 import '../services/presetting_service.dart';
 import '../services/utils.dart';
 
@@ -220,7 +220,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           _buildSizedBox(20),
           _buildInvestmentNoteWidget(),
           _buildSizedBox(20),
-          _build4PercentWidget(),
+          _buildBreakTaxWithdrawalWidgets(),
           _buildTaxNoteWidget(),
           _buildTabView(),
         ],
@@ -248,7 +248,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
-  Widget _build4PercentWidget() {
+  Widget _buildBreakTaxWithdrawalWidgets() {
     return Column(
       children: <Widget>[
         BreakPeriodWidget(
@@ -258,12 +258,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak + _investmentPlan.depositPlan.deposits,
           recalculateValues: _recalculateValues,
         ),
-        const SizedBox(height: 20),
-        SwitchAndTaxRate(
+        TaxRateWidget(
           customTaxController: _customTaxController,
           recalculateValues: _recalculateValues, // Callback for recalculating
         ),
-        const SizedBox(height: 20),
         WithdrawalWidget(
           withdrawalPercentageController: _withdrawalPercentageController,
           withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearly,
