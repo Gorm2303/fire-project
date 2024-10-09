@@ -4,7 +4,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 class FormulaWidget extends StatelessWidget {
   final double principal;
   final double rate;
-  final double time;
+  final double duration;
   final double additionalAmount;
   final String contributionFrequency;
 
@@ -12,7 +12,7 @@ class FormulaWidget extends StatelessWidget {
     super.key,
     required this.principal,
     required this.rate,
-    required this.time,
+    required this.duration,
     required this.additionalAmount,
     required this.contributionFrequency,
   });
@@ -38,7 +38,7 @@ class FormulaWidget extends StatelessWidget {
     if (principal > 0) {
       String principalPart = principal.toStringAsFixed(0);
       String ratePart = (rate / 100).toStringAsFixed(3);
-      String exponentPart = "^{$time}";
+      String exponentPart = "^{$duration}";
       String mainFormula = "$principalPart \\times (1 + $ratePart)$exponentPart";
       fullFormula += "A = $mainFormula";
     }
@@ -50,7 +50,7 @@ class FormulaWidget extends StatelessWidget {
 
       // Corrected monthly contributions with remaining months' interest over `t` years
       String monthlyContributionFormula =
-        "\\sum_{t=1}^{$time} \\sum_{k=1}^{12} $contributionText \\times \\left(1 + \\frac{$ratePart}{12} \\times \\frac{12 - k}{12}\\right)^{$time - t}";
+        "\\sum_{t=1}^{$duration} \\sum_{k=1}^{12} $contributionText \\times \\left(1 + \\frac{$ratePart}{12} \\times \\frac{12 - k}{12}\\right)^{$duration - t}";
 
       if (fullFormula.isNotEmpty) {
         fullFormula += " + ";
@@ -62,7 +62,7 @@ class FormulaWidget extends StatelessWidget {
       // Handle yearly contributions (unchanged)
       String contributionText = additionalAmount.toStringAsFixed(0);
       String ratePart = (rate / 100).toStringAsFixed(3);
-      String exponentPart = "^{$time}";
+      String exponentPart = "^{$duration}";
 
       String contributionFormula =
           "$contributionText \\times \\frac{(1 + $ratePart)$exponentPart - 1}{$ratePart}";

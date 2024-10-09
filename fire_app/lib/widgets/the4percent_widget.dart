@@ -10,7 +10,7 @@ class The4PercentWidget extends StatelessWidget {
   final VoidCallback toggleTaxNote;
   final TextEditingController breakController;
   final double interestGatheredDuringBreak; 
-  final TextEditingController withdrawalTimeController;
+  final TextEditingController withdrawalDurationController;
   final TextEditingController taxController;
   final Widget toggleSwitchWidget;
 
@@ -23,7 +23,7 @@ class The4PercentWidget extends StatelessWidget {
     required this.toggleTaxNote,
     required this.breakController,
     required this.interestGatheredDuringBreak,
-    required this.withdrawalTimeController, 
+    required this.withdrawalDurationController, 
     required this.taxController,
     required this.toggleSwitchWidget,
     required this.totalDeposits,
@@ -56,7 +56,7 @@ class The4PercentWidget extends StatelessWidget {
         SizedBox(
           width: 305,  // Set the fixed width for the TextField
           child: TextField(
-            controller: withdrawalTimeController,
+            controller: withdrawalDurationController,
             decoration: const InputDecoration(labelText: 'Withdrawal Period (Years)'),
             keyboardType: TextInputType.number,
             onChanged: (value) => recalculateValues(),  // Trigger recalculation on change

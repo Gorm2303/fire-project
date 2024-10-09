@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class InputFieldsWidget extends StatelessWidget {
   final TextEditingController principalController;
   final TextEditingController rateController;
-  final TextEditingController timeController;
+  final TextEditingController durationController;
   final TextEditingController additionalAmountController;
   final String contributionFrequency;
   final Function(String) onContributionFrequencyChanged;  // Callback for dropdown
@@ -17,7 +17,7 @@ class InputFieldsWidget extends StatelessWidget {
     super.key,
     required this.principalController,
     required this.rateController,
-    required this.timeController,
+    required this.durationController,
     required this.additionalAmountController,
     required this.contributionFrequency,
     required this.onContributionFrequencyChanged,
@@ -81,8 +81,8 @@ class InputFieldsWidget extends StatelessWidget {
           SizedBox(
             width: 305,
             child: TextField(
-              controller: timeController,
-              decoration: const InputDecoration(labelText: 'Time (Years)'),
+              controller: durationController,
+              decoration: const InputDecoration(labelText: 'Duration (Years)'),
               keyboardType: TextInputType.number,
               onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
             ),
