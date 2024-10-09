@@ -177,12 +177,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       child: Column(
         children: <Widget>[
           SizedBox(
-            width: 1000,
+            width: 550,
             child: Column(
               children: [
                 _buildInputFields(),
                 _buildInvestmentNoteWidget(),
-                _buildBreakTaxWithdrawalWidgets(),
+                Column(
+                  children: <Widget>[
+                    _buildBreakPeriodWidget(),
+                    _buildTaxRateWidget(),
+                    _buildWithdrawalWidget(),
+                  ],
+                ),              
               ],
             ),
           ),
@@ -212,42 +218,44 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
-  Widget _buildBreakTaxWithdrawalWidgets() {
-    return Column(
-      children: <Widget>[
-        BreakPeriodWidget(
-          breakController: _breakController,
-          interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
-          totalDeposits: _investmentPlan.depositPlan.deposits,
-          totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak + _investmentPlan.depositPlan.deposits,
-          recalculateValues: _recalculateValues,
-        ),
-        TaxRateWidget(
-          customTaxController: _customTaxController,
-          recalculateValues: _recalculateValues, // Callback for recalculating
-        ),
-        WithdrawalWidget(
-          withdrawalPercentageController: _withdrawalPercentageController,
-          withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearly,
-          taxYearlyAfterBreak: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
-          recalculateValues: _recalculateValues,
-          toggleTaxNote: () {
-            setState(() {
-              _showTaxNote = !_showTaxNote;
-            });
-          },
-          withdrawalDurationController: _withdrawalDurationController,
-          taxNoteWidget: TaxNoteWidget(
-            showTaxNote: _showTaxNote,
-            earningsWithdrawalRatio: TaxCalculationResults(
-              earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
-              earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
-              taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
-              annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
-            ),
-        ),
-        ),
-      ],
+  Widget _buildBreakPeriodWidget() {
+    return BreakPeriodWidget(
+      breakController: _breakController,
+      interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
+      totalDeposits: _investmentPlan.depositPlan.deposits,
+      totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak + _investmentPlan.depositPlan.deposits,
+      recalculateValues: _recalculateValues,
+    );
+  }
+
+  Widget _buildTaxRateWidget() {
+    return TaxRateWidget(
+      customTaxController: _customTaxController,
+      recalculateValues: _recalculateValues, // Callback for recalculating
+    );
+  }
+
+  Widget _buildWithdrawalWidget() {
+    return WithdrawalWidget(
+        withdrawalPercentageController: _withdrawalPercentageController,
+        withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearly,
+        taxYearlyAfterBreak: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
+        recalculateValues: _recalculateValues,
+        toggleTaxNote: () {
+          setState(() {
+            _showTaxNote = !_showTaxNote;
+          });
+        },
+        withdrawalDurationController: _withdrawalDurationController,
+        taxNoteWidget: TaxNoteWidget(
+          showTaxNote: _showTaxNote,
+          earningsWithdrawalRatio: TaxCalculationResults(
+            earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
+            earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
+            taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
+            annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
+          ),
+      ),
     );
   }
 

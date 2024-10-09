@@ -1,6 +1,7 @@
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:fire_app/widgets/investment_widgets/formula_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_compounding_results_widget.dart';
+import 'package:fire_app/widgets/wrappers/math_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
@@ -98,47 +99,44 @@ class InvestmentNoteWidget extends StatelessWidget {
 
   // MathTeX formulas as part of the investment explanation
   Widget _buildMathTexWidget() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Math.tex(
-            r"""
-            \text{Principal and Compound Interest} = \text{Principal} \times (1 + \text{Interest Rate})^\text{Years}
-            """,
-            textStyle: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Math.tex(
-            r"""
-            \text{Monthly Interest Rate} = \frac{\text{Interest Rate}}{12}
-            """,
-            textStyle: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Math.tex(
-            r"""
-            \text{Remaining Year Fraction} = \frac{12 - \text{Month No.}}{12}
-            """,
-            textStyle: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Math.tex(
-            r"""
-            \text{Monthly Contributions and Compound Interest} = \sum_{\text{t}=1}^{\text{Years}} \sum_{\text{Month No.}=1}^{12} \text{Monthly Contribution} \times \left(1 + \frac{\text{Interest Rate}}{12} \times \frac{12 - \text{Month No.}}{12}\right)^\text{Years - t}
-            """,
-            textStyle: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Math.tex(
-            r"""
-            \text{Total Investment} = \text{Principal and Compound Interest} + \text{Monthly Contributions and Compound Interest}
-            """,
-            textStyle: const TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
+    return MathWrapper(
+      rightBoundaryMargin: 415,
+      children: [
+        Math.tex(
+          r"""
+          \text{Principal and Compound Interest} = \text{Principal} \times (1 + \text{Interest Rate})^\text{Years}
+          """,
+          textStyle: const TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        Math.tex(
+          r"""
+          \text{Monthly Interest Rate} = \frac{\text{Interest Rate}}{12}
+          """,
+          textStyle: const TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        Math.tex(
+          r"""
+          \text{Remaining Year Fraction} = \frac{12 - \text{Month No.}}{12}
+          """,
+          textStyle: const TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        Math.tex(
+          r"""
+          \text{Monthly Contributions and Compound Interest} = \sum_{\text{t}=1}^{\text{Years}} \sum_{\text{Month No.}=1}^{12} \text{Monthly Contribution} \times \left(1 + \frac{\text{Interest Rate}}{12} \times \frac{12 - \text{Month No.}}{12}\right)^\text{Years - t}
+          """,
+          textStyle: const TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        Math.tex(
+          r"""
+          \text{Total Investment} = \text{Principal and Compound Interest} + \text{Monthly Contributions and Compound Interest}
+          """,
+          textStyle: const TextStyle(fontSize: 16),
+        ),
+      ],
     );
   }
 }
