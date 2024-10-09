@@ -42,7 +42,7 @@ class _TaxTypeDropdownState extends State<TaxTypeDropdown> {
         const Text('Select Tax Type:', style: TextStyle(fontSize: 14)),
         const SizedBox(width: 10), // Reduce horizontal space
         SizedBox(
-          height: 38, // Adjust height to reduce vertical space
+          height: 34, // Adjust height to reduce vertical space
           child: DropdownButton<String>(
             value: _selectedTaxType,
             iconSize: 16,  // Reduce the dropdown icon size

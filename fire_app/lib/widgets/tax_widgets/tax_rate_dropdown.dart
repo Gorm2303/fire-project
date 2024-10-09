@@ -40,22 +40,24 @@ class _TaxRateDropdownState extends State<TaxRateDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<TaxOption>(
-      value: _selectedOption,
-      items: widget.taxOptions.map((TaxOption option) {
-        return DropdownMenuItem<TaxOption>(
-          value: option,
-          child: Text('${option.ratePercentage}% - ${option.description}'),
-        );
-      }).toList(),
-      onChanged: (newOption) {
-        if (newOption != null) {
-          setState(() {
-            _selectedOption = newOption;  // Update the local state to reflect the new selection
-          });
-          widget.onTaxOptionChanged(newOption);  // Notify the parent widget of the change
-        }
-      },
+    return SizedBox( height: 34, // Set an explicit height to reduce vertical space
+      child: DropdownButton<TaxOption>(
+        value: _selectedOption,
+        items: widget.taxOptions.map((TaxOption option) {
+          return DropdownMenuItem<TaxOption>(
+            value: option,
+            child: Text('${option.ratePercentage}% - ${option.description}'),
+          );
+        }).toList(),
+        onChanged: (newOption) {
+          if (newOption != null) {
+            setState(() {
+              _selectedOption = newOption;  // Update the local state to reflect the new selection
+            });
+            widget.onTaxOptionChanged(newOption);  // Notify the parent widget of the change
+          }
+        },
+      ),
     );
   }
 }

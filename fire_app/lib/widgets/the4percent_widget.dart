@@ -30,32 +30,9 @@ class The4PercentWidget extends StatelessWidget {
     required this.totalValue,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    double interestOverDeposits = totalDeposits != 0 ? (interestGatheredDuringBreak / totalDeposits * 100) : 0;
-    double interestOverTotalValue = totalValue != 0 ? (interestGatheredDuringBreak / (totalValue - interestGatheredDuringBreak) * 100) : 0;
-
+  Widget _buildWithdrawalWidget() {
     return Column(
       children: <Widget>[
-        // Constrain the Break Period Input to a fixed width
-        SizedBox(
-          width: 305,  // Set the fixed width for the TextField
-          child: TextField(
-            controller: breakController,
-            decoration: const InputDecoration(labelText: 'Break Period (No Deposits Nor Withdrawals in Years)'),
-            keyboardType: TextInputType.number,
-            onChanged: (value) => recalculateValues(),  // Trigger recalculation on change
-          ),
-        ),
-        const SizedBox(height: 15),  // Spacing between rows
-        // Constrain the Interest Gathered Text
-        Text(
-            'Interest Gathered During Break: ${interestGatheredDuringBreak.toStringAsFixed(0)} kr.-',
-            style: const TextStyle(fontSize: 16),
-          ),
-          Text('Compared to deposits: ${interestOverDeposits.toStringAsFixed(2)}%'),
-            Text('Compared to total value: ${interestOverTotalValue.toStringAsFixed(2)}%'),
-        const SizedBox(height: 15),  // Spacing between rows
         SizedBox(
           width: 305,  // Set the fixed width for the TextField
           child: TextField(
@@ -65,37 +42,36 @@ class The4PercentWidget extends StatelessWidget {
             onChanged: (value) => recalculateValues(),  // Trigger recalculation on change
           ),
         ),
-        const SizedBox(height: 5),  // Spacing between rows
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,  // Center the row
-          children: <Widget>[
-            // Constrain the Withdrawal Period Input to a fixed width
-              DropdownButton<String>(
-                value: withdrawalPercentageController.text,
-                items: ['3', '4', '5'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text('$value%'),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    withdrawalPercentageController.text = newValue;
-                    recalculateValues();  // Trigger recalculation when value changes
-                  }
-                },
-              ),
-            // Constrain the Withdrawal Each Month Text
-            Text(
-              'Withdrawal Each Month: ${(withdrawalYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
-              style: const TextStyle(fontSize: 16),
-              softWrap: true, // Allow text wrapping
-            ),
-          ],
+        SizedBox(
+          height: 34, // Set an explicit height to reduce vertical space
+          child:Row(
+              mainAxisAlignment: MainAxisAlignment.center,  // Center the row
+              children: <Widget>[
+                // Constrain the Withdrawal Period Input to a fixed width
+                  DropdownButton<String>(
+                    value: withdrawalPercentageController.text,
+                    items: ['3', '4', '5'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text('$value%'),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        withdrawalPercentageController.text = newValue;
+                        recalculateValues();  // Trigger recalculation when value changes
+                      }
+                    },
+                  ),
+                // Constrain the Withdrawal Each Month Text
+                Text(
+                  'Withdrawal Each Month: ${(withdrawalYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
+                  style: const TextStyle(fontSize: 16),
+                  softWrap: true, // Allow text wrapping
+                ),
+              ],
+          ),
         ),
-        const SizedBox(height: 10),  // Spacing between rows
-        toggleSwitchWidget,
-        const SizedBox(height: 20),  // Spacing between rows
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -118,10 +94,43 @@ class The4PercentWidget extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 5),
         Text(
               'Monthly Withdrawal After Tax: ${((withdrawalYearlyAfterBreak / 12) - taxYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
               style: const TextStyle(fontSize: 16),
             ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double interestOverDeposits = totalDeposits != 0 ? (interestGatheredDuringBreak / totalDeposits * 100) : 0;
+    double interestOverTotalValue = totalValue != 0 ? (interestGatheredDuringBreak / (totalValue - interestGatheredDuringBreak) * 100) : 0;
+
+    return Column(
+      children: <Widget>[
+        // Constrain the Break Period Input to a fixed width
+        SizedBox(
+          width: 305,  // Set the fixed width for the TextField
+          child: TextField(
+            controller: breakController,
+            decoration: const InputDecoration(labelText: 'Break Period (No Deposits Nor Withdrawals in Years)'),
+            keyboardType: TextInputType.number,
+            onChanged: (value) => recalculateValues(),  // Trigger recalculation on change
+          ),
+        ),
+        const SizedBox(height: 10),  // Spacing between rows
+        Text(
+            'Interest Gathered During Break: ${interestGatheredDuringBreak.toStringAsFixed(0)} kr.-',
+            style: const TextStyle(fontSize: 16),
+          ),
+        Text('Compared to deposits: ${interestOverDeposits.toStringAsFixed(2)}%'),
+        Text('Compared to total value: ${interestOverTotalValue.toStringAsFixed(2)}%'),
+        const SizedBox(height: 20),  // Spacing between rows
+        toggleSwitchWidget,
+        const SizedBox(height: 20),  // Spacing between rows
+        _buildWithdrawalWidget(),
       ],
     );
   }

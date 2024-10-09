@@ -13,7 +13,7 @@ class TaxExemptionSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 28, // Set an explicit height to reduce vertical space
+      height: 24, // Set an explicit height to reduce vertical space
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center, // Ensure centering
