@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/tax_option_manager.dart';
 import '../widgets/investment_widgets/formula_widget.dart';
-import '../widgets/tax_widgets/tax_note_widget.dart';
+import '../widgets/withdrawal_tax_widgets/tax_note_widget.dart';
 import '../models/investment_plan.dart';
 import '../widgets/investment_table_widget.dart';
 import '../widgets/investment_widgets/input_fields_widget.dart';
 import '../widgets/the4percent_widget.dart';
 import '../widgets/tab_dropdown_widget.dart';
-import '../widgets/tax_widgets/tax_calculation_results_widget.dart';
-import '../widgets/tax_widgets/switch_taxrate_widget.dart';
+import '../widgets/withdrawal_tax_widgets/tax_calculation_results_widget.dart';
+import '../widgets/withdrawal_tax_widgets/switch_taxrate_widget.dart';
 import '../services/presetting_service.dart';
 import '../services/utils.dart';
 
