@@ -177,13 +177,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       child: Column(
         children: <Widget>[
           SizedBox(
-            width: 550,
+            width: 1000,
             child: Column(
               children: [
                 _buildInputFields(),
                 _buildInvestmentNoteWidget(),
                 _buildBreakTaxWithdrawalWidgets(),
-                _buildTaxNoteWidget(),
               ],
             ),
           ),
@@ -238,20 +237,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
             });
           },
           withdrawalDurationController: _withdrawalDurationController,
+          taxNoteWidget: TaxNoteWidget(
+            showTaxNote: _showTaxNote,
+            earningsWithdrawalRatio: TaxCalculationResults(
+              earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
+              earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
+              taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
+              annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
+            ),
+        ),
         ),
       ],
-    );
-  }
-
-  Widget _buildTaxNoteWidget() {
-    return TaxNoteWidget(
-      showTaxNote: _showTaxNote,
-      earningsWithdrawalRatio: TaxCalculationResults(
-        earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
-        earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
-        taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
-        annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
-      ),
     );
   }
 
