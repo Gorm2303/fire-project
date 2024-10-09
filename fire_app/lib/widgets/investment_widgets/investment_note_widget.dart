@@ -80,7 +80,13 @@ class InvestmentNoteWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Math.tex(
             r"""
-            \text{Monthly Contributions and Compound Interest} = \sum_{\text{t}=1}^{\text{Years}} \sum_{\text{Month No.}=1}^{12} \text{Monthly Contribution} \times \left(1 + \frac{\text{Interest Rate}}{12} \times \frac{12 - \text{Month No.}}{12}\right)^\text{Years - t}
+            \text{Monthly Contributions and Compound Interest}
+            """,
+            textStyle: const TextStyle(fontSize: 16),
+          ),
+          Math.tex(
+            r"""
+            = \sum_{t=1}^{\text{Years}} \sum_{k=1}^{12} \text{Monthly Contribution} \times \left(1 + \text{Monthly Interest Rate} \times \text{Remaining Year Fraction}\right)^{\text{Years} - t}
             """,
             textStyle: const TextStyle(fontSize: 16),
           ),

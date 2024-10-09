@@ -185,7 +185,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
             ),
           ),
           showInvestmentNote ? ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1000),
+              constraints: const BoxConstraints(maxWidth: 800),
               child: CardWrapper(
             title: 'Investment Note', 
             children: [_buildInvestmentNoteWidget()]
