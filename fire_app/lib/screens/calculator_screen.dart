@@ -1,5 +1,4 @@
 import 'package:fire_app/models/tax_option.dart';
-import 'package:fire_app/widgets/investment_widgets/investment_compounding_results_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_note_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/break_period_widget.dart';
 import 'package:fire_app/widgets/withdrawal_tax_widgets/withdrawal_widget.dart';
@@ -148,56 +147,25 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     });
   }
 
-  Widget _buildFormulaWidget() {
-    return FormulaWidget(
-      principal: Utils.parseTextToDouble(_investmentPlan.depositPlan.principal.toString()),
-      interestRate: Utils.parseTextToDouble(_investmentPlan.depositPlan.interestRate.toString()),
-      duration: Utils.parseTextToDouble(_investmentPlan.depositPlan.duration.toString()),
-      additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
-      contributionFrequency: _contributionFrequency,
-    );
-  }
-
   Widget _buildInvestmentNoteWidget() {
-    double compoundEarningsOverDeposits = _investmentPlan.depositPlan.deposits != 0 ? (_investmentPlan.depositPlan.compoundEarnings / _investmentPlan.depositPlan.deposits * 100) : 0;
-    return Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: toggleInvestmentNote,  // Toggle the investment note
-                child: const Text(
-                  'Investment',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-              Text(
-                ' After ${_investmentPlan.depositPlan.duration} Years: ${_investmentPlan.depositPlan.totalValue.toStringAsFixed(0)} kr.-',
-                style: const TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-          Text('Earnings compared to deposits: ${compoundEarningsOverDeposits.toStringAsFixed(2)}%'),
-          // Investment note section
-          InvestmentNoteWidget(
-            showInvestmentNote: showInvestmentNote,
-            investmentCompoundingResults: InvestmentCompoundingResults(
-              totalDeposits: _investmentPlan.depositPlan.deposits,
-              totalValue: _investmentPlan.depositPlan.totalValue,
-              totalInterestFromPrincipal: _investmentPlan.depositPlan.totalInterestFromPrincipal,
-              totalInterestFromContributions: _investmentPlan.depositPlan.totalInterestFromContributions,
-              compoundEarnings: _investmentPlan.depositPlan.compoundEarnings,
-              tax: _investmentPlan.depositPlan.totalTax,
-            ),
-          ),
-        ],
-      );
+    return InvestmentNoteWidget(
+      showInvestmentNote: showInvestmentNote, 
+      totalDeposits: _investmentPlan.depositPlan.deposits, 
+      totalValue: _investmentPlan.depositPlan.totalValue, 
+      totalInterestFromPrincipal: _investmentPlan.depositPlan.totalInterestFromPrincipal, 
+      totalInterestFromContributions: _investmentPlan.depositPlan.totalInterestFromContributions, 
+      compoundEarnings: _investmentPlan.depositPlan.compoundEarnings, 
+      tax: _investmentPlan.depositPlan.totalTax, 
+      duration: _investmentPlan.depositPlan.duration, 
+      toggleInvestmentNote: toggleInvestmentNote,
+      formulaWidget: FormulaWidget(
+        principal: Utils.parseTextToDouble(_investmentPlan.depositPlan.principal.toString()),
+        interestRate: Utils.parseTextToDouble(_investmentPlan.depositPlan.interestRate.toString()),
+        duration: Utils.parseTextToDouble(_investmentPlan.depositPlan.duration.toString()),
+        additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
+        contributionFrequency: _contributionFrequency,
+      ),
+    );
   }
 
   Widget _buildSizedBox(double height) {
@@ -208,15 +176,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          _buildInputFields(),
-          _buildSizedBox(20),
-          _buildFormulaWidget(),
-          _buildSizedBox(20),
-          _buildInvestmentNoteWidget(),
-          _buildSizedBox(20),
-          _buildBreakTaxWithdrawalWidgets(),
-          _buildTaxNoteWidget(),
-          _buildTabView(),
+          SizedBox(
+            width: 550,
+            child: Column(
+              children: [
+                _buildInputFields(),
+                _buildInvestmentNoteWidget(),
+                _buildBreakTaxWithdrawalWidgets(),
+                _buildTaxNoteWidget(),
+              ],
+            ),
+          ),
+          _buildTabView(),  // No SizedBox around this one
         ],
       ),
     );

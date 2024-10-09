@@ -1,3 +1,5 @@
+import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
+import 'package:fire_app/widgets/wrappers/textfield_wrapper.dart';
 import 'package:flutter/material.dart';
 
 class BreakPeriodWidget extends StatelessWidget {
@@ -18,33 +20,12 @@ class BreakPeriodWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),  // Add margin around the card
-        elevation: 3,  // Adds a shadow to the card for depth
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),  // Rounded corners for a polished look
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 0),  // Padding inside the card
-          child: Column(
-            mainAxisSize: MainAxisSize.min,  // Keep the card height as small as possible
-            crossAxisAlignment: CrossAxisAlignment.center,  // Center everything horizontally
-            children: <Widget>[
-              // Title for this section
-              const Text(
-                'Break Period Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,  // Center the title
-              ),
-              const Divider(),  // Separate title from content
-              _buildBreakPeriodInput(),
-              const SizedBox(height: 10),
-              _buildInterestGatheredText(),
-            ],
-          ),
-        ),
-      ),
+    return CardWrapper(
+      title: 'Break Period Information',
+      children: [
+        _buildBreakPeriodInput(),
+        _buildInterestGatheredText(),
+      ],
     );
   }
 
@@ -71,16 +52,17 @@ class BreakPeriodWidget extends StatelessWidget {
   }
 
   Widget _buildBreakPeriodInput() {
-    return SizedBox(
-      width: 305,
-      child: TextField(
-        controller: breakController,
-        decoration: const InputDecoration(
-          labelText: 'Break Period (No Deposits Nor Withdrawals in Years)',
+    return TextFieldWrapper( 
+      children: [
+        TextField(
+          controller: breakController,
+          decoration: const InputDecoration(
+            labelText: 'Break Period (No Deposits Nor Withdrawals in Years)',
+          ),
+          keyboardType: TextInputType.number,
+          onChanged: (value) => recalculateValues(),
         ),
-        keyboardType: TextInputType.number,
-        onChanged: (value) => recalculateValues(),
-      ),
+      ]
     );
   }
 }

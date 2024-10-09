@@ -1,4 +1,6 @@
+import 'package:fire_app/widgets/wrappers/textfield_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 
 class WithdrawalWidget extends StatelessWidget {
   final TextEditingController withdrawalPercentageController;
@@ -20,47 +22,28 @@ class WithdrawalWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),  // Add margin around the card
-        elevation: 3,  // Adds a shadow to the card for depth
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),  // Rounded corners for a polished look
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 0),  // Padding inside the card
-          child: Column(
-            mainAxisSize: MainAxisSize.min,  // Minimize the height of the column to the content
-            crossAxisAlignment: CrossAxisAlignment.center,  // Center contents horizontally
-            children: <Widget>[
-              // Title for this section
-              const Text(
-                'Withdrawal Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,  // Center the title
-              ),
-              const Divider(),
-              _buildWithdrawalPeriod(),
-              _build4PercentWidget(),
-              _buildTaxOnMonthlyWithdrawal(),
-              const SizedBox(height: 10),
-              _buildMonthlyWithdrawalAfterTax(),
-            ],
-          ),
-        ),
-      ),
+    return CardWrapper(
+      title: 'Withdrawal Information',
+      children: [
+        _buildWithdrawalPeriod(),
+        _build4PercentWidget(),
+        _buildTaxOnMonthlyWithdrawal(),
+        const SizedBox(height: 10),
+        _buildMonthlyWithdrawalAfterTax(),
+      ],
     );
   }
 
   Widget _buildWithdrawalPeriod() {
-    return SizedBox(
-      width: 305,  
-      child: TextField(
-        controller: withdrawalDurationController,
-        decoration: const InputDecoration(labelText: 'Withdrawal Period (Years)'),
-        keyboardType: TextInputType.number,
-        onChanged: (value) => recalculateValues(),
-      ),
+    return TextFieldWrapper( 
+      children: [
+        TextField(
+          controller: withdrawalDurationController,
+          decoration: const InputDecoration(labelText: 'Withdrawal Period (Years)'),
+          keyboardType: TextInputType.number,
+          onChanged: (value) => recalculateValues(),
+        ),
+      ]
     );
   }
 

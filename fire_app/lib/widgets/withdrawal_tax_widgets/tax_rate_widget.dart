@@ -1,4 +1,6 @@
 import 'package:fire_app/models/tax_option.dart';
+import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
+import 'package:fire_app/widgets/wrappers/textfield_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import Provider package
 import 'custom_tax_switch.dart';
@@ -22,68 +24,48 @@ class TaxRateWidget extends StatelessWidget {
     // Using Consumer to listen to TaxOptionManager updates
     return Consumer<TaxOptionManager>(
       builder: (context, taxOptionManager, child) {
-        return Center(
-          child: Card(
-            margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),  // Add margin around the card
-            elevation: 3,  // Adds a shadow to the card for depth
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),  // Rounded corners for a polished look
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 0),  // Padding inside the card
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,  // Centers all content horizontally
-                mainAxisSize: MainAxisSize.min,  // Minimize the column height to content size
-                children: <Widget>[
-                  // Title for the section
-                  const Text(
-                    'Tax Options',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,  // Center the title
-                  ),
-                  const Divider(),  // Separate the title from the rest of the content
+        return CardWrapper(
+          title: 'Tax Options',
+          children: [
+            // Custom Tax Switch
+            _buildCustomTaxSwitch(taxOptionManager),
 
-                  // Custom Tax Switch
-                  _buildCustomTaxSwitch(taxOptionManager),
+            // Display custom tax rate input when custom rate is selected
+            taxOptionManager.isCustomTaxRate
+                ? _buildCustomTaxRateInput(taxOptionManager)
+                : _buildTaxRateDropdown(taxOptionManager),
 
-                  // Display custom tax rate input when custom rate is selected
-                  taxOptionManager.isCustomTaxRate
-                      ? _buildCustomTaxRateInput(taxOptionManager)
-                      : _buildTaxRateDropdown(taxOptionManager),
+            // Tax Type Dropdown
+            _buildTaxTypeDropdown(taxOptionManager),
 
-                  // Tax Type Dropdown
-                  _buildTaxTypeDropdown(taxOptionManager),
-
-                  // Tax Exemption Switch
-                  _buildTaxExemptionSwitch(taxOptionManager),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+            // Tax Exemption Switch
+            _buildTaxExemptionSwitch(taxOptionManager),
+          ],
+        );          
+      }
     );
   }
 
 
   Widget _buildCustomTaxRateInput(TaxOptionManager taxOptionManager) {
-    return SizedBox(
-      width: 305,
-      child: TextField(
-        controller: customTaxController,
-        decoration: const InputDecoration(labelText: 'Tax Rate (%)'),
-        keyboardType: TextInputType.number,
-        onChanged: (String value) {
-          if (value.isNotEmpty) {
-            taxOptionManager.switchToCustomRate(
-              double.tryParse(value) ?? taxOptionManager.currentOption.ratePercentage,
-              taxOptionManager.currentOption.isNotionallyTaxed,
-              taxOptionManager.currentOption.useTaxExemptionCardAndThreshold,
-            );
-          }
-          recalculateValues(); // Recalculate after tax rate change
-        },
-      ),
+    return TextFieldWrapper( 
+      children: [ 
+        TextField(
+          controller: customTaxController,
+          decoration: const InputDecoration(labelText: 'Tax Rate (%)'),
+          keyboardType: TextInputType.number,
+          onChanged: (String value) {
+            if (value.isNotEmpty) {
+              taxOptionManager.switchToCustomRate(
+                double.tryParse(value) ?? taxOptionManager.currentOption.ratePercentage,
+                taxOptionManager.currentOption.isNotionallyTaxed,
+                taxOptionManager.currentOption.useTaxExemptionCardAndThreshold,
+              );
+            }
+            recalculateValues(); // Recalculate after tax rate change
+          },
+        ),
+      ]
     );
   }
 
