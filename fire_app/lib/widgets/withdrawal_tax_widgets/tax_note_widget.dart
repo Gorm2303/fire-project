@@ -1,8 +1,9 @@
+import 'package:fire_app/widgets/withdrawal_tax_widgets/tax_calculation_results_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 class TaxNoteWidget extends StatelessWidget {
   final bool showTaxNote;   // Whether to show the tax note
-  final Widget earningsWithdrawalRatio;
+  final TaxCalculationResults earningsWithdrawalRatio;
 
 
   // Constructor with default values for totalAfterBreak and withdrawalAmount
@@ -55,7 +56,7 @@ class TaxNoteWidget extends StatelessWidget {
                     const SizedBox(height: 8),
                     Math.tex(
                       r"""
-                      \text{Taxable Withdrawal} = \text{Earnings Percent} \times \text{Withdrawal Amount} - 49700, \ \ \text{Tax Exemption Card} = 49700
+                      \text{Taxable Withdrawal} = \text{Withdrawal Amount} \times \text{Earnings Percent} - 49700, \ \ \text{Tax Exemption Card} = 49700
                       """,
                       textStyle: const TextStyle(fontSize: 16),
                     ),
@@ -64,8 +65,8 @@ class TaxNoteWidget extends StatelessWidget {
                       r"""
                       \text{Annual Tax} = 
                       \begin{cases} 
-                      0.27 \times \text{Taxable Withdrawal}, & \text{if } \text{Taxable Withdrawal} \leq 61000 \\ 
-                      0.27 \times 61000 + 0.42 \times (\text{Taxable Withdrawal} - 61000), & \text{if } \text{Taxable Withdrawal} > 61000
+                      \text{Taxable Withdrawal} \times 0.27, & \text{if } \text{Taxable Withdrawal} \leq 61000 \\ 
+                      61000 \times 0.27 + (\text{Taxable Withdrawal} - 61000) \times 0.42, & \text{if } \text{Taxable Withdrawal} > 61000
                       \end{cases}
                       """,
                       textStyle: const TextStyle(fontSize: 16),

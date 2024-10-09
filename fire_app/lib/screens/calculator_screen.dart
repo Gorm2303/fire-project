@@ -218,9 +218,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     return TaxNoteWidget(
       showTaxNote: _showTaxNote,
       earningsWithdrawalRatio: TaxCalculationResults(
+        totalAfterBreak: _investmentPlan.withdrawalPlan.earningsAfterBreak + _investmentPlan.depositPlan.deposits,
+        deposits: _investmentPlan.depositPlan.deposits,
         earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
         earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
+        withdrawalPercentage: _investmentPlan.withdrawalPlan.withdrawalPercentage / 100,
         taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
+        useTaxExemptionCardAndThreshold: _investmentPlan.withdrawalPlan.selectedTaxOption.useTaxExemptionCardAndThreshold,
+        taxOption: _investmentPlan.withdrawalPlan.selectedTaxOption,
         annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
       ),
     );
