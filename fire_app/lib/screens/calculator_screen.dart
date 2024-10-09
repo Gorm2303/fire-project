@@ -1,7 +1,9 @@
 import 'package:fire_app/models/tax_option.dart';
-import 'package:fire_app/widgets/investment_widgets/investment_note_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/investment_calculation_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/break_period_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/investment_note_widget.dart';
 import 'package:fire_app/widgets/withdrawal_tax_widgets/withdrawal_widget.dart';
+import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/tax_option_manager.dart';
@@ -147,8 +149,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     });
   }
 
-  Widget _buildInvestmentNoteWidget() {
-    return InvestmentNoteWidget(
+  Widget _buildInvestmentCalculationWidget() {
+    return InvestmentCalculationWidget(
       showInvestmentNote: showInvestmentNote, 
       totalDeposits: _investmentPlan.depositPlan.deposits, 
       totalValue: _investmentPlan.depositPlan.totalValue, 
@@ -168,33 +170,70 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     );
   }
 
-  Widget _buildSizedBox(double height) {
-    return SizedBox(height: height);
-  }
-
   Widget investmentCalculatorContent() {
+    double width = 520;
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
           SizedBox(
-            width: 550,
+            width: width,
             child: Column(
               children: [
                 _buildInputFields(),
-                _buildInvestmentNoteWidget(),
-                Column(
-                  children: <Widget>[
-                    _buildBreakPeriodWidget(),
-                    _buildTaxRateWidget(),
-                    _buildWithdrawalWidget(),
-                  ],
-                ),              
+                _buildInvestmentCalculationWidget(),
               ],
             ),
           ),
-          _buildTabView(),  // No SizedBox around this one
+          showInvestmentNote ? ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1000),
+              child: CardWrapper(
+            title: 'Investment Note', 
+            children: [_buildInvestmentNoteWidget()]
+            )
+          ) : Container(),
+          SizedBox(
+            width: width,
+            child: Column(
+              children: <Widget>[
+                _buildBreakPeriodWidget(),
+                _buildTaxRateWidget(),
+                _buildWithdrawalWidget(),
+              ],
+            ), 
+          ),
+          _showTaxNote ? ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: CardWrapper(
+            title: 'Tax Note', 
+            children: [_buildTaxNoteWidget()]
+            )
+          ) : Container(),
+          _buildTabView(),
         ],
       ),
+    );
+  }
+  
+  Widget _buildTaxNoteWidget() {
+    return TaxNoteWidget(
+      showTaxNote: _showTaxNote,
+      earningsWithdrawalRatio: TaxCalculationResults(
+        earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
+        earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
+        taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
+        annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
+      ),
+    );
+  }
+
+  Widget _buildInvestmentNoteWidget() {
+    return InvestmentNoteWidget(
+      totalDeposits: _investmentPlan.depositPlan.deposits,
+      totalValue: _investmentPlan.depositPlan.totalValue,
+      totalInterestFromPrincipal: _investmentPlan.depositPlan.totalInterestFromPrincipal,
+      totalInterestFromContributions: _investmentPlan.depositPlan.totalInterestFromContributions,
+      compoundEarnings: _investmentPlan.depositPlan.compoundEarnings,
+      tax: _investmentPlan.depositPlan.totalTax,
     );
   }
 
@@ -247,15 +286,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           });
         },
         withdrawalDurationController: _withdrawalDurationController,
-        taxNoteWidget: TaxNoteWidget(
-          showTaxNote: _showTaxNote,
-          earningsWithdrawalRatio: TaxCalculationResults(
-            earnings: _investmentPlan.withdrawalPlan.earningsAfterBreak,
-            earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
-            taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
-            annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
-          ),
-      ),
     );
   }
 

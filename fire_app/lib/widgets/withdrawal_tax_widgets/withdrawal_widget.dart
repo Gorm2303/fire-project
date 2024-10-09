@@ -10,7 +10,6 @@ class WithdrawalWidget extends StatelessWidget {
   final VoidCallback recalculateValues;
   final VoidCallback toggleTaxNote;
   final TextEditingController withdrawalDurationController;
-  final TaxNoteWidget taxNoteWidget;
 
   const WithdrawalWidget({
     super.key,
@@ -20,7 +19,6 @@ class WithdrawalWidget extends StatelessWidget {
     required this.recalculateValues,
     required this.toggleTaxNote,
     required this.withdrawalDurationController,
-    required this.taxNoteWidget,
   });
 
   @override
@@ -33,7 +31,6 @@ class WithdrawalWidget extends StatelessWidget {
         _buildTaxOnMonthlyWithdrawal(),
         const SizedBox(height: 10),
         _buildMonthlyWithdrawalAfterTax(),
-        taxNoteWidget,
       ],
     );
   }
