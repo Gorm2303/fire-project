@@ -84,6 +84,7 @@ class SwitchAndTaxRate extends StatelessWidget {
       onTaxOptionChanged: (TaxOption? newOption) {
         if (newOption != null) {
           taxOptionManager.switchToPredefined(newOption);
+          recalculateValues(); // Recalculate after tax rate change
         }
       },
     );
