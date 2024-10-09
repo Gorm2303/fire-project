@@ -163,6 +163,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   }
 
   Widget _buildInvestmentNoteWidget() {
+    double compoundEarningsOverDeposits = _investmentPlan.depositPlan.deposits != 0 ? (_investmentPlan.depositPlan.compoundEarnings / _investmentPlan.depositPlan.deposits * 100) : 0;
+
     return Column(
         children: [
           Row(
@@ -186,7 +188,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
               ),
             ],
           ),
-          Text('Earnings compared to deposits: ${(_investmentPlan.depositPlan.compoundEarnings / _investmentPlan.depositPlan.deposits * 100).toStringAsFixed(2)}%'),
+          Text('Earnings compared to deposits: ${compoundEarningsOverDeposits.toStringAsFixed(2)}%'),
           // Investment note section
           InvestmentNoteWidget(
             showInvestmentNote: showInvestmentNote,

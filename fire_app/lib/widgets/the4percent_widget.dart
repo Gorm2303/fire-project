@@ -32,6 +32,9 @@ class The4PercentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double interestOverDeposits = totalDeposits != 0 ? (interestGatheredDuringBreak / totalDeposits * 100) : 0;
+    double interestOverTotalValue = totalValue != 0 ? (interestGatheredDuringBreak / (totalValue - interestGatheredDuringBreak) * 100) : 0;
+
     return Column(
       children: <Widget>[
         // Constrain the Break Period Input to a fixed width
@@ -50,8 +53,8 @@ class The4PercentWidget extends StatelessWidget {
             'Interest Gathered During Break: ${interestGatheredDuringBreak.toStringAsFixed(0)} kr.-',
             style: const TextStyle(fontSize: 16),
           ),
-          Text('Compared to deposits: ${(interestGatheredDuringBreak / totalDeposits * 100).toStringAsFixed(2)}%'),
-            Text('Compared to total value: ${(interestGatheredDuringBreak / (totalValue - interestGatheredDuringBreak) * 100).toStringAsFixed(2)}%'),
+          Text('Compared to deposits: ${interestOverDeposits.toStringAsFixed(2)}%'),
+            Text('Compared to total value: ${interestOverTotalValue.toStringAsFixed(2)}%'),
         const SizedBox(height: 15),  // Spacing between rows
         SizedBox(
           width: 305,  // Set the fixed width for the TextField
