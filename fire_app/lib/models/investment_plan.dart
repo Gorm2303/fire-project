@@ -1,14 +1,12 @@
 import 'package:fire_app/models/tax_option.dart';
 import 'deposit_plan.dart';
 import 'withdrawal_plan.dart';
+import 'package:flutter/foundation.dart'; 
 
-class InvestmentPlan {
+class InvestmentPlan extends ChangeNotifier {
   String name;
   DepositPlan depositPlan;
   WithdrawalPlan withdrawalPlan;
-
-  List<Map<String, double>>? depositValues;
-  List<Map<String, double>>? withdrawalValues;
 
   InvestmentPlan({
     required this.name,
@@ -41,70 +39,10 @@ class InvestmentPlan {
 
   // Method to calculate the investment
   void calculateInvestment() {
-    depositValues = depositPlan.calculateYearlyValues();
+    depositPlan.calculateYearlyValues();
     withdrawalPlan.totalValue = depositPlan.totalValue;
     withdrawalPlan.deposits = depositPlan.deposits;
-
-    withdrawalValues = withdrawalPlan.calculateWithdrawalValues(
-      depositPlan.totalValue
-    );
-  }
-
-  // Method to display deposit plan results
-  void displayDepositPlanResults() {
-    if (depositValues != null) {
-      print("Deposit Plan Results:");
-      for (var yearData in depositValues!) {
-        print("Year ${yearData['year']}: Total Value: ${yearData['totalValue']}, Deposits: ${yearData['totalDeposits']}, Compound Earnings: ${yearData['compoundEarnings']}");
-      }
-    } else {
-      print("No deposit plan results available. Run calculateInvestment() first.");
-    }
-  }
-
-  // Method to display withdrawal plan results
-  void displayWithdrawalPlanResults() {
-    if (withdrawalValues != null) {
-      print("Withdrawal Plan Results:");
-      for (var yearData in withdrawalValues!) {
-        print("Year ${yearData['year']}: Total Value: ${yearData['totalValue']}, Withdrawal: ${yearData['withdrawal']}, Tax: ${yearData['tax']}");
-      }
-    } else {
-      print("No withdrawal plan results available. Run calculateInvestment() first.");
-    }
-  }
-
-  // Method to return final balance after withdrawals
-  double getFinalBalance() {
-    if (withdrawalValues != null && withdrawalValues!.isNotEmpty) {
-      return withdrawalValues!.last['totalValue'] ?? 0;
-    } else {
-      print("No withdrawal plan results available. Returning initial total value.");
-      return depositPlan.totalValue;
-    }
-  }
-
-  // Method to get total taxes paid during the withdrawal period
-  double getTotalTaxesPaid() {
-    if (withdrawalValues != null) {
-      return withdrawalValues!
-          .map((yearData) => yearData['tax'] ?? 0)
-          .reduce((a, b) => a + b);
-    } else {
-      print("No withdrawal plan results available. Returning 0.");
-      return 0;
-    }
-  }
-
-  // Method to get total withdrawals over the withdrawal period
-  double getTotalWithdrawals() {
-    if (withdrawalValues != null) {
-      return withdrawalValues!
-          .map((yearData) => yearData['withdrawal'] ?? 0)
-          .reduce((a, b) => a + b);
-    } else {
-      print("No withdrawal plan results available. Returning 0.");
-      return 0;
-    }
+    withdrawalPlan.calculateYearlyValues(depositPlan.totalValue);
+    notifyListeners();  // Notify listeners after calculation
   }
 }

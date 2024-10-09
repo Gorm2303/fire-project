@@ -38,9 +38,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _presettingsController = TextEditingController(text: 'None');
   final TextEditingController _customTaxController = TextEditingController(text: '0');
 
-  List<Map<String, double>> _depositYearlyValues = [];
-  List<Map<String, double>> _withdrawalYearlyValues = [];
-
   String _contributionFrequency = 'Monthly';
   String _selectedTab = 'Investment Calculator';
   bool _showTaxNote = false;
@@ -63,7 +60,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
     _initializeTaxOptionManager();
     _initializeTabControllers();
-    _initializeInvestmentPlan();  // Call this during initialization to ensure it's set up
+    _createInvestmentPlan();  // Call this during initialization to ensure it's set up
 
     // Optionally load a preset if needed after everything is initialized
     _loadPresetValues('High Investment');
@@ -81,8 +78,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _mainTabController = TabController(length: 2, vsync: this);
   }
 
-  void _initializeInvestmentPlan() {
-    _investmentPlan = InvestmentPlan(
+  InvestmentPlan _createInvestmentPlan() {
+    return _investmentPlan = InvestmentPlan(
       name: "Custom Plan",
       principal: Utils.parseTextToDouble(_principalController.text),
       interestRate: Utils.parseTextToDouble(_interestRateController.text),
@@ -121,10 +118,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   void _recalculateValues() {
     setState(() {
-      _initializeInvestmentPlan();  // Initialize the investment plan with updated values
+      _createInvestmentPlan();  // Initialize the investment plan with updated values
       _investmentPlan.calculateInvestment();  // Trigger calculations based on the current plan
-      _depositYearlyValues = _investmentPlan.depositValues ?? [];
-      _withdrawalYearlyValues = _investmentPlan.withdrawalValues ?? [];
     });
   }
 
@@ -165,7 +160,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   Widget _buildInvestmentNoteWidget() {
     double compoundEarningsOverDeposits = _investmentPlan.depositPlan.deposits != 0 ? (_investmentPlan.depositPlan.compoundEarnings / _investmentPlan.depositPlan.deposits * 100) : 0;
-
     return Column(
         children: [
           Row(
@@ -306,12 +300,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
             controller: _tableTabController,
             children: [
               InvestmentTableWidget(
-                yearlyValues: _depositYearlyValues,
+                yearlyValues: _investmentPlan.depositPlan.yearlyValues,
                 isDepositingTable: true,
                 isWithdrawingTable: false,
               ),
               InvestmentTableWidget(
-                yearlyValues: _withdrawalYearlyValues,
+                yearlyValues: _investmentPlan.withdrawalPlan.yearlyValues,
                 isDepositingTable: false,
                 isWithdrawingTable: true,
               ),

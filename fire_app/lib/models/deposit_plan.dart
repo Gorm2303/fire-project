@@ -14,6 +14,7 @@ class DepositPlan {
   double totalTax = 0;
   double totalInterestFromPrincipal = 0;
   double totalInterestFromContributions = 0;
+  List<Map<String, double>> yearlyValues = [];  
 
   DepositPlan({
     required this.principal,
@@ -26,7 +27,7 @@ class DepositPlan {
 
   /// Main method to calculate yearly values including deposits, compounding, and tax
   List<Map<String, double>> calculateYearlyValues() {
-    List<Map<String, double>> yearlyValues = [
+    yearlyValues = [
       {
         'year': 0.0,
         'totalValue': principal,
@@ -36,7 +37,6 @@ class DepositPlan {
         'tax': 0,
       }
     ];
-
     totalValue = principal;
     deposits = principal;
     int contributionPeriods = _getContributionPeriods(); // Monthly or Yearly contributions

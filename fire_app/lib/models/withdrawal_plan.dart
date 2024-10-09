@@ -17,6 +17,7 @@ class WithdrawalPlan {
   double taxYearlyAfterBreak = 0;
   double totalValue;
   double deposits;
+  List<Map<String, double>> yearlyValues = [];
 
   WithdrawalPlan({
     required this.interestRate,
@@ -28,7 +29,7 @@ class WithdrawalPlan {
     required this.deposits,
   });
 
-  List<Map<String, double>> calculateWithdrawalValues(double valueAfterDepositYears) {
+  List<Map<String, double>> calculateYearlyValues(double valueAfterDepositYears) {
     totalValue = valueAfterDepositYears;
     double previousValue;
     interestGatheredDuringBreak = 0;
@@ -41,7 +42,7 @@ class WithdrawalPlan {
       interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
     }
 
-    List<Map<String, double>> withdrawalValues = [
+    yearlyValues = [
       {
         'year': 0.0,
         'totalValue': totalValue,
@@ -87,7 +88,7 @@ class WithdrawalPlan {
       totalValue -= withdrawalYearly;
 
       // Store yearly values for reporting
-      withdrawalValues.add({
+      yearlyValues.add({
         'year': year.toDouble(),
         'totalValue': totalValue,
         'compoundThisYear': compoundThisYear,
@@ -97,7 +98,7 @@ class WithdrawalPlan {
       });
     }
 
-    return withdrawalValues;
+    return yearlyValues;
   }
 
   // Helper function to calculate taxable withdrawal (portion of the withdrawal that is taxed)
