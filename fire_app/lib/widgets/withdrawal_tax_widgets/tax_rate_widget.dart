@@ -59,7 +59,8 @@ class TaxRateWidget extends StatelessWidget {
               taxOptionManager.switchToCustomRate(
                 double.tryParse(value) ?? taxOptionManager.currentOption.ratePercentage,
                 taxOptionManager.currentOption.isNotionallyTaxed,
-                taxOptionManager.currentOption.useTaxExemptionCardAndThreshold,
+                taxOptionManager.currentOption.useTaxExemptionCard,
+                taxOptionManager.currentOption.useTaxProgressionLimit,
               );
             }
             recalculateValues(); // Recalculate after tax rate change
@@ -77,7 +78,8 @@ class TaxRateWidget extends StatelessWidget {
           taxOptionManager.switchToCustomRate(
             double.tryParse(customTaxController.text) ?? taxOptionManager.currentOption.ratePercentage,
             taxOptionManager.currentOption.isNotionallyTaxed,
-            taxOptionManager.currentOption.useTaxExemptionCardAndThreshold,
+            taxOptionManager.currentOption.useTaxExemptionCard,
+            taxOptionManager.currentOption.useTaxProgressionLimit,
           );
         } else {
           taxOptionManager.switchBackToLastPredefined();
@@ -89,10 +91,15 @@ class TaxRateWidget extends StatelessWidget {
 
   Widget _buildTaxExemptionSwitch(TaxOptionManager taxOptionManager) {
     return TaxExemptionSwitch(
-      useTaxExemptionCard: taxOptionManager.currentOption.useTaxExemptionCardAndThreshold,
-      onSwitchChanged: (bool value) {
+      useTaxExemptionCard: taxOptionManager.currentOption.useTaxExemptionCard,
+      useTaxProgressionLimit: taxOptionManager.currentOption.useTaxProgressionLimit, // Add this line
+      onExemptionSwitchChanged: (bool value) { // Add this block
         taxOptionManager.toggleTaxExemption(value);
-        recalculateValues(); // Recalculate after exemption switch
+        recalculateValues(); // Recalculate after exemption switch change
+      },
+      onProgressionSwitchChanged: (bool value) { // Add this block
+        taxOptionManager.toggleTaxProgressionLimit(value);
+        recalculateValues(); // Recalculate after progression switch change
       },
     );
   }

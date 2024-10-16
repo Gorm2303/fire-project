@@ -111,7 +111,7 @@ class WithdrawalPlan {
     double taxableWithdrawal = withdrawal * earningsPercent;
 
     // Apply tax exemption if enabled
-    if (selectedTaxOption.useTaxExemptionCardAndThreshold) {
+    if (selectedTaxOption.useTaxExemptionCard) {
       taxableWithdrawal -= TaxOption.taxExemptionCard;
     }
 
@@ -123,7 +123,7 @@ class WithdrawalPlan {
     if (taxableWithdrawal <= 0 || selectedTaxOption.ratePercentage == 0) return 0;
     double tax = 0;
     
-    if (!selectedTaxOption.useTaxExemptionCardAndThreshold ||
+    if (!selectedTaxOption.useTaxProgressionLimit ||
         selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
         return tax < 0 ? 0 : tax = taxableWithdrawal * selectedTaxOption.ratePercentage / 100;
     }
@@ -140,20 +140,19 @@ class WithdrawalPlan {
     double tax = 0;
 
     // Apply notional gains tax only on the yearly compound earnings
-    if (!selectedTaxOption.useTaxExemptionCardAndThreshold) {
+    if (selectedTaxOption.useTaxExemptionCard) {
+      earnings -= TaxOption.taxExemptionCard;
+    }
+
+    if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate || !selectedTaxOption.useTaxProgressionLimit) {
       return tax < 0 ? 0 : tax = earnings * selectedTaxOption.ratePercentage / 100;
     }
-      earnings -= TaxOption.taxExemptionCard;
 
-      if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
-        return tax < 0 ? 0 : tax = earnings * selectedTaxOption.ratePercentage / 100;
-      }
-
-      if (earnings <= TaxOption.threshold) {
-        return tax < 0 ? 0 : tax = earnings * TaxOption.lowerTaxRate / 100;
-      } else {
-        return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + (earnings * selectedTaxOption.ratePercentage / 100);
-      } 
+    if (earnings <= TaxOption.threshold) {
+      return tax < 0 ? 0 : tax = earnings * TaxOption.lowerTaxRate / 100;
+    } else {
+      return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + (earnings * selectedTaxOption.ratePercentage / 100);
+    } 
   }
 }
 

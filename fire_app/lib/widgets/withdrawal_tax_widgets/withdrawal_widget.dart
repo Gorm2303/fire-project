@@ -1,4 +1,3 @@
-import 'package:fire_app/widgets/withdrawal_tax_widgets/tax_note_widget.dart';
 import 'package:fire_app/widgets/wrappers/textfield_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';

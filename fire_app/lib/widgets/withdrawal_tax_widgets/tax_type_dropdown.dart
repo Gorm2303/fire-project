@@ -39,7 +39,7 @@ class _TaxTypeDropdownState extends State<TaxTypeDropdown> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text('Select Tax Type:', style: TextStyle(fontSize: 16)),
+        const Text('Tax Type:', style: TextStyle(fontSize: 16)),
         const SizedBox(width: 10), // Reduce horizontal space
         SizedBox(
           height: 38, // Adjust height to reduce vertical space

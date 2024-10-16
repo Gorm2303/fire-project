@@ -97,29 +97,24 @@ class DepositPlan {
   double calculateTaxOnEarnings(double earnings) {
     if (earnings <= 0) return 0;
     double tax = 0;
+    double taxableEarnings = earnings;
 
-    if (!selectedTaxOption.useTaxExemptionCardAndThreshold) {
-      tax = earnings * selectedTaxOption.ratePercentage / 100;
-      return tax < 0 ? 0 : tax;
+    if (selectedTaxOption.useTaxExemptionCard) {
+      taxableEarnings = earnings - TaxOption.taxExemptionCard;
     }
-
-    double taxableEarnings = earnings - TaxOption.taxExemptionCard;
 
     if (taxableEarnings <= 0) {
       return 0; // No tax if taxable earnings are below or equal to 0
     }
 
-    if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
-      tax = taxableEarnings * selectedTaxOption.ratePercentage / 100;
-      return tax < 0 ? 0 : tax;
+    if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate || !selectedTaxOption.useTaxProgressionLimit) {
+      return tax < 0 ? 0 : tax = taxableEarnings * selectedTaxOption.ratePercentage / 100;
     }
     
     if (taxableEarnings <= TaxOption.threshold) {
-      tax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
-      return tax < 0 ? 0 : tax;
+      return tax < 0 ? 0 : tax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
     } else {
-      tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
-      return tax < 0 ? 0 : tax;
+      return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
     }
   }
 

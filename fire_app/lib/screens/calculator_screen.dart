@@ -45,11 +45,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   bool showInvestmentNote = false;
 
   final List<TaxOption> _taxOptions = [
-    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: true),
-    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
-    TaxOption(17.0, 'Aktiesparekonto', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
-    TaxOption(15.3, 'Pension PAL-skat', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
-    TaxOption(42.0, 'Tax On Sale*', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCard: true, useTaxProgressionLimit: true),
+    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
+    TaxOption(17.0, 'Aktiesparekonto', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
+    TaxOption(15.3, 'Pension PAL-skat', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
+    TaxOption(42.0, 'Tax On Sale*', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
   ];
 
   late InvestmentPlan _investmentPlan;
@@ -224,7 +224,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
         earningsPercent: _investmentPlan.withdrawalPlan.earningsPercentAfterBreak,
         withdrawalPercentage: _investmentPlan.withdrawalPlan.withdrawalPercentage / 100,
         taxableWithdrawal: _investmentPlan.withdrawalPlan.taxableWithdrawalYearlyAfterBreak,
-        useTaxExemptionCardAndThreshold: _investmentPlan.withdrawalPlan.selectedTaxOption.useTaxExemptionCardAndThreshold,
+        useTaxExemptionCard: _investmentPlan.withdrawalPlan.selectedTaxOption.useTaxExemptionCard,
+        useTaxProgressionLimit: _investmentPlan.withdrawalPlan.selectedTaxOption.useTaxProgressionLimit,
         taxOption: _investmentPlan.withdrawalPlan.selectedTaxOption,
         annualTax: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
       ),

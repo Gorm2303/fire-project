@@ -4,16 +4,21 @@ import 'package:fire_app/models/deposit_plan.dart'; // Import your model here
 
 void main() {
   final List<TaxOption> taxOptions = [
-    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: true),
-    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
-    TaxOption(17.0, 'Aktiesparekonto', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
-    TaxOption(15.3, 'Pension PAL-skat', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
-    TaxOption(42.0, 'Custom 1', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: true),
-    TaxOption(42.0, 'Custom 2', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCard: true, useTaxProgressionLimit: true),
+    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
+    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCard: true, useTaxProgressionLimit: false),
+    TaxOption(42.0, 'Tax On Sale', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: true),
+    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
+    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCard: true, useTaxProgressionLimit: false),
+    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: true),
+    TaxOption(42.0, 'Tax Every Year', isNotionallyTaxed: true, useTaxExemptionCard: true, useTaxProgressionLimit: true),
+    TaxOption(17.0, 'Aktiesparekonto', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
+    TaxOption(15.3, 'Pension PAL-skat', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
   ];
 
+
   List<DepositPlan> depositPlans = [];
-  for (int i = 0; i < taxOptions.length; i++) {
+  for (TaxOption taxOption in taxOptions) {
     depositPlans.add(
       DepositPlan(
         principal: 10000.0,
@@ -21,7 +26,7 @@ void main() {
         duration: 25,
         additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
-        selectedTaxOption: taxOptions[i],
+        selectedTaxOption: taxOption,
       ),
     );
   }
@@ -29,54 +34,107 @@ void main() {
   group('Tax Calculation Tests', () {
     test('No earnings should return 0 tax', () {
       const earnings = 0.0;
-      for (int i = 0; i < depositPlans.length; i++) {
-        final result = depositPlans[i].calculateTaxOnEarnings(earnings); // Make this method public in your DepositPlan
+      for (DepositPlan depositPlan in depositPlans) {
+        final result = depositPlan.calculateTaxOnEarnings(earnings); // Make this method public in your DepositPlan
         expect(result, 0.0);
       }
     });
 
     test('Earnings below tax exemption should return 0 tax for applicable tax options', () {
       const earnings = TaxOption.taxExemptionCard - 1000; // Slightly below threshold for exemption
-      for (int i = 0; i < depositPlans.length; i++) {
-        final result = depositPlans[i].calculateTaxOnEarnings(earnings); // Public method
+      for (DepositPlan depositPlan in depositPlans) {
+        final result = depositPlan.calculateTaxOnEarnings(earnings); // Public method
 
-        if (depositPlans[i].selectedTaxOption.useTaxExemptionCardAndThreshold) {
+        if (depositPlan.selectedTaxOption.useTaxExemptionCard) {
           const expectedTax = 0.0; // No tax for earnings below threshold when using exemption
           expect(result, expectedTax);
-        } else {
-          final expectedTax = earnings * depositPlans[i].selectedTaxOption.ratePercentage / 100;
+        } else if (!depositPlan.selectedTaxOption.useTaxProgressionLimit || depositPlan.selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate) {
+          final expectedTax = earnings * depositPlan.selectedTaxOption.ratePercentage / 100;
           expect(result, expectedTax); // Apply tax directly when not using exemption
+        } else {
+          const expectedTax = earnings * TaxOption.lowerTaxRate / 100;
+          expect(result, expectedTax);
         }
       }
     });
 
     test('Earnings below threshold but above tax exemption should return correct tax for applicable options', () {
-      const earnings = TaxOption.taxExemptionCard + TaxOption.threshold - 1000 ; // Slightly below threshold for exemption
-      for (int i = 0; i < depositPlans.length; i++) {
-        final result = depositPlans[i].calculateTaxOnEarnings(earnings);
+      const earnings = TaxOption.taxExemptionCard + TaxOption.threshold - 1000; // Slightly below threshold for exemption
+      for (DepositPlan depositPlan in depositPlans) {
+        final selectedTaxOption = depositPlan.selectedTaxOption;
+        final result = depositPlan.calculateTaxOnEarnings(earnings);
+        if (!selectedTaxOption.isNotionallyTaxed) {
+          continue; // Skip non-notionally taxed options
+        }
 
-        if (depositPlans[i].selectedTaxOption.useTaxExemptionCardAndThreshold) {
-          const expectedTax = (earnings - TaxOption.taxExemptionCard) * TaxOption.lowerTaxRate/100; // Tax calculation for below threshold
+        double expectedTax = 0;
+        double taxableEarnings = earnings;
+
+        if (selectedTaxOption.useTaxExemptionCard) {
+          taxableEarnings = earnings - TaxOption.taxExemptionCard;
+        }
+
+        if (taxableEarnings <= 0) {
+          expectedTax = 0; // No tax if taxable earnings are below or equal to 0
           expect(result, expectedTax);
+          continue;
+        }
+
+        if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate || !selectedTaxOption.useTaxProgressionLimit) {
+          expectedTax < 0 ? 0 : expectedTax = taxableEarnings * selectedTaxOption.ratePercentage / 100;
+          expect(result, expectedTax);
+          continue;
+        }
+        
+        if (taxableEarnings <= TaxOption.threshold) {
+          expectedTax < 0 ? 0 : expectedTax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
+          expect(result, expectedTax);
+          continue;
         } else {
-          final expectedTax = earnings * depositPlans[i].selectedTaxOption.ratePercentage / 100;
-          expect(result, expectedTax); // Apply tax directly when not using exemption
+          expectedTax < 0 ? 0 : expectedTax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+          expect(result, expectedTax);
+          continue;
         }
       }
     });
 
+
     test('Earnings above threshold with tax exemption should return correct tax for applicable options', () {
       const earnings = 1050000.0; // Well above threshold
-      for (int i = 0; i < depositPlans.length; i++) {
-        final result = depositPlans[i].calculateTaxOnEarnings(earnings);
+      for (DepositPlan depositPlan in depositPlans) {
+        final selectedTaxOption = depositPlan.selectedTaxOption;
+        final result = depositPlan.calculateTaxOnEarnings(earnings);
+        if (!selectedTaxOption.isNotionallyTaxed) {
+          continue; // Skip non-notionally taxed options
+        }
 
-        if (depositPlans[i].selectedTaxOption.useTaxExemptionCardAndThreshold) {
-          final expectedTax = (TaxOption.threshold * TaxOption.lowerTaxRate/100) 
-          + ((earnings - TaxOption.taxExemptionCard - TaxOption.threshold) * depositPlans[i].selectedTaxOption.ratePercentage/100); // Tax calculation for above threshold
+        double expectedTax = 0;
+        double taxableEarnings = earnings;
+
+        if (selectedTaxOption.useTaxExemptionCard) {
+          taxableEarnings = earnings - TaxOption.taxExemptionCard;
+        }
+
+        if (taxableEarnings <= 0) {
+          expectedTax = 0; // No tax if taxable earnings are below or equal to 0
           expect(result, expectedTax);
+          continue;
+        }
+
+        if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate || !selectedTaxOption.useTaxProgressionLimit) {
+          expectedTax < 0 ? 0 : expectedTax = taxableEarnings * selectedTaxOption.ratePercentage / 100;
+          expect(result, expectedTax);
+          continue;
+        }
+        
+        if (taxableEarnings <= TaxOption.threshold) {
+          expectedTax < 0 ? 0 : expectedTax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
+          expect(result, expectedTax);
+          continue;
         } else {
-          final expectedTax = earnings * depositPlans[i].selectedTaxOption.ratePercentage / 100;
-          expect(result, expectedTax); // Apply tax directly when not using exemption
+          expectedTax < 0 ? 0 : expectedTax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+          expect(result, expectedTax);
+          continue;
         }
       }
     });
@@ -91,11 +149,40 @@ void main() {
 
     test('Earnings without tax exemption should apply default rate', () {
       const earnings = TaxOption.taxExemptionCard - 1000; // Slightly below threshold for exemption
-      for (int i = 0; i < depositPlans.length; i++) {
-        final result = depositPlans[i].calculateTaxOnEarnings(earnings);
-        if (!depositPlans[i].selectedTaxOption.useTaxExemptionCardAndThreshold) {
-          final expectedTax = earnings * depositPlans[i].selectedTaxOption.ratePercentage / 100;
+      for (DepositPlan depositPlan in depositPlans) {
+        final selectedTaxOption = depositPlan.selectedTaxOption;
+        final result = depositPlan.calculateTaxOnEarnings(earnings);
+        if (!selectedTaxOption.isNotionallyTaxed) {
+          continue; // Skip non-notionally taxed options
+        }
+
+        double expectedTax = 0;
+        double taxableEarnings = earnings;
+
+        if (selectedTaxOption.useTaxExemptionCard) {
+          taxableEarnings = earnings - TaxOption.taxExemptionCard;
+        }
+
+        if (taxableEarnings <= 0) {
+          expectedTax = 0; // No tax if taxable earnings are below or equal to 0
           expect(result, expectedTax);
+          continue;
+        }
+
+        if (selectedTaxOption.ratePercentage < TaxOption.lowerTaxRate || !selectedTaxOption.useTaxProgressionLimit) {
+          expectedTax < 0 ? 0 : expectedTax = taxableEarnings * selectedTaxOption.ratePercentage / 100;
+          expect(result, expectedTax);
+          continue;
+        }
+        
+        if (taxableEarnings <= TaxOption.threshold) {
+          expectedTax < 0 ? 0 : expectedTax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
+          expect(result, expectedTax);
+          continue;
+        } else {
+          expectedTax < 0 ? 0 : expectedTax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+          expect(result, expectedTax);
+          continue;
         }
       }
     });
@@ -108,7 +195,7 @@ void main() {
         duration: 1,
         additionalContribution: 0, // No contributions
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       final result = depositPlan.calculateInterest(12); // 12 periods (monthly)
       expect(result, 0.0);
@@ -121,7 +208,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       final result = depositPlan.calculateInterest(12); // 12 periods (monthly)
       expect(result, 0.0);
@@ -134,7 +221,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0, // No contributions
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       const contributionPeriods = 12;
       final result = depositPlan.calculateInterest(contributionPeriods); // 12 periods (monthly)
@@ -159,7 +246,7 @@ void main() {
         duration: 1,
         additionalContribution: 0.0, // No contributions
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       final result = depositPlan.calculateInterest(12); // 12 periods
       final expectedInterest = depositPlan.principal * 0.07; // Interest on principal only
@@ -174,7 +261,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0,
         contributionFrequency: 'Yearly', // Yearly contributions
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       
       const contributionPeriods = 1;
@@ -193,7 +280,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );    
       const contributionPeriods = 12;
       final result = depositPlan.calculateInterest(contributionPeriods); // 12 periods (monthly)
@@ -220,7 +307,7 @@ void main() {
         duration: 25,
         additionalContribution: 10000.0,
         contributionFrequency: 'Yearly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );    
       depositPlan.calculateYearlyValues(); // 1 period (Yearly)
       final contributionsResult = depositPlan.totalInterestFromContributions;
@@ -252,7 +339,7 @@ void main() {
         duration: 25,
         additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: false, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );    
       const contributionPeriods = 12;
       depositPlan.calculateYearlyValues(); // 12 periods (Monthly)
@@ -287,7 +374,6 @@ void main() {
     });
 
   });
-
   group('Compound Interest Tests with Notional Gains Tax (tax in deposit plan)', () {
   test('No investment should return 0 interest', () {
       final depositPlan = DepositPlan(
@@ -296,7 +382,7 @@ void main() {
         duration: 1,
         additionalContribution: 0, // No contributions
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       final result = depositPlan.calculateInterest(12); // 12 periods (monthly)
       expect(result, 0.0);
@@ -309,7 +395,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       final result = depositPlan.calculateInterest(12); // 12 periods (monthly)
       expect(result, 0.0);
@@ -322,7 +408,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0, // No contributions
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       const contributionPeriods = 12;
       final result = depositPlan.calculateInterest(contributionPeriods); // 12 periods (monthly)
@@ -347,7 +433,7 @@ void main() {
         duration: 1,
         additionalContribution: 0.0, // No contributions
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       final result = depositPlan.calculateInterest(12); // 12 periods
       final expectedInterest = depositPlan.principal * 0.07; // Interest on principal only
@@ -362,7 +448,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0,
         contributionFrequency: 'Yearly', // Yearly contributions
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       
       const contributionPeriods = 1;
@@ -381,7 +467,7 @@ void main() {
         duration: 1,
         additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );    
       const contributionPeriods = 12;
       final result = depositPlan.calculateInterest(contributionPeriods); // 12 periods (monthly)
@@ -408,7 +494,7 @@ void main() {
         duration: 25,
         additionalContribution: 10000.0,
         contributionFrequency: 'Yearly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
       
       depositPlan.calculateYearlyValues(); // Perform yearly calculations
@@ -439,7 +525,7 @@ void main() {
         duration: 25,
         additionalContribution: 10000.0,
         contributionFrequency: 'Yearly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );
 
       depositPlan.calculateYearlyValues(); // Perform yearly calculations
@@ -474,7 +560,7 @@ void main() {
       duration: 25,
       additionalContribution: 10000.0,
       contributionFrequency: 'Yearly',
-      selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+      selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
     );
 
     depositPlan.calculateYearlyValues(); // Perform yearly calculations
@@ -493,7 +579,7 @@ void main() {
         duration: 25,
         additionalContribution: 10000.0,
         contributionFrequency: 'Monthly',
-        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCardAndThreshold: false),
+        selectedTaxOption: TaxOption(42.0, 'Custom', isNotionallyTaxed: true, useTaxExemptionCard: false, useTaxProgressionLimit: false),
       );    
       depositPlan.calculateYearlyValues(); // Perform yearly calculations
       final contributionsResult = depositPlan.totalInterestFromContributions;

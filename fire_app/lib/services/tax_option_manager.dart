@@ -39,27 +39,29 @@ class TaxOptionManager extends ChangeNotifier {
   }
 
   /// Switches to a custom tax rate
-  void switchToCustomRate(double customRate, bool isNotionallyTaxed, bool useExemption) {
-    _isCustomTaxRate = true;
-    _isCustomPredefined = false;
-    _currentTaxOption = TaxOption(
-      customRate,
-      'Custom ($customRate%)',
-      isNotionallyTaxed: isNotionallyTaxed,
-      useTaxExemptionCardAndThreshold: useExemption,
-    );
-    notifyListeners();  // Notify listeners to update UI
-  }
+  void switchToCustomRate(double customRate, bool isNotionallyTaxed, bool useExemption, bool useProgressionLimit) {
+      _isCustomTaxRate = true;
+      _isCustomPredefined = false;
+      _currentTaxOption = TaxOption(
+        customRate,
+        'Custom ($customRate%)',
+        isNotionallyTaxed: isNotionallyTaxed,
+        useTaxExemptionCard: useExemption,
+        useTaxProgressionLimit: useProgressionLimit,
+      );
+      notifyListeners();  // Notify listeners to update UI
+    }
 
   /// Switches to a custom predefined tax option
-  void switchToCustomPredefined(bool isNotionallyTaxed, bool useExemption) {
+  void switchToCustomPredefined(bool isNotionallyTaxed, bool useExemption, bool useProgressionLimit) {
     if (_isCustomTaxRate) return;  // Prevent custom predefined option when a custom rate is active
     _isCustomPredefined = true;
     _currentTaxOption = TaxOption(
       _currentTaxOption.ratePercentage,  // Keep predefined rate
       'Custom',
       isNotionallyTaxed: isNotionallyTaxed,
-      useTaxExemptionCardAndThreshold: useExemption,
+      useTaxExemptionCard: useExemption,
+      useTaxProgressionLimit: useProgressionLimit,
     );
     notifyListeners();  // Notify listeners to update UI
   }
@@ -81,13 +83,34 @@ class TaxOptionManager extends ChangeNotifier {
         _currentTaxOption.ratePercentage,
         _currentTaxOption.isNotionallyTaxed,
         useExemption,
+        _currentTaxOption.useTaxProgressionLimit,
       );
-    } else if (existsPredefinedOption(_currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption)) {
+    } else if (existsPredefinedOption(
+        _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption, _currentTaxOption.useTaxProgressionLimit)) {
       TaxOption matchedOption = findPredefinedOption(
-        _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption)!;
+        _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, useExemption, _currentTaxOption.useTaxProgressionLimit)!;
       switchToPredefined(matchedOption);
     } else {
-      switchToCustomPredefined(_currentTaxOption.isNotionallyTaxed, useExemption);
+      switchToCustomPredefined(_currentTaxOption.isNotionallyTaxed, useExemption, _currentTaxOption.useTaxProgressionLimit);
+    }
+  }
+
+  /// Toggles progression limit
+  void toggleTaxProgressionLimit(bool useProgressionLimit) {
+    if (_isCustomTaxRate) {
+      switchToCustomRate(
+        _currentTaxOption.ratePercentage,
+        _currentTaxOption.isNotionallyTaxed, // Use progression limit here
+        _currentTaxOption.useTaxExemptionCard,
+        useProgressionLimit, // Use progression limit here
+      );
+    } else if (existsPredefinedOption(
+        _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, _currentTaxOption.useTaxExemptionCard, useProgressionLimit)) {
+      TaxOption matchedOption = findPredefinedOption(
+        _currentTaxOption.ratePercentage, _currentTaxOption.isNotionallyTaxed, _currentTaxOption.useTaxExemptionCard, useProgressionLimit)!;
+      switchToPredefined(matchedOption);
+    } else {
+      switchToCustomPredefined(_currentTaxOption.isNotionallyTaxed, _currentTaxOption.useTaxExemptionCard, useProgressionLimit);
     }
   }
 
@@ -97,30 +120,33 @@ class TaxOptionManager extends ChangeNotifier {
       switchToCustomRate(
         _currentTaxOption.ratePercentage,
         isNotionallyTaxed,
-        _currentTaxOption.useTaxExemptionCardAndThreshold,
+        _currentTaxOption.useTaxExemptionCard,
+        _currentTaxOption.useTaxProgressionLimit,
       );
-    } else if (existsPredefinedOption(_currentTaxOption.ratePercentage, isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold)) {
+    } else if (existsPredefinedOption(_currentTaxOption.ratePercentage, isNotionallyTaxed,_currentTaxOption.useTaxExemptionCard, _currentTaxOption.useTaxProgressionLimit)) {
       TaxOption matchedOption = findPredefinedOption(
-        _currentTaxOption.ratePercentage, isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold)!;
+        _currentTaxOption.ratePercentage, isNotionallyTaxed, _currentTaxOption.useTaxExemptionCard, _currentTaxOption.useTaxProgressionLimit)!;
       switchToPredefined(matchedOption);
     } else {
-      switchToCustomPredefined(isNotionallyTaxed, _currentTaxOption.useTaxExemptionCardAndThreshold);
+      switchToCustomPredefined(isNotionallyTaxed, _currentTaxOption.useTaxExemptionCard, _currentTaxOption.useTaxProgressionLimit);
     }
   }
 
-  bool existsPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption) {
+  bool existsPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption, bool useProgressionLimit) {
     return _taxOptions.any((option) =>
         option.ratePercentage == ratePercentage &&
         option.isNotionallyTaxed == isNotionallyTaxed &&
-        option.useTaxExemptionCardAndThreshold == useExemption);
+        option.useTaxExemptionCard == useExemption &&
+        option.useTaxProgressionLimit == useProgressionLimit);
   }
 
-  TaxOption? findPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption) {
+  TaxOption? findPredefinedOption(double ratePercentage, bool isNotionallyTaxed, bool useExemption, bool useProgressionLimit) {
     try {
       return _taxOptions.firstWhere((option) =>
           option.ratePercentage == ratePercentage &&
           option.isNotionallyTaxed == isNotionallyTaxed &&
-          option.useTaxExemptionCardAndThreshold == useExemption);
+          option.useTaxExemptionCard == useExemption &&
+          option.useTaxProgressionLimit == useProgressionLimit);
     } catch (e) {
       return null;
     }
