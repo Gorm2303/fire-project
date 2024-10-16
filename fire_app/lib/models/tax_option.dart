@@ -4,7 +4,7 @@ class TaxOption {
   final bool isNotionallyTaxed;
   final bool useTaxExemptionCard;  // New field for tax exemption card
   final bool useTaxProgressionLimit;  // New field for progression limit
-  static const double threshold = 61000;  // The threshold for lower tax rate
+  static const double taxProgressionLimit = 61000;  // The threshold for lower tax rate
   static const double taxExemptionCard = 49700;  // The tax-free limit for the year
   static const double lowerTaxRate = 27;  // The lower tax rate for threshold
 

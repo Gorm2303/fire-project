@@ -10,6 +10,7 @@ class WithdrawalPlan {
   double taxableWithdrawalYearly = 0;
   TaxOption selectedTaxOption;
   double taxYearly = 0;
+  double taxInBreakPeriod = 0;
   double withdrawalAfterTax = 0;
   double earningsAfterBreak = 0;
   double earningsPercentAfterBreak = 0;
@@ -37,7 +38,13 @@ class WithdrawalPlan {
     // Apply interest growth during the break period
     if (breakPeriod >= 1) {
       for (int year = 1; year <= breakPeriod; year++) {
+        previousValue = totalValue;
         totalValue *= (1 + interestRate / 100);
+        if (selectedTaxOption.isNotionallyTaxed) {
+          // Notional gains tax applies only to yearly earnings (not the withdrawal)
+          taxInBreakPeriod = _notionalGainsTax(totalValue - previousValue);
+          totalValue -= taxInBreakPeriod;
+        }
       }
       interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
     }
@@ -58,7 +65,7 @@ class WithdrawalPlan {
     earningsPercentAfterBreak = earningsAfterBreak / totalValue;
     withdrawalYearly = totalValue * (withdrawalPercentage / 100);
 
-        // If it's not notionally taxed, apply capital gains tax logic
+    // If it's not notionally taxed, apply capital gains tax logic
     if (!selectedTaxOption.isNotionallyTaxed) {
       taxableWithdrawalYearlyAfterBreak = _calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
       taxYearlyAfterBreak = _capitalGainsTax(taxableWithdrawalYearlyAfterBreak);
@@ -128,10 +135,10 @@ class WithdrawalPlan {
         return tax < 0 ? 0 : tax = taxableWithdrawal * selectedTaxOption.ratePercentage / 100;
     }
 
-    if (taxableWithdrawal <= TaxOption.threshold) {
+    if (taxableWithdrawal <= TaxOption.taxProgressionLimit) {
       return tax < 0 ? 0 : tax = taxableWithdrawal * TaxOption.lowerTaxRate / 100;  // Apply lower tax rate under the threshold
     } else {
-      return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableWithdrawal - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+      return tax < 0 ? 0 : tax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + ((taxableWithdrawal - TaxOption.taxProgressionLimit) * selectedTaxOption.ratePercentage / 100);
     }
   }
 
@@ -148,10 +155,10 @@ class WithdrawalPlan {
       return tax < 0 ? 0 : tax = earnings * selectedTaxOption.ratePercentage / 100;
     }
 
-    if (earnings <= TaxOption.threshold) {
+    if (earnings <= TaxOption.taxProgressionLimit) {
       return tax < 0 ? 0 : tax = earnings * TaxOption.lowerTaxRate / 100;
     } else {
-      return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + (earnings * selectedTaxOption.ratePercentage / 100);
+      return tax < 0 ? 0 : tax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + (earnings * selectedTaxOption.ratePercentage / 100);
     } 
   }
 }

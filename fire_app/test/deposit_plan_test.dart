@@ -59,7 +59,7 @@ void main() {
     });
 
     test('Earnings below threshold but above tax exemption should return correct tax for applicable options', () {
-      const earnings = TaxOption.taxExemptionCard + TaxOption.threshold - 1000; // Slightly below threshold for exemption
+      const earnings = TaxOption.taxExemptionCard + TaxOption.taxProgressionLimit - 1000; // Slightly below threshold for exemption
       for (DepositPlan depositPlan in depositPlans) {
         final selectedTaxOption = depositPlan.selectedTaxOption;
         final result = depositPlan.calculateTaxOnEarnings(earnings);
@@ -86,12 +86,12 @@ void main() {
           continue;
         }
         
-        if (taxableEarnings <= TaxOption.threshold) {
+        if (taxableEarnings <= TaxOption.taxProgressionLimit) {
           expectedTax < 0 ? 0 : expectedTax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
           expect(result, expectedTax);
           continue;
         } else {
-          expectedTax < 0 ? 0 : expectedTax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+          expectedTax < 0 ? 0 : expectedTax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.taxProgressionLimit) * selectedTaxOption.ratePercentage / 100);
           expect(result, expectedTax);
           continue;
         }
@@ -127,12 +127,12 @@ void main() {
           continue;
         }
         
-        if (taxableEarnings <= TaxOption.threshold) {
+        if (taxableEarnings <= TaxOption.taxProgressionLimit) {
           expectedTax < 0 ? 0 : expectedTax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
           expect(result, expectedTax);
           continue;
         } else {
-          expectedTax < 0 ? 0 : expectedTax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+          expectedTax < 0 ? 0 : expectedTax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.taxProgressionLimit) * selectedTaxOption.ratePercentage / 100);
           expect(result, expectedTax);
           continue;
         }
@@ -175,12 +175,12 @@ void main() {
           continue;
         }
         
-        if (taxableEarnings <= TaxOption.threshold) {
+        if (taxableEarnings <= TaxOption.taxProgressionLimit) {
           expectedTax < 0 ? 0 : expectedTax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
           expect(result, expectedTax);
           continue;
         } else {
-          expectedTax < 0 ? 0 : expectedTax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+          expectedTax < 0 ? 0 : expectedTax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.taxProgressionLimit) * selectedTaxOption.ratePercentage / 100);
           expect(result, expectedTax);
           continue;
         }

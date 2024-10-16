@@ -111,10 +111,10 @@ class DepositPlan {
       return tax < 0 ? 0 : tax = taxableEarnings * selectedTaxOption.ratePercentage / 100;
     }
     
-    if (taxableEarnings <= TaxOption.threshold) {
+    if (taxableEarnings <= TaxOption.taxProgressionLimit) {
       return tax < 0 ? 0 : tax = taxableEarnings * TaxOption.lowerTaxRate / 100; // Apply lower tax rate for threshold
     } else {
-      return tax < 0 ? 0 : tax = (TaxOption.threshold * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.threshold) * selectedTaxOption.ratePercentage / 100);
+      return tax < 0 ? 0 : tax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + ((taxableEarnings - TaxOption.taxProgressionLimit) * selectedTaxOption.ratePercentage / 100);
     }
   }
 

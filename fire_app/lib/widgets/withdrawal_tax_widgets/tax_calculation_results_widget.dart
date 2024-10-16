@@ -64,8 +64,8 @@ Widget build(BuildContext context) {
             const TextSpan(text: 'Taxable Withdrawal (Yearly): ', style: TextStyle(fontWeight: FontWeight.bold)),
             TextSpan(
               text: useTaxExemptionCard  // Check if useTaxExemptionCardAndThreshold is true 
-                ? '${(totalAfterBreak * withdrawalPercentage).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} - ${TaxOption.taxExemptionCard} = ' // If condition is true
-                : '${(totalAfterBreak * withdrawalPercentage).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} = '  // If condition is false
+                ? '${(taxOption.isNotionallyTaxed ? 0 : totalAfterBreak * withdrawalPercentage).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} - ${TaxOption.taxExemptionCard} = ' // If condition is true
+                : '${(taxOption.isNotionallyTaxed ? 0 : totalAfterBreak * withdrawalPercentage).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} = '  // If condition is false
             ),
             TextSpan(text: taxableWithdrawal.toStringAsFixed(0), style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -78,8 +78,8 @@ Widget build(BuildContext context) {
             const TextSpan(text: 'Taxable Withdrawal (Monthly): ', style: TextStyle(fontWeight: FontWeight.bold)),
             TextSpan(
               text: useTaxExemptionCard  // Check if useTaxExemptionCardAndThreshold is true 
-                ? '${(totalAfterBreak * withdrawalPercentage/12).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} - ${(TaxOption.taxExemptionCard/12).toStringAsFixed(0)} = ' // If condition is true
-                : '${(totalAfterBreak * withdrawalPercentage/12).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} = '  // If condition is false
+                ? '${(taxOption.isNotionallyTaxed ? 0 : totalAfterBreak * withdrawalPercentage/12).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} - ${(TaxOption.taxExemptionCard/12).toStringAsFixed(0)} = ' // If condition is true
+                : '${(taxOption.isNotionallyTaxed ? 0 : totalAfterBreak * withdrawalPercentage/12).toStringAsFixed(0)} × ${earningsPercent.toStringAsFixed(4)} = '  // If condition is false
             ),
             TextSpan(text: (taxableWithdrawal / 12).toStringAsFixed(0), style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -93,9 +93,9 @@ Widget build(BuildContext context) {
             TextSpan(
               text: !useTaxProgressionLimit || taxOption.ratePercentage < TaxOption.lowerTaxRate  // Check if useTaxExemptionCardAndThreshold is false 
                 ? '${taxableWithdrawal.toStringAsFixed(0)} × ${taxOption.ratePercentage/100} = ' // If condition is true
-                : taxableWithdrawal < TaxOption.threshold  // Check if taxableWithdrawal is less than the threshold 
+                : taxableWithdrawal < TaxOption.taxProgressionLimit  // Check if taxableWithdrawal is less than the threshold 
                   ? '${taxableWithdrawal.toStringAsFixed(0)} × ${TaxOption.lowerTaxRate/100} = ' // If condition is true
-                  : '${TaxOption.threshold.toStringAsFixed(0)} × ${TaxOption.lowerTaxRate/100} + (${taxableWithdrawal.toStringAsFixed(0)} - ${TaxOption.threshold}) × ${(taxOption.ratePercentage/100).toStringAsFixed(2)} = '  // If condition is false
+                  : '${TaxOption.taxProgressionLimit.toStringAsFixed(0)} × ${TaxOption.lowerTaxRate/100} + (${taxableWithdrawal.toStringAsFixed(0)} - ${TaxOption.taxProgressionLimit}) × ${(taxOption.ratePercentage/100).toStringAsFixed(2)} = '  // If condition is false
             ),            
             TextSpan(text: annualTax.toStringAsFixed(0), style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -109,9 +109,9 @@ Widget build(BuildContext context) {
             TextSpan(
               text: !useTaxProgressionLimit || taxOption.ratePercentage < TaxOption.lowerTaxRate  // Check if useTaxExemptionCardAndThreshold is false 
                 ? '${(taxableWithdrawal/12).toStringAsFixed(0)} × ${taxOption.ratePercentage/100} = ' // If condition is true
-                : taxableWithdrawal < TaxOption.threshold  // Check if taxableWithdrawal is less than the threshold 
+                : taxableWithdrawal < TaxOption.taxProgressionLimit  // Check if taxableWithdrawal is less than the threshold 
                   ? '${(taxableWithdrawal/12).toStringAsFixed(0)} × ${TaxOption.lowerTaxRate/100} = ' // If condition is true
-                  : '${(TaxOption.threshold/12).toStringAsFixed(0)} × ${TaxOption.lowerTaxRate/100} + (${(taxableWithdrawal/12).toStringAsFixed(0)} - ${(TaxOption.threshold/12).toStringAsFixed(0)}) × ${(taxOption.ratePercentage/100).toStringAsFixed(2)} = '  // If condition is false
+                  : '${(TaxOption.taxProgressionLimit/12).toStringAsFixed(0)} × ${TaxOption.lowerTaxRate/100} + (${(taxableWithdrawal/12).toStringAsFixed(0)} - ${(TaxOption.taxProgressionLimit/12).toStringAsFixed(0)}) × ${(taxOption.ratePercentage/100).toStringAsFixed(2)} = '  // If condition is false
             ),
             TextSpan(text: (annualTax / 12).toStringAsFixed(0), style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -127,21 +127,21 @@ Widget build(BuildContext context) {
             ),
             TextSpan(
               text: (useTaxExemptionCard && useTaxProgressionLimit)
-                ? '${annualTax.toStringAsFixed(0)} / ${(taxableWithdrawal + TaxOption.taxExemptionCard + TaxOption.threshold).toStringAsFixed(2)} = '  // Both conditions are true
+                ? '${annualTax.toStringAsFixed(0)} / ${(taxableWithdrawal + TaxOption.taxExemptionCard + TaxOption.taxProgressionLimit).toStringAsFixed(2)} = '  // Both conditions are true
                 : (useTaxExemptionCard)
                   ? '${annualTax.toStringAsFixed(0)} / ${(taxableWithdrawal + TaxOption.taxExemptionCard).toStringAsFixed(2)} = '  // Only exemption card is true
                   : (useTaxProgressionLimit)
-                    ? '${annualTax.toStringAsFixed(0)} / ${(taxableWithdrawal + TaxOption.threshold).toStringAsFixed(2)} = '  // Only progression limit is true
+                    ? '${annualTax.toStringAsFixed(0)} / ${(taxableWithdrawal + TaxOption.taxProgressionLimit).toStringAsFixed(2)} = '  // Only progression limit is true
                     : '${annualTax.toStringAsFixed(0)} / ${(taxableWithdrawal).toStringAsFixed(2)} = ',  // Neither condition is true
             ),
             TextSpan(
               text: (useTaxExemptionCard && useTaxProgressionLimit)
-                ? '${(annualTax / (taxableWithdrawal + TaxOption.taxExemptionCard + TaxOption.threshold) * 100).toStringAsFixed(2)}%'  // Both conditions are true
+                ? '${(annualTax / (taxableWithdrawal + TaxOption.taxExemptionCard + TaxOption.taxProgressionLimit) * 100).toStringAsFixed(2)}%'  // Both conditions are true
                 : (useTaxExemptionCard)
                   ? '${(annualTax / (taxableWithdrawal + TaxOption.taxExemptionCard) * 100).toStringAsFixed(2)}%'  // Only exemption card is true
                   : (useTaxProgressionLimit)
-                    ? '${(annualTax / (taxableWithdrawal + TaxOption.threshold) * 100).toStringAsFixed(2)}%'  // Only progression limit is true
-                    : '${(annualTax / taxableWithdrawal * 100).toStringAsFixed(2)}%',  // Neither condition is true
+                    ? '${(annualTax / (taxableWithdrawal + TaxOption.taxProgressionLimit) * 100).toStringAsFixed(2)}%'  // Only progression limit is true
+                    : '${((taxOption.isNotionallyTaxed ? 0 : annualTax / taxableWithdrawal) * 100).toStringAsFixed(2)}%',  // Neither condition is true
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
