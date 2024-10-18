@@ -36,4 +36,4 @@ jobs:
         run: |
           tar -czf /tmp/build.tar.gz -C fire_app/build/web .  # Archive the build files
           scp -o StrictHostKeyChecking=no /tmp/build.tar.gz opc@${{ secrets.ORACLE_IP }}:/tmp/
-          ssh opc@${{ secrets.ORACLE_IP }} 'sudo tar -xzf /tmp/build.tar.gz -C /usr/share/nginx/html/fire && sudo systemctl restart nginx'
+          ssh opc@${{ secrets.ORACLE_IP }} 'sudo tar -xzf /tmp/build.tar.gz -C /usr/share/nginx/html/ && sudo systemctl restart nginx'
