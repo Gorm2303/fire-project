@@ -3,6 +3,9 @@
     "short_name": "FIRE",
     "description": "A new Flutter project.",
     "start_url": "/",
+    "theme_color":"#ffffff",
+    "background_color":"#ffffff",
+    "display":"standalone",
     "icons": [
         {
             "src": "icons/android-chrome-192x192.png",
