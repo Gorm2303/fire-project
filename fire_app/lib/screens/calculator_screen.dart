@@ -137,9 +137,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _withdrawalDurationController.dispose();
     _presettingsController.dispose();
     _customTaxController.dispose();
-    _tableTabController.dispose();
-    _mainTabController.dispose();
-    super.dispose();
+    
+    super.dispose(); // Ensure super.dispose() is always called last
   }
 
   // Toggle investment note visibility
@@ -269,6 +268,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
       totalDeposits: _investmentPlan.depositPlan.deposits,
       totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak + _investmentPlan.depositPlan.deposits,
+      taxDuringBreak: _investmentPlan.withdrawalPlan.taxDuringBreak,
       recalculateValues: _recalculateValues,
     );
   }

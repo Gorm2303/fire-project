@@ -7,6 +7,7 @@ class BreakPeriodWidget extends StatelessWidget {
   final double interestGatheredDuringBreak;
   final double totalDeposits;
   final double totalValue;
+  final double taxDuringBreak;
   final VoidCallback recalculateValues;
 
   const BreakPeriodWidget({
@@ -15,6 +16,7 @@ class BreakPeriodWidget extends StatelessWidget {
     required this.interestGatheredDuringBreak,
     required this.totalDeposits,
     required this.totalValue,
+    required this.taxDuringBreak,
     required this.recalculateValues,
   });
 
@@ -45,6 +47,10 @@ class BreakPeriodWidget extends StatelessWidget {
         ),
         Text(
           'Compared to total value: ${interestOverTotalValue.toStringAsFixed(2)}%',
+          style: const TextStyle(fontSize: 14),
+        ),
+        Text(
+          'Tax Payed During Break: ${taxDuringBreak.toStringAsFixed(0)} kr.-',
           style: const TextStyle(fontSize: 14),
         ),
       ],

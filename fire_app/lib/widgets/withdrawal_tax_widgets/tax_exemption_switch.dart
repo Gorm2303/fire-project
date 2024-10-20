@@ -25,7 +25,7 @@ class TaxExemptionSwitch extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center, // Ensure centering
             children: [
               const Text(
-                'Use Tax Exemption Card:',
+                'Tax Exemption Card:',
                 style: TextStyle(fontSize: 16), // Smaller font size for compactness
               ),
               Transform.scale(
@@ -45,7 +45,7 @@ class TaxExemptionSwitch extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center, // Ensure centering
             children: [
               const Text(
-                'Use Tax Progression Limit:',
+                'Tax Progression Limit:',
                 style: TextStyle(fontSize: 16), // Smaller font size for compactness
               ),
               Transform.scale(

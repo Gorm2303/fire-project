@@ -10,7 +10,7 @@ class WithdrawalPlan {
   double taxableWithdrawalYearly = 0;
   TaxOption selectedTaxOption;
   double taxYearly = 0;
-  double taxInBreakPeriod = 0;
+  double taxDuringBreak = 0;
   double withdrawalAfterTax = 0;
   double earningsAfterBreak = 0;
   double earningsPercentAfterBreak = 0;
@@ -33,7 +33,6 @@ class WithdrawalPlan {
   List<Map<String, double>> calculateYearlyValues(double valueAfterDepositYears) {
     totalValue = valueAfterDepositYears;
     double previousValue;
-    interestGatheredDuringBreak = 0;
 
     // Apply interest growth during the break period
     if (breakPeriod >= 1) {
@@ -42,11 +41,9 @@ class WithdrawalPlan {
         totalValue *= (1 + interestRate / 100);
         if (selectedTaxOption.isNotionallyTaxed) {
           // Notional gains tax applies only to yearly earnings (not the withdrawal)
-          taxInBreakPeriod = _notionalGainsTax(totalValue - previousValue);
-          totalValue -= taxInBreakPeriod;
+          taxDuringBreak += _notionalGainsTax(totalValue - previousValue);
         }
       }
-      interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
     }
 
     yearlyValues = [
@@ -59,6 +56,9 @@ class WithdrawalPlan {
         'tax': 0,
       }
     ];
+    // Subtract tax in break period from total value
+    totalValue -= taxDuringBreak;
+    interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
 
     // Calculate earnings and withdrawal details after the break
     earningsAfterBreak = totalValue - deposits;
@@ -158,7 +158,7 @@ class WithdrawalPlan {
     if (earnings <= TaxOption.taxProgressionLimit) {
       return tax < 0 ? 0 : tax = earnings * TaxOption.lowerTaxRate / 100;
     } else {
-      return tax < 0 ? 0 : tax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + (earnings * selectedTaxOption.ratePercentage / 100);
+      return tax < 0 ? 0 : tax = (TaxOption.taxProgressionLimit * TaxOption.lowerTaxRate / 100) + ((earnings - TaxOption.taxProgressionLimit) * selectedTaxOption.ratePercentage / 100);
     } 
   }
 }
