@@ -14,11 +14,13 @@ class WithdrawalPlan {
   double withdrawalAfterTax = 0;
   double earningsAfterBreak = 0;
   double earningsPercentAfterBreak = 0;
+  double withdrawalYearlyAfterBreak = 0;
   double taxableWithdrawalYearlyAfterBreak = 0;
   double taxYearlyAfterBreak = 0;
   double totalValue;
   double deposits;
   List<Map<String, double>> yearlyValues = [];
+  double inflationRate;
 
   WithdrawalPlan({
     required this.interestRate,
@@ -28,6 +30,7 @@ class WithdrawalPlan {
     required this.selectedTaxOption,
     required this.totalValue,
     required this.deposits,
+    required this.inflationRate,
   });
 
   List<Map<String, double>> calculateYearlyValues(double valueAfterDepositYears) {
@@ -60,14 +63,14 @@ class WithdrawalPlan {
     totalValue -= taxDuringBreak;
     interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
 
-    // Calculate earnings and withdrawal details after the break
+    // Calculate earnings after break period and withdrawal
     earningsAfterBreak = totalValue - deposits;
     earningsPercentAfterBreak = earningsAfterBreak / totalValue;
-    withdrawalYearly = totalValue * (withdrawalPercentage / 100);
-
+    withdrawalYearlyAfterBreak = (totalValue * (withdrawalPercentage / 100)) * (1 + (inflationRate / 100));
+    
     // If it's not notionally taxed, apply capital gains tax logic
     if (!selectedTaxOption.isNotionallyTaxed) {
-      taxableWithdrawalYearlyAfterBreak = _calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearly);
+      taxableWithdrawalYearlyAfterBreak = _calculateTaxableWithdrawal(totalValue, deposits, withdrawalYearlyAfterBreak);
       taxYearlyAfterBreak = _capitalGainsTax(taxableWithdrawalYearlyAfterBreak);
     }
 
@@ -75,6 +78,8 @@ class WithdrawalPlan {
 
     // Loop through each withdrawal year and apply compound interest, tax, and withdrawals
     for (int year = 1; year <= duration; year++) {
+      withdrawalYearly = (totalValue * (withdrawalPercentage / 100)) * (1 + (inflationRate / 100));
+    
       previousValue = totalValue;
       totalValue *= (1 + interestRate / 100);  // Apply compound interest for the year
       double compoundThisYear = totalValue - previousValue;

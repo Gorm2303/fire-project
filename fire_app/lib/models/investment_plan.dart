@@ -18,6 +18,7 @@ class InvestmentPlan extends ChangeNotifier {
     required String contributionFrequency,
     required double increaseInContribution,
     required TaxOption selectedTaxOption,
+    required double inflationRate,
     int breakPeriod = 0,  // Added break period
     double withdrawalPercentage = 4,
     int withdrawalPeriod = 30,
@@ -34,6 +35,7 @@ class InvestmentPlan extends ChangeNotifier {
           interestRate: interestRate,
           duration: withdrawalPeriod,
           withdrawalPercentage: withdrawalPercentage,
+          inflationRate: inflationRate,
           selectedTaxOption: selectedTaxOption,
           totalValue: 0,  // Initial value after deposit years, to be updated later
           deposits: 0,    // Initial deposits, to be updated later

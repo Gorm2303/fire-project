@@ -70,7 +70,7 @@ class WithdrawalWidget extends StatelessWidget {
       children: [
         TextField(
           controller: inflationController,
-          decoration: const InputDecoration(labelText: 'Inflation Rate (%)'),
+          decoration: const InputDecoration(labelText: 'Inflation Rate And Withdrawal Adjustment (%)'),
           keyboardType: TextInputType.number,
           onChanged: (value) => recalculateValues(),
         ),
@@ -97,20 +97,62 @@ class WithdrawalWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,  // Center the contents of the Row
         children: <Widget>[
-          DropdownButton<String>(
-            value: withdrawalPercentageController.text,
-            items: ['3', '4', '5'].map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text('$value%'),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              if (newValue != null) {
-                withdrawalPercentageController.text = newValue;
-                recalculateValues();
-              }
-            },
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: withdrawalPercentageController.text,
+              items: ['1', '2', '3', '4', '5', '6', '7'].map((String value) {
+                // Customize the background color for each option
+                Color backgroundColor;
+                const int transparency = 87;
+
+                switch (value) {
+                  case '1':
+                    backgroundColor = const Color.fromARGB(transparency, 255, 153, 0);
+                    break;
+                  case '2':
+                    backgroundColor = const Color.fromARGB(transparency, 255, 235, 59);
+                    break;
+                  case '3':
+                    backgroundColor = const Color.fromARGB(transparency, 76, 175, 79);
+                    break;
+                  case '4':
+                    backgroundColor = const Color.fromARGB(transparency, 76, 175, 79);
+                    break;
+                  case '5':
+                    backgroundColor = const Color.fromARGB(transparency, 255, 235, 59);
+                    break;
+                  case '6':
+                    backgroundColor = const Color.fromARGB(transparency, 255, 153, 0);
+                    break;
+                  case '7':
+                    backgroundColor = const Color.fromARGB(transparency, 244, 67, 54);
+                    break;
+                  default:
+                    backgroundColor = const Color.fromARGB(transparency, 0, 0, 0);
+                }
+
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: backgroundColor,  // Set the background color
+                      borderRadius: BorderRadius.circular(12.0),  // Round the corners
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    child: Text(
+                      '$value%',
+                      style: const TextStyle(color: Colors.black), // Text color
+                    ),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  withdrawalPercentageController.text = newValue!;
+                  recalculateValues();
+                }
+              },
+            ),
           ),
           const SizedBox(width: 10),  // Small spacing between dropdown and text
           Text(

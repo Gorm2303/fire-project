@@ -92,6 +92,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       increaseInContribution: Utils.parseTextToDouble(_increaseInContributionController.text),
       selectedTaxOption: _taxOptionManager.currentOption,  // Use manager's current option
       withdrawalPercentage: Utils.parseTextToDouble(_withdrawalPercentageController.text),
+      inflationRate: Utils.parseTextToDouble(_inflationController.text),
       breakPeriod: Utils.parseTextToInt(_breakController.text),
       withdrawalPeriod: Utils.parseTextToInt(_withdrawalDurationController.text),
     );
@@ -289,7 +290,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   Widget _buildWithdrawalWidget() {
     return WithdrawalWidget(
         withdrawalPercentageController: _withdrawalPercentageController,
-        withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearly,
+        withdrawalYearlyAfterBreak: _investmentPlan.withdrawalPlan.withdrawalYearlyAfterBreak,
         taxYearlyAfterBreak: _investmentPlan.withdrawalPlan.taxYearlyAfterBreak,
         recalculateValues: _recalculateValues,
         toggleTaxNote: () {

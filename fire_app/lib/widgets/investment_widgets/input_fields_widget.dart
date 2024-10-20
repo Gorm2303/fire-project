@@ -119,7 +119,7 @@ class InputFieldsWidget extends StatelessWidget {
             ),
             TextField(
               controller: increaseInContributionController,
-              decoration: const InputDecoration(labelText: 'Increase in Contribution (%)'),
+              decoration: const InputDecoration(labelText: 'Increase in Contribution (Yearly in %)'),
               keyboardType: TextInputType.number,
               onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
             ),
