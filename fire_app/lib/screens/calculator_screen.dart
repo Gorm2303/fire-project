@@ -33,11 +33,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _interestRateController = TextEditingController(text: '0');
   final TextEditingController _durationController = TextEditingController(text: '0');
   final TextEditingController _additionalAmountController = TextEditingController(text: '0');
+  final TextEditingController _increaseInContributionController = TextEditingController(text: '0');
   final TextEditingController _withdrawalPercentageController = TextEditingController(text: '0');
   final TextEditingController _breakController = TextEditingController(text: '0');
   final TextEditingController _withdrawalDurationController = TextEditingController(text: '0');
   final TextEditingController _presettingsController = TextEditingController(text: 'None');
   final TextEditingController _customTaxController = TextEditingController(text: '0');
+  final TextEditingController _inflationController = TextEditingController(text: '0');
 
   String _contributionFrequency = 'Monthly';
   String _selectedTab = 'Investment Calculator';
@@ -87,6 +89,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       depositYears: Utils.parseTextToInt(_durationController.text),
       additionalAmount: Utils.parseTextToDouble(_additionalAmountController.text),
       contributionFrequency: _contributionFrequency,
+      increaseInContribution: Utils.parseTextToDouble(_increaseInContributionController.text),
       selectedTaxOption: _taxOptionManager.currentOption,  // Use manager's current option
       withdrawalPercentage: Utils.parseTextToDouble(_withdrawalPercentageController.text),
       breakPeriod: Utils.parseTextToInt(_breakController.text),
@@ -105,10 +108,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       _interestRateController.text = presetValues['interestRate'] ?? '7';  // Default to 7% if not provided
       _durationController.text = presetValues['duration'] ?? '25';  // Default to 25 years if not provided
       _additionalAmountController.text = presetValues['additionalAmount'] ?? '5000';  // Default to 5000 if not provided
+      _increaseInContributionController.text = presetValues['increaseInContribution'] ?? '0';  // Default to 0% if not provided
       _breakController.text = presetValues['breakPeriod'] ?? '0';
       _withdrawalDurationController.text = presetValues['withdrawalPeriod'] ?? '30';
       _withdrawalPercentageController.text = presetValues['withdrawalPercentage'] ?? '4'; // Min 3% and Max 5%
-
+      _inflationController.text = presetValues['inflation'] ?? '2';  // Default to 2% if not provided
       // Switch to the new predefined option and trigger a rebuild of SwitchAndTaxRate
       _taxOptionManager.switchToPredefined(predefinedOption ?? _taxOptions[0]);
       _presettingsController.text = presetKey;
@@ -153,6 +157,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       showInvestmentNote: showInvestmentNote, 
       totalDeposits: _investmentPlan.depositPlan.deposits, 
       totalValue: _investmentPlan.depositPlan.totalValue, 
+      principal: _investmentPlan.depositPlan.principal,
       totalInterestFromPrincipal: _investmentPlan.depositPlan.totalInterestFromPrincipal, 
       totalInterestFromContributions: _investmentPlan.depositPlan.totalInterestFromContributions, 
       compoundEarnings: _investmentPlan.depositPlan.compoundEarnings, 
@@ -250,6 +255,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
       additionalAmountController: _additionalAmountController,
       presettingsController: _presettingsController,
       contributionFrequency: _contributionFrequency,
+      increaseInContributionController: _increaseInContributionController,
       presetValues: PresettingService.getPresetKeys(),
       onPresetSelected: _loadPresetValues,
       onInputChanged: _recalculateValues,
@@ -292,6 +298,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
           });
         },
         withdrawalDurationController: _withdrawalDurationController,
+        inflationController: _inflationController,
+        durationAfterBreak: _investmentPlan.withdrawalPlan.breakPeriod + _investmentPlan.depositPlan.duration,
     );
   }
 

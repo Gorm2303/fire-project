@@ -7,6 +7,7 @@ class InputFieldsWidget extends StatelessWidget {
   final TextEditingController interestRateController;
   final TextEditingController durationController;
   final TextEditingController additionalAmountController;
+  final TextEditingController increaseInContributionController;
   final String contributionFrequency;
   final Function(String) onContributionFrequencyChanged;  // Callback for dropdown
   final VoidCallback onInputChanged;  // Callback for when any input changes
@@ -22,6 +23,7 @@ class InputFieldsWidget extends StatelessWidget {
     required this.durationController,
     required this.additionalAmountController,
     required this.contributionFrequency,
+    required this.increaseInContributionController,
     required this.onContributionFrequencyChanged,
     required this.onInputChanged,
     required this.presettingsController,
@@ -114,6 +116,12 @@ class InputFieldsWidget extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            TextField(
+              controller: increaseInContributionController,
+              decoration: const InputDecoration(labelText: 'Increase in Contribution (%)'),
+              keyboardType: TextInputType.number,
+              onChanged: (value) => onInputChanged(),  // Trigger recalculation on change
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class InvestmentCompoundingResults extends StatelessWidget {
   final double totalDeposits;
@@ -28,12 +29,12 @@ class InvestmentCompoundingResults extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Text('Total Deposits: ${totalDeposits.toStringAsFixed(0)}'),
-        Text('Compound Interest from Principal: ${totalInterestFromPrincipal.toStringAsFixed(0)}'),
-        Text('Compound Interest from Contributions: ${totalInterestFromContributions.toStringAsFixed(0)}'),
-        Text('Tax on Compound Interest: ${tax.toStringAsFixed(2)}'),
-        Text('Total Compound Interest: ${compoundEarnings.toStringAsFixed(0)}'),
-        Text('Total Investment Value: ${totalValue.toStringAsFixed(0)}'),
+        Text('Total Deposits: ${NumberFormat('###,###').format(totalDeposits)}'),
+        Text('Compound Interest from Principal: ${NumberFormat('###,###').format(totalInterestFromPrincipal)}'),
+        Text('Compound Interest from Contributions: ${NumberFormat('###,###').format(totalInterestFromContributions)}'),
+        Text('Tax on Compound Interest: ${NumberFormat('###,###').format(tax)}'),
+        Text('Total Compound Interest: ${NumberFormat('###,###').format(compoundEarnings)}'),
+        Text('Total Investment Value: ${NumberFormat('###,###').format(totalValue)}'),
       ],
     );
   }

@@ -1,11 +1,13 @@
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:fire_app/widgets/investment_widgets/formula_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class InvestmentCalculationWidget extends StatelessWidget {
   final bool showInvestmentNote;  // Whether to show the investment note
   final double totalDeposits;
   final double totalValue;
+  final double principal;
   final double totalInterestFromPrincipal;
   final double totalInterestFromContributions;
   final double compoundEarnings;
@@ -19,6 +21,7 @@ class InvestmentCalculationWidget extends StatelessWidget {
     required this.showInvestmentNote, 
     required this.totalDeposits,
     required this.totalValue,
+    required this.principal,
     required this.totalInterestFromPrincipal,
     required this.totalInterestFromContributions,
     required this.compoundEarnings,
@@ -52,13 +55,13 @@ class InvestmentCalculationWidget extends StatelessWidget {
               ),
             ),
             Text(
-              ' After $duration Years: ${totalValue.toStringAsFixed(0)} kr.-',
+              ' After $duration Years: ${NumberFormat('###,###').format(totalValue)}',
               style: const TextStyle(fontSize: 16),
             ),
           ],
         ),
         Text('Earnings compared to deposits: ${compoundEarningsOverDeposits.toStringAsFixed(2)}%'),
-        // Conditionally show the detailed investment note
+        Text('Principal Increased Value To: ${((principal + totalInterestFromPrincipal) / 100).toStringAsFixed(2)}%'),
       ],
     );
   }

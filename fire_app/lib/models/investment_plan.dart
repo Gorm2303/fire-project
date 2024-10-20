@@ -7,6 +7,7 @@ class InvestmentPlan extends ChangeNotifier {
   String name;
   DepositPlan depositPlan;
   WithdrawalPlan withdrawalPlan;
+  int totalDuration = 0;
 
   InvestmentPlan({
     required this.name,
@@ -15,6 +16,7 @@ class InvestmentPlan extends ChangeNotifier {
     required int depositYears,
     required double additionalAmount,
     required String contributionFrequency,
+    required double increaseInContribution,
     required TaxOption selectedTaxOption,
     int breakPeriod = 0,  // Added break period
     double withdrawalPercentage = 4,
@@ -25,6 +27,7 @@ class InvestmentPlan extends ChangeNotifier {
           duration: depositYears,
           additionalContribution: additionalAmount,
           contributionFrequency: contributionFrequency,
+          increaseInContribution: increaseInContribution,
           selectedTaxOption: selectedTaxOption,
         ),
         withdrawalPlan = WithdrawalPlan(
@@ -43,6 +46,7 @@ class InvestmentPlan extends ChangeNotifier {
     withdrawalPlan.totalValue = depositPlan.totalValue;
     withdrawalPlan.deposits = depositPlan.deposits;
     withdrawalPlan.calculateYearlyValues(depositPlan.totalValue);
+    totalDuration = depositPlan.duration + withdrawalPlan.breakPeriod + withdrawalPlan.duration;
     notifyListeners();  // Notify listeners after calculation
   }
 }

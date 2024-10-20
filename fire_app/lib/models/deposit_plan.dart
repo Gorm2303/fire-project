@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:fire_app/models/tax_option.dart';
 
 class DepositPlan {
@@ -7,6 +9,7 @@ class DepositPlan {
   int duration;
   double additionalContribution;
   String contributionFrequency;
+  double increaseInContribution;
   TaxOption selectedTaxOption;
   double totalValue = 0;
   double deposits = 0;
@@ -22,6 +25,7 @@ class DepositPlan {
     required this.duration,
     required this.additionalContribution,
     required this.contributionFrequency,
+    required this.increaseInContribution,
     required this.selectedTaxOption,
   });
 
@@ -62,7 +66,9 @@ class DepositPlan {
         'compoundEarnings': compoundEarnings,
         'tax': tax,
       });
+      additionalContribution += additionalContribution * (increaseInContribution / 100); // Increase contributions for next year
     }
+    additionalContribution = additionalContribution / (pow((1 + increaseInContribution / 100), duration).toDouble()); // Update deposits to include all contributions
     calculateTotalInterest();
 
     return yearlyValues;

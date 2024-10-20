@@ -1,6 +1,9 @@
+import 'package:fire_app/services/utils.dart';
 import 'package:fire_app/widgets/wrappers/textfield_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
+import 'package:intl/intl.dart';
+import 'dart:math';
 
 class WithdrawalWidget extends StatelessWidget {
   final TextEditingController withdrawalPercentageController;
@@ -9,6 +12,8 @@ class WithdrawalWidget extends StatelessWidget {
   final VoidCallback recalculateValues;
   final VoidCallback toggleTaxNote;
   final TextEditingController withdrawalDurationController;
+  final TextEditingController inflationController;
+  final int durationAfterBreak;
 
   const WithdrawalWidget({
     super.key,
@@ -18,18 +23,57 @@ class WithdrawalWidget extends StatelessWidget {
     required this.recalculateValues,
     required this.toggleTaxNote,
     required this.withdrawalDurationController,
+    required this.inflationController,
+    required this.durationAfterBreak,
   });
 
   @override
   Widget build(BuildContext context) {
+    final taxOnMonthlyWithdrawal = taxYearlyAfterBreak / 12;
+    final withdrawalMonthly = withdrawalYearlyAfterBreak / 12;
+    final withdrawalMonthyAfterTax = withdrawalMonthly - taxOnMonthlyWithdrawal;
+    final double expectedInflation = (pow(1 + (Utils.parseTextToDouble(inflationController.text)/100), durationAfterBreak) - 1);
+    final double withdrawalMonthlyAfterTaxAndInflation = withdrawalMonthyAfterTax / (1 + expectedInflation);
     return CardWrapper(
       title: 'Withdrawal Information',
       children: [
         _buildWithdrawalPeriod(),
-        _build4PercentWidget(),
-        _buildTaxOnMonthlyWithdrawal(),
+        _build4PercentWidget(withdrawalMonthly),
+        _buildTaxOnMonthlyWithdrawal(taxOnMonthlyWithdrawal),
         const SizedBox(height: 10),
-        _buildMonthlyWithdrawalAfterTax(),
+        _buildMonthlyWithdrawalAfterTax(withdrawalMonthyAfterTax),
+        _buildInflation(),
+        _buildInflationAccumulated(expectedInflation),
+        _buildInflationAdjustedWithdrawal(withdrawalMonthyAfterTax, withdrawalMonthlyAfterTaxAndInflation),
+      ],
+    );
+  }
+
+  Widget _buildInflationAccumulated(double expectedInflation) {
+    return Text(
+      'Inflation Accumulated Over $durationAfterBreak Years: ${(expectedInflation*100).toStringAsFixed(2)}%',
+      style: const TextStyle(fontSize: 16),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildInflationAdjustedWithdrawal(double withdrawal, double withdrawalAfterInflation) {
+    return Text(
+      'In $durationAfterBreak Years ${NumberFormat('###,###').format(withdrawal)} Is Worth: ${NumberFormat('###,###').format(withdrawalAfterInflation)}',
+      style: const TextStyle(fontSize: 16),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildInflation() {
+    return TextFieldWrapper(
+      children: [
+        TextField(
+          controller: inflationController,
+          decoration: const InputDecoration(labelText: 'Inflation Rate (%)'),
+          keyboardType: TextInputType.number,
+          onChanged: (value) => recalculateValues(),
+        ),
       ],
     );
   }
@@ -47,7 +91,7 @@ class WithdrawalWidget extends StatelessWidget {
     );
   }
 
-  Widget _build4PercentWidget() {
+  Widget _build4PercentWidget(double withdrawal) {
     return SizedBox(
       height: 45, 
       child: Row(
@@ -70,7 +114,7 @@ class WithdrawalWidget extends StatelessWidget {
           ),
           const SizedBox(width: 10),  // Small spacing between dropdown and text
           Text(
-            'Withdrawal Each Month: ${(withdrawalYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
+            'Withdrawal Each Month: ${NumberFormat('###,###').format(withdrawal)}',
             style: const TextStyle(fontSize: 16),
             softWrap: true,
             textAlign: TextAlign.center,  // Center text if it's multi-line
@@ -80,15 +124,15 @@ class WithdrawalWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildMonthlyWithdrawalAfterTax() {
+  Widget _buildMonthlyWithdrawalAfterTax(withdrawal) {
     return Text(
-      'Monthly Withdrawal After Tax: ${(withdrawalYearlyAfterBreak / 12 - taxYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
+      'Monthly Withdrawal After Tax: ${NumberFormat('###,###').format(withdrawal)}',
       style: const TextStyle(fontSize: 16),
       textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildTaxOnMonthlyWithdrawal() {
+  Widget _buildTaxOnMonthlyWithdrawal(withdrawal) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -105,7 +149,7 @@ class WithdrawalWidget extends StatelessWidget {
           ),
         ),
         Text(
-          ' on Monthly Withdrawal: ${(taxYearlyAfterBreak / 12).toStringAsFixed(0)} kr.-',
+          ' on Monthly Withdrawal: ${NumberFormat('###,###').format(withdrawal)}',
           style: const TextStyle(fontSize: 16),
           textAlign: TextAlign.center,
         ),

@@ -1,6 +1,7 @@
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:fire_app/widgets/wrappers/textfield_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BreakPeriodWidget extends StatelessWidget {
   final TextEditingController breakController;
@@ -38,7 +39,7 @@ class BreakPeriodWidget extends StatelessWidget {
     return Column(
       children: <Widget>[
         Text(
-          'Interest Gathered During Break: ${interestGatheredDuringBreak.toStringAsFixed(0)} kr.-',
+          'Interest Gathered During Break: ${NumberFormat('###,###').format(interestGatheredDuringBreak)}',
           style: const TextStyle(fontSize: 16),
         ),
         Text(
@@ -50,7 +51,7 @@ class BreakPeriodWidget extends StatelessWidget {
           style: const TextStyle(fontSize: 14),
         ),
         Text(
-          'Tax Payed During Break: ${taxDuringBreak.toStringAsFixed(0)} kr.-',
+          'Tax Payed During Break: ${NumberFormat('###,###').format(taxDuringBreak)}',
           style: const TextStyle(fontSize: 14),
         ),
       ],
