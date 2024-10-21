@@ -1,4 +1,5 @@
 import 'package:fire_app/models/tax_option.dart';
+import 'package:fire_app/screens/expenses_screen.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_calculation_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/break_period_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/investment_note_widget.dart';
@@ -12,7 +13,7 @@ import '../widgets/withdrawal_tax_widgets/tax_note_widget.dart';
 import '../models/investment_plan.dart';
 import '../widgets/investment_table_widget.dart';
 import '../widgets/investment_widgets/input_fields_widget.dart';
-import '../widgets/tab_dropdown_widget.dart';
+import '../widgets/tab_menu_widget.dart';
 import '../widgets/withdrawal_tax_widgets/tax_calculation_results_widget.dart';
 import '../widgets/withdrawal_tax_widgets/tax_rate_widget.dart';
 import '../services/presetting_service.dart';
@@ -42,7 +43,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   final TextEditingController _inflationController = TextEditingController(text: '0');
 
   String _contributionFrequency = 'Monthly';
-  String _selectedTab = 'Investment Calculator';
+  int _selectedTab = 0;
   bool _showTaxNote = false;
   bool showInvestmentNote = false;
 
@@ -142,7 +143,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     _withdrawalDurationController.dispose();
     _presettingsController.dispose();
     _customTaxController.dispose();
-    
+
     super.dispose(); // Ensure super.dispose() is always called last
   }
 
@@ -177,45 +178,43 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   Widget investmentCalculatorContent() {
     double width = 520;
-    return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          SizedBox(
-            width: width,
-            child: Column(
-              children: [
-                _buildInputFields(),
-                _buildInvestmentCalculationWidget(),
-              ],
-            ),
+    return Column(
+      children: <Widget>[
+        SizedBox(
+          width: width,
+          child: Column(
+            children: [
+              _buildInputFields(),
+              _buildInvestmentCalculationWidget(),
+            ],
           ),
-          showInvestmentNote ? ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: CardWrapper(
-            title: 'Investment Note', 
-            children: [_buildInvestmentNoteWidget()]
-            )
-          ) : Container(),
-          SizedBox(
-            width: width,
-            child: Column(
-              children: <Widget>[
-                _buildBreakPeriodWidget(),
-                _buildTaxRateWidget(),
-                _buildWithdrawalWidget(),
-              ],
-            ), 
-          ),
-          _showTaxNote ? ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: CardWrapper(
-            title: 'Tax Note', 
-            children: [_buildTaxNoteWidget()]
-            )
-          ) : Container(),
-          _buildTabView(),
-        ],
-      ),
+        ),
+        showInvestmentNote ? ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: CardWrapper(
+          title: 'Investment Note', 
+          children: [_buildInvestmentNoteWidget()]
+          )
+        ) : Container(),
+        SizedBox(
+          width: width,
+          child: Column(
+            children: <Widget>[
+              _buildBreakPeriodWidget(),
+              _buildTaxRateWidget(),
+              _buildWithdrawalWidget(),
+            ],
+          ), 
+        ),
+        _showTaxNote ? ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: CardWrapper(
+          title: 'Tax Note', 
+          children: [_buildTaxNoteWidget()]
+          )
+        ) : Container(),
+        _buildTabView(),
+      ],
     );
   }
   
@@ -337,15 +336,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   }
 
   Widget expensesCalculatorContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(Icons.money_off_csred_rounded, size: 100),
-          Text('Expenses Calculator Coming Soon!', style: TextStyle(fontSize: 24)),
-        ],
-      ),
-    );
+    return const ExpensesScreen();
   }
 
   @override
@@ -353,23 +344,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
     return ChangeNotifierProvider(
       create: (context) => _taxOptionManager,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Compound Interest Calculators'),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(48.0),
-            child: TabDropdownWidget(
-              selectedOption: _selectedTab,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedTab = newValue!;
-                });
-              },
-            ),
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Prevents infinite height issues
+            children: [
+                const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  'Compound Interest Calculators',
+                  style: TextStyle(fontSize: 24),
+                ),
+                ),
+              TabMenuWidget(
+                selectedIndex: _selectedTab, // Pass the selected tab index
+                onChanged: (int newIndex) {
+                  setState(() {
+                    _selectedTab = newIndex; // Update tab index when changed
+                  });
+                },
+              ),
+                _selectedTab == 0
+                  ? expensesCalculatorContent()
+                  : investmentCalculatorContent(),
+            ],
           ),
         ),
-        body: _selectedTab == 'Investment Calculator'
-            ? investmentCalculatorContent()
-            : expensesCalculatorContent(),
       ),
     );
   }
