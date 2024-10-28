@@ -15,6 +15,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
   final TextEditingController _expenseController = TextEditingController(text: '10000');
   final TextEditingController _interestRateController = TextEditingController(text: '7');
   final TextEditingController _inflationRateController = TextEditingController(text: '2');
+  final TextEditingController _durationController = TextEditingController(text: '50');
   late final TabController _tableTabController = TabController(length: 1, vsync: this);
 
   String _selectedFrequency = 'One Time';
@@ -126,6 +127,18 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Inflation Rate',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (String value) {
+                    _calculateTableData(); // Recalculate when interest rate changes
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _durationController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Duration',
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (String value) {
@@ -262,6 +275,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
   void _calculateTableData() {
     double interestRate = double.tryParse(_interestRateController.text) ?? 0;
     double inflationRate = double.tryParse(_inflationRateController.text) ?? 0;
+    int duration =  _durationController.text.isNotEmpty ? int.parse(_durationController.text) : 50;
 
     List<Map<String, dynamic>> tableData = [];
     List<FlSpot> graphDataTotalValue = [];
@@ -299,7 +313,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
     cumulativeTotalValue += year0Expenses;
 
     // Loop for years 1 to 50, adding interest and inflation adjustments
-    for (int year = 1; year <= 50; year++) {
+    for (int year = 1; year <= duration; year++) {
       double totalExpenses = 0;
       double yearlyInterest = 0;
 

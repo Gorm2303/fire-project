@@ -4,7 +4,7 @@ class Expense {
   final String frequency;
   bool isSelected;
 
-  Expense({required this.amount, required this.frequency, this.isSelected = false});
+  Expense({required this.amount, required this.frequency, this.isSelected = true});
 
   double getYearlyAmount(int year) {
     if (frequency == 'One Time') {
