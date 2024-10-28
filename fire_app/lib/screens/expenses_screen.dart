@@ -177,6 +177,22 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                   belowBarData: BarAreaData(show: true, color: Colors.green.withOpacity(0.3)),
                 ),
               ],
+              // Tooltip settings to show formatted values
+              lineTouchData: LineTouchData(
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipItems: (touchedSpots) {
+                    return touchedSpots.map((touchedSpot) {
+                      final formattedValue = formatNumber(touchedSpot.y); // Format with commas and no decimals
+                      final lineColor = touchedSpot.bar.color; // Get the color of the line
+
+                      return LineTooltipItem(
+                        '$formattedValue',
+                        TextStyle(color: lineColor, fontWeight: FontWeight.bold), // Use the line color
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -208,11 +224,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                       rows: _tableData.map((data) {
                         return DataRow(cells: [
                           DataCell(Text(data['year'].toString())),
-                          DataCell(Text(data['Total Expenses'].toStringAsFixed(0))),
-                          DataCell(Text(data['Interest (Yearly)'].toStringAsFixed(0))),
-                          DataCell(Text(data['Interest (Total)'].toStringAsFixed(0))),
-                          DataCell(Text(data['Total Value'].toStringAsFixed(0))),
-                          DataCell(Text(data['Inflation Adjusted'].toStringAsFixed(0))),
+                          DataCell(Text(data['Total Expenses'])),
+                          DataCell(Text(data['Interest (Yearly)'])),
+                          DataCell(Text(data['Interest (Total)'])),
+                          DataCell(Text(data['Total Value'])),
+                          DataCell(Text(data['Inflation Adjusted'])),
                         ]);
                       }).toList(),
                     ),
@@ -252,9 +268,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
     List<FlSpot> graphDataTotalExpenses = [];
     List<FlSpot> graphDataInflationAdjusted = [];
 
-    double cumulativeTotalValue = 0;
-    double cumulativeTotalExpenses = 0;
-    double cumulativeTotalInterest = 0;
+    double cumulativeTotalValue = 0.0;
+    double cumulativeTotalExpenses = 0.0;
+    double cumulativeTotalInterest = 0.0;
 
     // Calculate total expenses for Year 0 (no interest yet, total value = total expenses)
     double year0Expenses = 0;
@@ -326,11 +342,22 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
       tableData.add(yearData);
 
       // Add data points for the graph
-      graphDataTotalExpenses.add(FlSpot(year.toDouble(), cumulativeTotalExpenses));
-      graphDataTotalValue.add(FlSpot(year.toDouble(), cumulativeTotalValue));
-      graphDataInflationAdjusted.add(FlSpot(year.toDouble(), inflationAdjustedValue));
+      graphDataTotalExpenses.add(FlSpot(year.toDouble(), cumulativeTotalExpenses.roundToDouble()));
+      graphDataTotalValue.add(FlSpot(year.toDouble(), cumulativeTotalValue.roundToDouble()));
+      graphDataInflationAdjusted.add(FlSpot(year.toDouble(), inflationAdjustedValue.roundToDouble()));
     }
 
+    // Update the table data with formatted numbers
+    tableData = tableData.map((data) {
+      return {
+        'year': data['year'],
+        'Total Expenses': formatNumber(data['Total Expenses']),
+        'Interest (Yearly)': formatNumber(data['Interest (Yearly)']),
+        'Interest (Total)': formatNumber(data['Interest (Total)']),
+        'Total Value': formatNumber(data['Total Value']),
+        'Inflation Adjusted': formatNumber(data['Inflation Adjusted']),
+      };
+    }).toList();
     setState(() {
       _tableData = tableData;
       _graphDataTotalExpenses = graphDataTotalExpenses;
@@ -339,5 +366,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
     });
   }
 
-
+  // Format numbers with thousand separators
+  String formatNumber(dynamic number) {
+    // Ensure number is a double or return '0' if null or non-numeric
+    if (number == null) return '0';
+    if (number is String) number = double.tryParse(number) ?? 0.0;
+    return number.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'), (Match match) => ',');
+  }
 }
