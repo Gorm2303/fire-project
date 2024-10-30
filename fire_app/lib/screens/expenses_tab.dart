@@ -196,7 +196,7 @@ class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStat
   void _calculateTableData() {
     double interestRate = double.tryParse(_interestRateController.text) ?? 0;
     double inflationRate = double.tryParse(_inflationRateController.text) ?? 0;
-    int duration =  _durationController.text.isNotEmpty ? int.parse(_durationController.text) : 50;
+    int duration =  int.tryParse(_durationController.text) ?? 50;
 
     List<Map<String, dynamic>> tableData = [];
     List<FlSpot> graphDataTotalValue = [];
