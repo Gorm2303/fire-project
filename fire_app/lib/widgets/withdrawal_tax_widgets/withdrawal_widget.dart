@@ -148,7 +148,7 @@ class WithdrawalWidget extends StatelessWidget {
               }).toList(),
               onChanged: (String? newValue) {
                 if (newValue != null) {
-                  withdrawalPercentageController.text = newValue!;
+                  withdrawalPercentageController.text = newValue;
                   recalculateValues();
                 }
               },

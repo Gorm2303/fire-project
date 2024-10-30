@@ -1,16 +1,16 @@
 import 'dart:math';
-
 import 'package:fire_app/models/expense.dart';
+import 'package:fire_app/services/utils.dart';
+import 'package:fire_app/widgets/expense_widgets/chart_widget.dart';
+import 'package:fire_app/widgets/expense_widgets/table_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
 class ExpensesScreen extends StatefulWidget {
   const ExpensesScreen({super.key});
 
   @override
   _ExpensesScreenState createState() => _ExpensesScreenState();
 }
-
 class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProviderStateMixin {
   final TextEditingController _expenseController = TextEditingController(text: '10000');
   final TextEditingController _interestRateController = TextEditingController(text: '7');
@@ -28,13 +28,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
   List<FlSpot> _graphDataInflationAdjusted = [];
 
   @override
-  @override
   void dispose() {
     _tableTabController.dispose();
     super.dispose();
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     double width = 520;
     return Column(
@@ -80,8 +79,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                   child: const Text('Add Expense'),
                 ),
                 const SizedBox(height: 16),
-                // List of added expenses with checkboxes
-                // Add remove button to each item in the list of expenses.
                 ListView.builder(
                   shrinkWrap: true,
                   itemCount: _expenses.length,
@@ -94,7 +91,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                           setState(() {
                             _expenses[index].isSelected = value ?? false;
                           });
-                          _calculateTableData(); // Recalculate when selection changes
+                          _calculateTableData();
                         },
                       ),
                       trailing: IconButton(
@@ -103,7 +100,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                           setState(() {
                             _expenses.removeAt(index);
                           });
-                          _calculateTableData(); // Recalculate when expense is removed
+                          _calculateTableData();
                         },
                       ),
                     );
@@ -118,7 +115,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (String value) {
-                    _calculateTableData(); // Recalculate when interest rate changes
+                    _calculateTableData();
                   },
                 ),
                 const SizedBox(height: 16),
@@ -130,7 +127,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (String value) {
-                    _calculateTableData(); // Recalculate when interest rate changes
+                    _calculateTableData();
                   },
                 ),
                 const SizedBox(height: 16),
@@ -142,7 +139,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (String value) {
-                    _calculateTableData(); // Recalculate when interest rate changes
+                    _calculateTableData();
                   },
                 ),
               ],
@@ -151,105 +148,30 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
         ),
         const SizedBox(height: 16),
         // Graph implementation using fl_chart
-        Container(
-          height: 600,
-          width: 600,
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: LineChart(
-            LineChartData(
-              borderData: FlBorderData(show: true),
-              gridData: const FlGridData(show: true),
-              titlesData: const FlTitlesData(show: true),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: _graphDataTotalValue,
-                  isCurved: true,
-                  color: Colors.blue,
-                  barWidth: 4,
-                  isStrokeCapRound: true,
-                  belowBarData: BarAreaData(show: true, color: Colors.blue.withOpacity(0.3)),
-                ),
-                LineChartBarData(
-                  spots: _graphDataTotalExpenses,
-                  isCurved: true,
-                  color: Colors.red,
-                  barWidth: 4,
-                  isStrokeCapRound: true,
-                  belowBarData: BarAreaData(show: true, color: Colors.red.withOpacity(0.3)),
-                ),
-                LineChartBarData(
-                  spots: _graphDataInflationAdjusted,  // Adding inflation-adjusted values to the graph
-                  isCurved: true,
-                  color: Colors.green,
-                  barWidth: 4,
-                  isStrokeCapRound: true,
-                  belowBarData: BarAreaData(show: true, color: Colors.green.withOpacity(0.3)),
-                ),
-              ],
-              // Tooltip settings to show formatted values
-              lineTouchData: LineTouchData(
-                touchTooltipData: LineTouchTooltipData(
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((touchedSpot) {
-                      final formattedValue = formatNumber(touchedSpot.y); // Format with commas and no decimals
-                      final lineColor = touchedSpot.bar.color; // Get the color of the line
-
-                      return LineTooltipItem(
-                        '$formattedValue',
-                        TextStyle(color: lineColor, fontWeight: FontWeight.bold), // Use the line color
-                      );
-                    }).toList();
-                  },
-                ),
-              ),
-            ),
-          ),
+        ExpenseLineChart(
+          graphDataTotalValue: _graphDataTotalValue,
+          graphDataTotalExpenses: _graphDataTotalExpenses,
+          graphDataInflationAdjusted: _graphDataInflationAdjusted,
         ),
-
         const SizedBox(height: 16),
-        Column(
-          children: [
-            TabBar(
-              controller: _tableTabController,
-              tabs: const [
-                Tab(text: 'Expenses Yearly'),
-              ],
-            ),
-            SizedBox(
-              height: 475,
-              child: TabBarView(
-                controller: _tableTabController,
-                children: [ SingleChildScrollView(
-                  child:
-                    DataTable(
-                      columns: const [
-                        DataColumn(label: Text('Year')),
-                        DataColumn(label: Text('Total Expenses')),
-                        DataColumn(label: Text('Interest (Yearly)')),
-                        DataColumn(label: Text('Interest (Total)')),
-                        DataColumn(label: Text('Total Value')),
-                        DataColumn(label: Text('Inflation Adjusted')),
-                      ],
-                      rows: _tableData.map((data) {
-                        return DataRow(cells: [
-                          DataCell(Text(data['year'].toString())),
-                          DataCell(Text(data['Total Expenses'])),
-                          DataCell(Text(data['Interest (Yearly)'])),
-                          DataCell(Text(data['Interest (Total)'])),
-                          DataCell(Text(data['Total Value'])),
-                          DataCell(Text(data['Inflation Adjusted'])),
-                        ]);
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        TabBar(
+          controller: _tableTabController,
+          tabs: const [
+            Tab(text: 'Expenses'),
           ],
+        ),
+        // Table implementation using data_table_2 with finite height
+        SizedBox(
+          height: 475,  // Set a fixed height for the table
+          child: TabBarView(
+            controller: _tableTabController,
+            children: [
+              ExpenseTable(
+                tableTabController: _tableTabController,
+                tableData: _tableData,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -269,7 +191,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
     // Dynamically recalculate the table and graph when an item is added
     _calculateTableData();
   }
-
 
   // Update _calculateTableData to compute compound interest annually and the total.
   void _calculateTableData() {
@@ -365,11 +286,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
     tableData = tableData.map((data) {
       return {
         'year': data['year'],
-        'Total Expenses': formatNumber(data['Total Expenses']),
-        'Interest (Yearly)': formatNumber(data['Interest (Yearly)']),
-        'Interest (Total)': formatNumber(data['Interest (Total)']),
-        'Total Value': formatNumber(data['Total Value']),
-        'Inflation Adjusted': formatNumber(data['Inflation Adjusted']),
+        'Total Expenses': Utils.formatNumber(data['Total Expenses']),
+        'Interest (Yearly)': Utils.formatNumber(data['Interest (Yearly)']),
+        'Interest (Total)': Utils.formatNumber(data['Interest (Total)']),
+        'Total Value': Utils.formatNumber(data['Total Value']),
+        'Inflation Adjusted': Utils.formatNumber(data['Inflation Adjusted']),
       };
     }).toList();
     setState(() {
@@ -378,14 +299,5 @@ class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProvid
       _graphDataTotalValue = graphDataTotalValue;
       _graphDataInflationAdjusted = graphDataInflationAdjusted;  // Added the inflation-adjusted data series
     });
-  }
-
-  // Format numbers with thousand separators
-  String formatNumber(dynamic number) {
-    // Ensure number is a double or return '0' if null or non-numeric
-    if (number == null) return '0';
-    if (number is String) number = double.tryParse(number) ?? 0.0;
-    return number.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'), (Match match) => ',');
   }
 }

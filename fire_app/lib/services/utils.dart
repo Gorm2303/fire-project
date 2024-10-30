@@ -37,4 +37,13 @@ class Utils {
     return principal * pow(1 + rate / 100, time) - principal;
   }
 
+  static String formatNumber(dynamic number) {
+    if (number == null) return '0';
+    if (number is String) number = double.tryParse(number) ?? 0.0;
+    return number.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (Match match) => ',',
+    );
+  }
+
 }
