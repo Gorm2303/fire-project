@@ -2,15 +2,13 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class ExpenseTable extends StatelessWidget {
-  final TabController _tableTabController;
   final List<Map<String, dynamic>> _tableData;
 
   const ExpenseTable({
     super.key,
     required TabController tableTabController,
     required List<Map<String, dynamic>> tableData,
-  }) : _tableTabController = tableTabController,
-       _tableData = tableData;
+  }) : _tableData = tableData;
 
   @override
   Widget build(BuildContext context) {

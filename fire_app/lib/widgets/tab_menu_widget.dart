@@ -21,7 +21,7 @@ class _TabMenuWidgetState extends State<TabMenuWidget> with SingleTickerProvider
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 2,
+      length: 3,
       vsync: this,
       initialIndex: widget.selectedIndex,
     );
@@ -51,8 +51,9 @@ class _TabMenuWidgetState extends State<TabMenuWidget> with SingleTickerProvider
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
           tabs: const [
-            Tab(text: 'Investments'),
+            Tab(text: 'Salary'),
             Tab(text: 'Expenses'),
+            Tab(text: 'Investments'),
           ],
         ),
       ],

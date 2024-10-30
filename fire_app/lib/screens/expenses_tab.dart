@@ -5,13 +5,13 @@ import 'package:fire_app/widgets/expense_widgets/chart_widget.dart';
 import 'package:fire_app/widgets/expense_widgets/table_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-class ExpensesScreen extends StatefulWidget {
-  const ExpensesScreen({super.key});
+class ExpensesTab extends StatefulWidget {
+  const ExpensesTab({super.key});
 
   @override
-  _ExpensesScreenState createState() => _ExpensesScreenState();
+  _ExpensesTabState createState() => _ExpensesTabState();
 }
-class _ExpensesScreenState extends State<ExpensesScreen> with SingleTickerProviderStateMixin {
+class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStateMixin {
   final TextEditingController _expenseController = TextEditingController(text: '10000');
   final TextEditingController _interestRateController = TextEditingController(text: '7');
   final TextEditingController _inflationRateController = TextEditingController(text: '2');
