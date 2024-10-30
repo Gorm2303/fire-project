@@ -65,6 +65,13 @@ class PresettingService {
       'additionalAmount': '1000',
       'breakPeriod': '50',
     },
+    'Money in the Bank': {
+      'principal': '5000',
+      'interestRate': '3.86',
+      'duration': '25',
+      'additionalAmount': '5000',
+      'breakPeriod': '0',
+    },
   };
 
   // Method to get a specific preset by key
