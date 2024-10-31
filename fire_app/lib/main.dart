@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     // Move _pages into build to access widget.onThemeChanged
-    List<Widget> _pages = <Widget>[
+    List<Widget> pages = <Widget>[
       const CalculatorScreen(),
       const StatisticsTab(),
       SettingsTab(onThemeChanged: widget.onThemeChanged), // Pass actual theme toggle
@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [

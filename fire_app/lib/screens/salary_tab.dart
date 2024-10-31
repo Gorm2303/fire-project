@@ -1,10 +1,12 @@
 import 'package:fire_app/models/salary.dart';
+import 'package:fire_app/services/salary_calculator.dart';
 import 'package:fire_app/widgets/salary_widgets/additional_inputs.dart';
 import 'package:fire_app/widgets/salary_widgets/chart_widget.dart';
 import 'package:fire_app/widgets/salary_widgets/list_widget.dart';
 import 'package:fire_app/widgets/salary_widgets/salary_input_fields.dart';
 import 'package:fire_app/widgets/salary_widgets/table_widget.dart';
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -19,13 +21,17 @@ class SalaryTab extends StatefulWidget {
 class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
   late TabController _tableTabController;
 
-  final TextEditingController monthlySalaryController = TextEditingController(text: '40000');
-  final TextEditingController yearlyRaiseController = TextEditingController(text: '2');
-  final TextEditingController taxRateController = TextEditingController(text: '40');
-  final TextEditingController durationController = TextEditingController(text: '40');
-  final TextEditingController inflationRateController = TextEditingController(text: '2');
+  final TextEditingController _monthlySalaryController = TextEditingController(text: '40000');
+  final TextEditingController _raiseYearlyController = TextEditingController(text: '2');
+  final TextEditingController _taxRateController = TextEditingController(text: '40');
+  final TextEditingController _durationController = TextEditingController(text: '40');
+  final TextEditingController _inflationRateController = TextEditingController(text: '2');
 
   final List<Salary> _salaries = [];
+  List<Map<String, dynamic>> _tableData = [];
+  List<FlSpot> _graphDataAccumulated = [];
+  List<FlSpot> _graphDataAccumulatedAfterTax = [];
+  List<FlSpot> _graphDataInflationAdjusted = [];
   List<double> accumulatedAfterTaxAndInflation = [];
 
   @override
@@ -42,8 +48,8 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
   }
 
   void addSalary() {
-    final monthlySalary = double.tryParse(monthlySalaryController.text) ?? 0;
-    final yearlyRaise = double.tryParse(yearlyRaiseController.text) ?? 0;
+    final monthlySalary = double.tryParse(_monthlySalaryController.text) ?? 0;
+    final yearlyRaise = double.tryParse(_raiseYearlyController.text) ?? 0;
 
     Salary salary = Salary(
       amount: monthlySalary, 
@@ -53,41 +59,26 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
         _salaries.add(salary);
       });
 
-    calculateAccumulatedSalaries();
+    _calculateTableData();
   }
 
-  List<double> calculateAccumulatedSalaries() {
-    double taxRate = (double.tryParse(taxRateController.text) ?? 0) / 100;
-    double inflationRate = (double.tryParse(inflationRateController.text) ?? 0) / 100;
-    int duration = int.tryParse(durationController.text) ?? 0;
+  void _calculateTableData() {
+    SalaryCalculator calculator = SalaryCalculator(
+      salaries: _salaries,
+      raiseYearlyPercentage: double.tryParse(_raiseYearlyController.text) ?? 0,
+      inflationRate: double.tryParse(_inflationRateController.text) ?? 0,
+      duration: int.tryParse(_durationController.text) ?? 50,
+      taxRate: double.tryParse(_taxRateController.text) ?? 0,
+    );
 
-    // Initialize the accumulated list with zero for each year
-    accumulatedAfterTaxAndInflation = List<double>.filled(duration + 1, 0);
+    final results = calculator.calculate();
 
-    for (Salary salary in _salaries) {
-      if (!salary.isSelected) {
-        continue;
-      }
-
-      double yearlySalary = salary.amount * 12;
-
-      for (int year = 1; year <= duration; year++) {
-        // Apply the raise for the current year
-        double raise = salary.raiseYearlyPercentage;
-        yearlySalary *= (1 + raise / 100); // Compounded salary with the raise
-
-        // Calculate the after-tax amount for this year's salary
-        double afterTax = yearlySalary * (1 - taxRate);
-
-        // Adjust this year's after-tax salary for inflation
-        double adjustedForInflation = afterTax / pow(1 + inflationRate, year);
-
-        // Add this year's adjusted salary to the accumulated total for this year
-        accumulatedAfterTaxAndInflation[year] += accumulatedAfterTaxAndInflation[year - 1] + adjustedForInflation;
-      }
-    }
-
-    return accumulatedAfterTaxAndInflation;
+    setState(() {
+      _tableData = results['tableData'];
+      _graphDataAccumulated = results['graphDataTotalValue'];
+      _graphDataAccumulatedAfterTax = results['graphDataTotalExpenses'];
+      _graphDataInflationAdjusted = results['graphDataInflationAdjusted'];
+    });
   }
 
   @override
@@ -99,11 +90,19 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
           width: widget.maxWidth,
           child: CardWrapper(
             title: 'Salary Information',
-            contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 100, vertical: 0),
+            darkColor: Colors.green.shade900,
+            lightColor: Colors.green.shade100,
+            contentPadding: MediaQuery.of(context).size.width > widget.maxWidth
+              ? const EdgeInsetsDirectional.symmetric(horizontal: 100, vertical: 0) 
+              : MediaQuery.of(context).size.width > widget.maxWidth - 100 
+              ? const EdgeInsetsDirectional.symmetric(horizontal: 75, vertical: 0)
+              : MediaQuery.of(context).size.width > widget.maxWidth - 200
+              ? const EdgeInsetsDirectional.symmetric(horizontal: 32, vertical: 0)
+              : const EdgeInsetsDirectional.symmetric(horizontal: 12, vertical: 0),
             children: [
               SalaryInputField(
-                controller: monthlySalaryController,
-                yearlyRaiseController: yearlyRaiseController,
+                controller: _monthlySalaryController,
+                yearlyRaiseController: _raiseYearlyController,
                 addSalaryCallback: addSalary,
               ),
               SalaryList(
@@ -112,24 +111,28 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
                   setState(() {
                     _salaries[index].toggleSelection();
                   });
+                  _calculateTableData();
                 }, removeSalaryCallback: (integer) { 
                   setState(() {
                     _salaries.removeAt(integer);
                   });
+                  _calculateTableData();
                 },
               ),
-              const SizedBox(height: 16),
               AdditionalInputs(
-                taxRateController: taxRateController,
-                durationController: durationController,
-                inflationRateController: inflationRateController,
+                taxRateController: _taxRateController,
+                durationController: _durationController,
+                inflationRateController: _inflationRateController,
+                onParameterChanged: _calculateTableData,
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
         SalaryChart(
-          accumulatedSalaries: calculateAccumulatedSalaries(),
+          graphDataAccumulated: _graphDataAccumulated,
+          graphDataAccumulatedAfterTax: _graphDataAccumulatedAfterTax,
+          graphDataInflationAdjusted: _graphDataInflationAdjusted,
         ),
         const SizedBox(height: 16),
         TabBar(
@@ -144,8 +147,7 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
             controller: _tableTabController,
             children: [
               SalaryTable(
-                duration: int.tryParse(durationController.text) ?? 0,
-                accumulatedSalaries: calculateAccumulatedSalaries(),
+                tableData: _tableData,
               ),
             ],
           ),

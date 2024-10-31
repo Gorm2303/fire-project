@@ -18,13 +18,9 @@ class ExpenseLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
+        SizedBox(
           width: 690,
           height: 600,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-          ),
           child: LineChart(
             LineChartData(
               titlesData: const FlTitlesData(

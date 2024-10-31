@@ -2,13 +2,12 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class ExpenseTable extends StatelessWidget {
-  final List<Map<String, dynamic>> _tableData;
+  final List<Map<String, dynamic>> tableData;
 
   const ExpenseTable({
     super.key,
-    required TabController tableTabController,
-    required List<Map<String, dynamic>> tableData,
-  }) : _tableData = tableData;
+    required this.tableData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,7 @@ class ExpenseTable extends StatelessWidget {
           DataColumn(label: Text('Total Value')),
           DataColumn(label: Text('Inflation Adjusted')),
         ],
-        rows: _tableData.map((data) {
+        rows: tableData.map((data) {
           return DataRow(cells: [
             DataCell(Text(data['year'].toString())),
             DataCell(Text(data['Total Expenses'])),

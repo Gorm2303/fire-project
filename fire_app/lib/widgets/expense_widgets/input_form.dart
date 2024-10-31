@@ -8,13 +8,13 @@ class ExpenseInputForm extends StatelessWidget {
   final VoidCallback onAddExpense;
 
   const ExpenseInputForm({
-    Key? key,
+    super.key,
     required this.expenseController,
     required this.frequencies,
     required this.selectedFrequency,
     required this.onFrequencyChanged,
     required this.onAddExpense,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

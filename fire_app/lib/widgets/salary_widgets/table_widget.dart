@@ -2,13 +2,12 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class SalaryTable extends StatelessWidget {
-  final int duration;
-  final List<double> accumulatedSalaries;
+  final List<Map<String, dynamic>> tableData;
+
 
   const SalaryTable({
     super.key,
-    required this.duration,
-    required this.accumulatedSalaries,
+    required this.tableData,
   });
 
   @override
@@ -16,19 +15,25 @@ class SalaryTable extends StatelessWidget {
     return SizedBox(
       height: 400,
       child: DataTable2(
+        columnSpacing: 12,
+        horizontalMargin: 12,
+        minWidth: 600,
         columns: const [
           DataColumn(label: Text('Year')),
-          DataColumn(label: Text('Accumulated After Tax & Inflation')),
+          DataColumn(label: Text('Salary (Monthly)')),
+          DataColumn(label: Text('Salary (Total)')),
+          DataColumn(label: Text('After Tax')),
+          DataColumn(label: Text('Inflation Adjusted')),
         ],
-        rows: List<DataRow>.generate(
-          duration + 1,
-          (index) => DataRow(
-            cells: [
-              DataCell(Text('$index')),
-              DataCell(Text(accumulatedSalaries[index].toStringAsFixed(0))),
-            ],
-          ),
-        ),
+        rows: tableData.map((data) {
+          return DataRow(cells: [
+            DataCell(Text(data['year'].toString())),
+            DataCell(Text(data['Salary (Monthly)'])),
+            DataCell(Text(data['Salary (Total)'])),
+            DataCell(Text(data['After Tax'])),
+            DataCell(Text(data['Inflation Adjusted'])),
+          ]);
+        }).toList(),
       ),
     );
   }

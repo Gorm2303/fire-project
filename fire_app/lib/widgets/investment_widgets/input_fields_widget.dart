@@ -35,6 +35,8 @@ class InputFieldsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return CardWrapper(
       title: 'Deposit Information',
+      darkColor: Colors.blue.shade900,
+      lightColor: Colors.blue.shade100,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,  // Center the row

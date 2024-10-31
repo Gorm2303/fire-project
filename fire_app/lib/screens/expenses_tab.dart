@@ -18,7 +18,6 @@ class ExpensesTab extends StatefulWidget {
 }
 
 class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStateMixin {
-  final List<Expense> _expenses = [];
   final TextEditingController _expenseController = TextEditingController(text: '10000');
   final TextEditingController _interestRateController = TextEditingController(text: '7');
   final TextEditingController _inflationRateController = TextEditingController(text: '2');
@@ -28,6 +27,7 @@ class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStat
   final List<String> _frequencies = ['One Time', 'Yearly', 'Monthly'];
   late final TabController _tableTabController = TabController(length: 1, vsync: this);
 
+  final List<Expense> _expenses = [];
   List<Map<String, dynamic>> _tableData = [];
   List<FlSpot> _graphDataTotalValue = [];
   List<FlSpot> _graphDataTotalExpenses = [];
@@ -39,6 +39,35 @@ class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStat
     super.dispose();
   }
 
+  void _addExpense() {
+    double expenseAmount = double.tryParse(_expenseController.text) ?? 0;
+    Expense newExpense = Expense(amount: expenseAmount, frequency: _selectedFrequency);
+    
+    setState(() {
+      _expenses.add(newExpense);
+    });
+
+    _calculateTableData();
+  }
+
+  void _calculateTableData() {
+    ExpenseCalculator calculator = ExpenseCalculator(
+      expenses: _expenses,
+      interestRate: double.tryParse(_interestRateController.text) ?? 0,
+      inflationRate: double.tryParse(_inflationRateController.text) ?? 0,
+      duration: int.tryParse(_durationController.text) ?? 50,
+    );
+
+    final results = calculator.calculate();
+
+    setState(() {
+      _tableData = results['tableData'];
+      _graphDataTotalExpenses = results['graphDataTotalExpenses'];
+      _graphDataTotalValue = results['graphDataTotalValue'];
+      _graphDataInflationAdjusted = results['graphDataInflationAdjusted'];
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -49,8 +78,15 @@ class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStat
             width: widget.maxWidth,
             child: CardWrapper(
               title: 'Expenses Information',
-              contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 100, vertical: 0),
-              children: [
+              darkColor: Colors.red.shade900,
+              lightColor: Colors.red.shade100,
+              contentPadding: MediaQuery.of(context).size.width > widget.maxWidth
+                ? const EdgeInsetsDirectional.symmetric(horizontal: 100, vertical: 0) 
+                : MediaQuery.of(context).size.width > widget.maxWidth - 100 
+                ? const EdgeInsetsDirectional.symmetric(horizontal: 75, vertical: 0)
+                : MediaQuery.of(context).size.width > widget.maxWidth - 200
+                ? const EdgeInsetsDirectional.symmetric(horizontal: 32, vertical: 0)
+                : const EdgeInsetsDirectional.symmetric(horizontal: 12, vertical: 0),              children: [
               ExpenseInputForm(
                 expenseController: _expenseController,
                 frequencies: _frequencies,
@@ -98,7 +134,6 @@ class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStat
             controller: _tableTabController,
             children: [
               ExpenseTable(
-                tableTabController: _tableTabController,
                 tableData: _tableData,
               ),
             ],
@@ -106,34 +141,5 @@ class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStat
         ),
       ],
     );
-  }
-
-  void _addExpense() {
-    double expenseAmount = double.tryParse(_expenseController.text) ?? 0;
-    Expense newExpense = Expense(amount: expenseAmount, frequency: _selectedFrequency);
-    
-    setState(() {
-      _expenses.add(newExpense);
-    });
-
-    _calculateTableData();
-  }
-
-  void _calculateTableData() {
-    ExpenseCalculator calculator = ExpenseCalculator(
-      expenses: _expenses,
-      interestRate: double.tryParse(_interestRateController.text) ?? 0,
-      inflationRate: double.tryParse(_inflationRateController.text) ?? 0,
-      duration: int.tryParse(_durationController.text) ?? 50,
-    );
-
-    final results = calculator.calculate();
-
-    setState(() {
-      _tableData = results['tableData'];
-      _graphDataTotalExpenses = results['graphDataTotalExpenses'];
-      _graphDataTotalValue = results['graphDataTotalValue'];
-      _graphDataInflationAdjusted = results['graphDataInflationAdjusted'];
-    });
   }
 }
