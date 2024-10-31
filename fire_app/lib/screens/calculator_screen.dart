@@ -1,6 +1,7 @@
 import 'package:fire_app/screens/expenses_tab.dart';
 import 'package:fire_app/screens/investment_tab.dart';
 import 'package:fire_app/screens/salary_tab.dart';
+import 'package:fire_app/screens/statistics_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:fire_app/widgets/tab_menu_widget.dart';
 
@@ -12,27 +13,8 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> with TickerProviderStateMixin {
-  late TabController _mainTabController;
   int _selectedTab = 0;
   static const double maxWidth = 550;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _initializeTabControllers();
-  }
-
-  void _initializeTabControllers() {
-    _mainTabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _mainTabController.dispose();
-    
-    super.dispose(); // Ensure super.dispose() is always called last
-  }
 
   Widget investmentCalculatorContent() {
     return const InvestmentTab(maxWidth: maxWidth);
@@ -44,6 +26,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
 
   Widget salaryCalculatorContent() {
     return const SalaryTab(maxWidth: maxWidth);
+  }
+
+  Widget statisticsCalculatorContent() {
+    return const StatisticsTab();
   }
 
   @override
@@ -72,7 +58,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
                 ? salaryCalculatorContent()
                 : _selectedTab == 1
                   ? expensesCalculatorContent()
-                  : investmentCalculatorContent(),
+                  : _selectedTab == 2
+                    ? investmentCalculatorContent()
+                    : statisticsCalculatorContent()
           ],
         ),
       ),

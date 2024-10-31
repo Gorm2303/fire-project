@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class CardWrapper extends StatelessWidget {
   final List<Widget> children;
   final String title;
+  final EdgeInsetsGeometry contentPadding;
 
-  const CardWrapper({super.key, required this.children, required this.title});
+  const CardWrapper({super.key, required this.children, required this.title, this.contentPadding = const EdgeInsets.all(0)});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Card(
-        color: const Color.fromARGB(176, 255, 255, 255),
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
         elevation: 3,
         shape: RoundedRectangleBorder(
@@ -29,7 +29,11 @@ class CardWrapper extends StatelessWidget {
               ),
               const Divider(),
               // Dynamically add all the passed children
-              ...children,
+              Padding(padding: contentPadding, 
+              child: Column(
+                  children: children,
+                ),
+              ),
             ],
           ),
         ),

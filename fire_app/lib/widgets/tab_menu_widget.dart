@@ -21,7 +21,7 @@ class _TabMenuWidgetState extends State<TabMenuWidget> with SingleTickerProvider
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 3,
+      length: 4,
       vsync: this,
       initialIndex: widget.selectedIndex,
     );
@@ -54,6 +54,7 @@ class _TabMenuWidgetState extends State<TabMenuWidget> with SingleTickerProvider
             Tab(text: 'Salary'),
             Tab(text: 'Expenses'),
             Tab(text: 'Investments'),
+            Tab(text: 'Statistics'),
           ],
         ),
       ],

@@ -35,26 +35,44 @@ class _TaxTypeDropdownState extends State<TaxTypeDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const Text('Tax Type:', style: TextStyle(fontSize: 16)),
-        const SizedBox(width: 10), // Reduce horizontal space
+        const SizedBox(width: 10),
         SizedBox(
-          height: 38, // Adjust height to reduce vertical space
+          height: 38,
           child: DropdownButton<String>(
             value: _selectedTaxType,
-            iconSize: 16,  // Reduce the dropdown icon size
-            style: const TextStyle(fontSize: 16),  // Control text style
-            items: const [
+            iconSize: 16,
+            style: TextStyle(
+              fontSize: 16,
+              color: isDarkMode ? Colors.white : Colors.black, // Set text color based on theme
+            ),
+            dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white, // Set dropdown background color
+            items: [
               DropdownMenuItem(
                 value: 'Capital Gains Tax',
-                child: Text('Capital Gains Tax', style: TextStyle(fontSize: 16)),
+                child: Text(
+                  'Capital Gains Tax',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isDarkMode ? Colors.white : Colors.black, // Match text color to theme
+                  ),
+                ),
               ),
               DropdownMenuItem(
                 value: 'Notional Gains Tax',
-                child: Text('Notional Gains Tax', style: TextStyle(fontSize: 16)),
+                child: Text(
+                  'Notional Gains Tax',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
             ],
             onChanged: (String? newValue) {

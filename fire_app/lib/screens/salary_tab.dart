@@ -4,6 +4,7 @@ import 'package:fire_app/widgets/salary_widgets/chart_widget.dart';
 import 'package:fire_app/widgets/salary_widgets/list_widget.dart';
 import 'package:fire_app/widgets/salary_widgets/salary_input_fields.dart';
 import 'package:fire_app/widgets/salary_widgets/table_widget.dart';
+import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -91,66 +92,65 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: widget.maxWidth,
-            child: Column ( 
-              children: [
-                SalaryInputField(
-                  controller: monthlySalaryController,
-                  yearlyRaiseController: yearlyRaiseController,
-                  addSalaryCallback: addSalary,
-                ),
-                SalaryList(
-                  salaries: _salaries,
-                  toggleSalaryCallback: (index) {
-                    setState(() {
-                      _salaries[index].toggleSelection();
-                    });
-                  }, removeSalaryCallback: (integer) { 
-                    setState(() {
-                      _salaries.removeAt(integer);
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                AdditionalInputs(
-                  taxRateController: taxRateController,
-                  durationController: durationController,
-                  inflationRateController: inflationRateController,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          SalaryChart(
-            accumulatedSalaries: calculateAccumulatedSalaries(),
-          ),
-          const SizedBox(height: 16),
-          TabBar(
-            controller: _tableTabController,
-            tabs: const [
-              Tab(text: 'Salaries'),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: widget.maxWidth,
+          child: CardWrapper(
+            title: 'Salary Information',
+            contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 100, vertical: 0),
+            children: [
+              SalaryInputField(
+                controller: monthlySalaryController,
+                yearlyRaiseController: yearlyRaiseController,
+                addSalaryCallback: addSalary,
+              ),
+              SalaryList(
+                salaries: _salaries,
+                toggleSalaryCallback: (index) {
+                  setState(() {
+                    _salaries[index].toggleSelection();
+                  });
+                }, removeSalaryCallback: (integer) { 
+                  setState(() {
+                    _salaries.removeAt(integer);
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              AdditionalInputs(
+                taxRateController: taxRateController,
+                durationController: durationController,
+                inflationRateController: inflationRateController,
+              ),
             ],
           ),
-          SizedBox(
-            height: 475,
-            child: TabBarView(
-              controller: _tableTabController,
-              children: [
-                SalaryTable(
-                  duration: int.tryParse(durationController.text) ?? 0,
-                  accumulatedSalaries: calculateAccumulatedSalaries(),
-                ),
-              ],
-            ),
+        ),
+        const SizedBox(height: 16),
+        SalaryChart(
+          accumulatedSalaries: calculateAccumulatedSalaries(),
+        ),
+        const SizedBox(height: 16),
+        TabBar(
+          controller: _tableTabController,
+          tabs: const [
+            Tab(text: 'Salaries'),
+          ],
+        ),
+        SizedBox(
+          height: 475,
+          child: TabBarView(
+            controller: _tableTabController,
+            children: [
+              SalaryTable(
+                duration: int.tryParse(durationController.text) ?? 0,
+                accumulatedSalaries: calculateAccumulatedSalaries(),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

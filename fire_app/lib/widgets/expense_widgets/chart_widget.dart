@@ -23,7 +23,6 @@ class ExpenseLineChart extends StatelessWidget {
           height: 600,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
             borderRadius: BorderRadius.circular(20),
           ),
           child: LineChart(

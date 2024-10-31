@@ -1,3 +1,4 @@
+import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:fire_app/widgets/expense_widgets/input_form.dart';
@@ -40,71 +41,70 @@ class _ExpensesTabState extends State<ExpensesTab> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          SizedBox(
-              width: widget.maxWidth,
-              child: Column ( 
-                children: [
-                ExpenseInputForm(
-                  expenseController: _expenseController,
-                  frequencies: _frequencies,
-                  selectedFrequency: _selectedFrequency,
-                  onFrequencyChanged: (newFrequency) => setState(() => _selectedFrequency = newFrequency),
-                  onAddExpense: _addExpense,
-                ),
-                ExpenseList(
-                  expenses: _expenses,
-                  onToggleExpense: (index) {
-                    setState(() {
-                      _expenses[index].isSelected = !_expenses[index].isSelected;
-                    });
-                    _calculateTableData();
-                  },
-                  onRemoveExpense: (index) {
-                    setState(() {
-                      _expenses.removeAt(index);
-                    });
-                    _calculateTableData();
-                  },
-                ),
-                ExpenseParameterInputs(
-                  interestRateController: _interestRateController,
-                  inflationRateController: _inflationRateController,
-                  durationController: _durationController,
-                  onParameterChanged: _calculateTableData,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          ExpenseLineChart(
-            graphDataTotalValue: _graphDataTotalValue,
-            graphDataTotalExpenses: _graphDataTotalExpenses,
-            graphDataInflationAdjusted: _graphDataInflationAdjusted,
-          ),
-          TabBar(
-            controller: _tableTabController,
-            tabs: const [Tab(text: 'Expenses')],
-          ),
-          SizedBox(
-            height: 475,
-            child: TabBarView(
-              controller: _tableTabController,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        SizedBox(
+            width: widget.maxWidth,
+            child: CardWrapper(
+              title: 'Expenses Information',
+              contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 100, vertical: 0),
               children: [
-                ExpenseTable(
-                  tableTabController: _tableTabController,
-                  tableData: _tableData,
-                ),
-              ],
-            ),
+              ExpenseInputForm(
+                expenseController: _expenseController,
+                frequencies: _frequencies,
+                selectedFrequency: _selectedFrequency,
+                onFrequencyChanged: (newFrequency) => setState(() => _selectedFrequency = newFrequency),
+                onAddExpense: _addExpense,
+              ),
+              ExpenseList(
+                expenses: _expenses,
+                onToggleExpense: (index) {
+                  setState(() {
+                    _expenses[index].isSelected = !_expenses[index].isSelected;
+                  });
+                  _calculateTableData();
+                },
+                onRemoveExpense: (index) {
+                  setState(() {
+                    _expenses.removeAt(index);
+                  });
+                  _calculateTableData();
+                },
+              ),
+              ExpenseParameterInputs(
+                interestRateController: _interestRateController,
+                inflationRateController: _inflationRateController,
+                durationController: _durationController,
+                onParameterChanged: _calculateTableData,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        ExpenseLineChart(
+          graphDataTotalValue: _graphDataTotalValue,
+          graphDataTotalExpenses: _graphDataTotalExpenses,
+          graphDataInflationAdjusted: _graphDataInflationAdjusted,
+        ),
+        TabBar(
+          controller: _tableTabController,
+          tabs: const [Tab(text: 'Expenses')],
+        ),
+        SizedBox(
+          height: 475,
+          child: TabBarView(
+            controller: _tableTabController,
+            children: [
+              ExpenseTable(
+                tableTabController: _tableTabController,
+                tableData: _tableData,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
