@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/calculator_screen.dart';
 import 'screens/statistics_tab.dart';
-import 'screens/settings_tab.dart'; // Import the settings tab
+import 'screens/settings_tab.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const FireApp());
@@ -17,7 +18,25 @@ class FireApp extends StatefulWidget {
 class _FireAppState extends State<FireApp> {
   ThemeMode _themeMode = ThemeMode.light;
 
-  void toggleTheme(bool isDarkMode) {
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode(); // Load theme mode on startup
+  }
+
+  // Save theme preference
+  void toggleTheme(bool isDarkMode) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    });
+    await prefs.setBool('isDarkMode', isDarkMode);
+  }
+
+  // Load theme preference
+  void _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDarkMode = prefs.getBool('isDarkMode') ?? false;
     setState(() {
       _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
     });
@@ -55,17 +74,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Move _pages into build to access widget.onThemeChanged
+    // Define the pages used in each tab
     List<Widget> pages = <Widget>[
       const CalculatorScreen(),
       const StatisticsTab(),
-      SettingsTab(onThemeChanged: widget.onThemeChanged), // Pass actual theme toggle
+      SettingsTab(onThemeChanged: widget.onThemeChanged), // Pass theme toggle to SettingsTab
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fire App Home'),
-      ),
+      // Remove the appBar property entirely if not needed
       body: IndexedStack(
         index: _selectedIndex,
         children: pages,
