@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class SalaryTable extends StatelessWidget {
@@ -13,21 +14,19 @@ class SalaryTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200,
-      child: SingleChildScrollView(
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('Year')),
-            DataColumn(label: Text('Accumulated After Tax & Inflation')),
-          ],
-          rows: List<DataRow>.generate(
-            duration + 1,
-            (index) => DataRow(
-              cells: [
-                DataCell(Text('$index')),
-                DataCell(Text(accumulatedSalaries[index].toStringAsFixed(0))),
-              ],
-            ),
+      height: 400,
+      child: DataTable2(
+        columns: const [
+          DataColumn(label: Text('Year')),
+          DataColumn(label: Text('Accumulated After Tax & Inflation')),
+        ],
+        rows: List<DataRow>.generate(
+          duration + 1,
+          (index) => DataRow(
+            cells: [
+              DataCell(Text('$index')),
+              DataCell(Text(accumulatedSalaries[index].toStringAsFixed(0))),
+            ],
           ),
         ),
       ),

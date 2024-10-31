@@ -8,13 +8,16 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class SalaryTab extends StatefulWidget {
-  const SalaryTab({Key? key}) : super(key: key);
+  final double maxWidth;
+  const SalaryTab({super.key, required this.maxWidth});
 
   @override
   _SalaryTabState createState() => _SalaryTabState();
 }
 
-class _SalaryTabState extends State<SalaryTab> {
+class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
+  late TabController _tableTabController;
+
   final TextEditingController monthlySalaryController = TextEditingController(text: '40000');
   final TextEditingController yearlyRaiseController = TextEditingController(text: '2');
   final TextEditingController taxRateController = TextEditingController(text: '40');
@@ -23,6 +26,19 @@ class _SalaryTabState extends State<SalaryTab> {
 
   final List<Salary> _salaries = [];
   List<double> accumulatedAfterTaxAndInflation = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _tableTabController = TabController(length: 1, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tableTabController.dispose();
+    super.dispose();
+  }
 
   void addSalary() {
     final monthlySalary = double.tryParse(monthlySalaryController.text) ?? 0;
@@ -44,24 +60,29 @@ class _SalaryTabState extends State<SalaryTab> {
     double inflationRate = (double.tryParse(inflationRateController.text) ?? 0) / 100;
     int duration = int.tryParse(durationController.text) ?? 0;
 
-    double totalAfterTaxAndInflation = 0;
+    // Initialize the accumulated list with zero for each year
     accumulatedAfterTaxAndInflation = List<double>.filled(duration + 1, 0);
 
-    for (int year = 1; year <= duration; year++) {
-      for (Salary salary in _salaries) {
-        if (!salary.isSelected) {
-          continue;
-        }
-          
-        double initialYearlySalary = salary.amount * 12;
-        double raise = salary.raiseYearlyPercentage;
+    for (Salary salary in _salaries) {
+      if (!salary.isSelected) {
+        continue;
+      }
 
-        double annualSalary = initialYearlySalary * pow(1 + raise / 100, year);
-        double afterTax = annualSalary * (1 - taxRate);
+      double yearlySalary = salary.amount * 12;
+
+      for (int year = 1; year <= duration; year++) {
+        // Apply the raise for the current year
+        double raise = salary.raiseYearlyPercentage;
+        yearlySalary *= (1 + raise / 100); // Compounded salary with the raise
+
+        // Calculate the after-tax amount for this year's salary
+        double afterTax = yearlySalary * (1 - taxRate);
+
+        // Adjust this year's after-tax salary for inflation
         double adjustedForInflation = afterTax / pow(1 + inflationRate, year);
 
-        totalAfterTaxAndInflation += adjustedForInflation;
-        accumulatedAfterTaxAndInflation[year] += totalAfterTaxAndInflation;
+        // Add this year's adjusted salary to the accumulated total for this year
+        accumulatedAfterTaxAndInflation[year] += accumulatedAfterTaxAndInflation[year - 1] + adjustedForInflation;
       }
     }
 
@@ -73,39 +94,60 @@ class _SalaryTabState extends State<SalaryTab> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SalaryInputField(
-            controller: monthlySalaryController,
-            yearlyRaiseController: yearlyRaiseController,
-            addSalaryCallback: addSalary,
-          ),
-          AdditionalInputs(
-            taxRateController: taxRateController,
-            durationController: durationController,
-            inflationRateController: inflationRateController,
-          ),
-          const SizedBox(height: 16),
-          SalaryList(
-            salaries: _salaries,
-            toggleSalaryCallback: (index) {
-              setState(() {
-                _salaries[index].toggleSelection();
-              });
-            }, removeSalaryCallback: (integer) { 
-              setState(() {
-                _salaries.removeAt(integer);
-              });
-            },
+          SizedBox(
+            width: widget.maxWidth,
+            child: Column ( 
+              children: [
+                SalaryInputField(
+                  controller: monthlySalaryController,
+                  yearlyRaiseController: yearlyRaiseController,
+                  addSalaryCallback: addSalary,
+                ),
+                SalaryList(
+                  salaries: _salaries,
+                  toggleSalaryCallback: (index) {
+                    setState(() {
+                      _salaries[index].toggleSelection();
+                    });
+                  }, removeSalaryCallback: (integer) { 
+                    setState(() {
+                      _salaries.removeAt(integer);
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                AdditionalInputs(
+                  taxRateController: taxRateController,
+                  durationController: durationController,
+                  inflationRateController: inflationRateController,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           SalaryChart(
             accumulatedSalaries: calculateAccumulatedSalaries(),
           ),
           const SizedBox(height: 16),
-          SalaryTable(
-            duration: int.tryParse(durationController.text) ?? 0,
-            accumulatedSalaries: calculateAccumulatedSalaries(),
+          TabBar(
+            controller: _tableTabController,
+            tabs: const [
+              Tab(text: 'Salaries'),
+            ],
+          ),
+          SizedBox(
+            height: 475,
+            child: TabBarView(
+              controller: _tableTabController,
+              children: [
+                SalaryTable(
+                  duration: int.tryParse(durationController.text) ?? 0,
+                  accumulatedSalaries: calculateAccumulatedSalaries(),
+                ),
+              ],
+            ),
           ),
         ],
       ),

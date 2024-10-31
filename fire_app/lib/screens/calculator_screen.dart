@@ -14,6 +14,7 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> with TickerProviderStateMixin {
   late TabController _mainTabController;
   int _selectedTab = 0;
+  static const double maxWidth = 550;
 
   @override
   void initState() {
@@ -34,15 +35,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   }
 
   Widget investmentCalculatorContent() {
-    return const InvestmentTab();
+    return const InvestmentTab(maxWidth: maxWidth);
   }
 
   Widget expensesCalculatorContent() {
-    return const ExpensesTab();
+    return const ExpensesTab(maxWidth: maxWidth);
   }
 
   Widget salaryCalculatorContent() {
-    return const SalaryTab();
+    return const SalaryTab(maxWidth: maxWidth);
   }
 
   @override

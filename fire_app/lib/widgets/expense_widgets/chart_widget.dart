@@ -86,13 +86,27 @@ class ExpenseLineChart extends StatelessWidget {
                 touchTooltipData: LineTouchTooltipData(
                   tooltipRoundedRadius: 8,
                   getTooltipItems: (touchedSpots) {
+                    bool isFirst = true; // Track if it’s the first item to display the year
                     return touchedSpots.map((touchedSpot) {
                       final color = touchedSpot.bar.color!;
+                      final year = touchedSpot.x.toInt(); // Convert x to an integer year
                       final formattedValue = Utils.formatNumber(touchedSpot.y);
-                      return LineTooltipItem(
-                        formattedValue,
-                        TextStyle(color: color),
-                      );
+
+                      if (isFirst) {
+                        isFirst = false; // Set isFirst to false after displaying year once
+                        
+                        // Display the year and value as separate lines in a single item
+                        return LineTooltipItem(
+                          'Year: $year\n$formattedValue',
+                          TextStyle(color: color, fontWeight: FontWeight.bold), // Use bold only for the first item
+                        );
+                      } else {
+                        // Display only the value for subsequent items with the default color
+                        return LineTooltipItem(
+                          formattedValue,
+                          TextStyle(color: color),
+                        );
+                      }
                     }).toList();
                   },
                 ),
@@ -104,7 +118,7 @@ class ExpenseLineChart extends StatelessWidget {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            LegendEntry(color: Colors.blue, label: 'Invested'),
+            LegendEntry(color: Colors.blue, label: 'If Invested'),
             SizedBox(width: 16),
             LegendEntry(color: Colors.green, label: 'Inflation Adjusted'),
             SizedBox(width: 16),

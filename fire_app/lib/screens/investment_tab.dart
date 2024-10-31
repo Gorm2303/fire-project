@@ -18,7 +18,8 @@ import 'package:fire_app/widgets/investment_widgets/formula_widget.dart';
 import 'package:provider/provider.dart';
 
 class InvestmentTab extends StatefulWidget {
-  const InvestmentTab({super.key});
+  final double maxWidth;
+  const InvestmentTab({super.key, required this.maxWidth});
 
   @override
   _InvestmentTabState createState() => _InvestmentTabState();
@@ -171,11 +172,10 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
   }
 
   Widget investmentCalculatorContent() {
-    double width = 520;
     return Column(
       children: <Widget>[
         SizedBox(
-          width: width,
+          width: widget.maxWidth,
           child: Column(
             children: [
               _buildInputFields(),
@@ -191,7 +191,7 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
           )
         ) : Container(),
         SizedBox(
-          width: width,
+          width: widget.maxWidth,
           child: Column(
             children: <Widget>[
               _buildBreakPeriodWidget(),

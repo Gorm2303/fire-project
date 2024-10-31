@@ -9,7 +9,8 @@ import '../models/expense.dart';
 import '../services/expense_calculator.dart';
 
 class ExpensesTab extends StatefulWidget {
-  const ExpensesTab({super.key});
+  final double maxWidth;
+  const ExpensesTab({super.key, required this.maxWidth});
 
   @override
   _ExpensesTabState createState() => _ExpensesTabState();
