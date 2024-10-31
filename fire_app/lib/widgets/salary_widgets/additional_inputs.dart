@@ -27,7 +27,7 @@ class AdditionalInputs extends StatelessWidget {
         TextField(
           controller: durationController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Duration (years)'),
+          decoration: const InputDecoration(labelText: 'Duration (Years)'),
           onChanged: (value) => onParameterChanged(),
         ),
         TextField(

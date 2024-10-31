@@ -21,19 +21,19 @@ class ExpenseParameterInputs extends StatelessWidget {
         TextField(
           controller: interestRateController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Interest Rate'),
+          decoration: const InputDecoration(labelText: 'Interest Rate (%)'),
           onChanged: (value) => onParameterChanged(),
         ),
         TextField(
           controller: inflationRateController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Inflation Rate'),
+          decoration: const InputDecoration(labelText: 'Inflation Rate (%)'),
           onChanged: (value) => onParameterChanged(),
         ),
         TextField(
           controller: durationController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Duration'),
+          decoration: const InputDecoration(labelText: 'Duration (Years)'),
           onChanged: (value) => onParameterChanged(),
         ),
       ],

@@ -8,7 +8,6 @@ import 'package:fire_app/widgets/salary_widgets/table_widget.dart';
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class SalaryTab extends StatefulWidget {
   final double maxWidth;
@@ -75,8 +74,8 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
 
     setState(() {
       _tableData = results['tableData'];
-      _graphDataAccumulated = results['graphDataTotalValue'];
-      _graphDataAccumulatedAfterTax = results['graphDataTotalExpenses'];
+      _graphDataAccumulated = results['graphDataAccumulated'];
+      _graphDataAccumulatedAfterTax = results['graphDataAccumulatedAfterTax'];
       _graphDataInflationAdjusted = results['graphDataInflationAdjusted'];
     });
   }

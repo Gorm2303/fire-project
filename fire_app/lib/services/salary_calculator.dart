@@ -67,21 +67,21 @@ class SalaryCalculator {
 
     return {
       'tableData': tableData,
-      'graphDataTotalValue': graphDataAccumulated,
-      'graphDataTotalExpenses': graphDataAccumulatedAfterTax,
+      'graphDataAccumulated': graphDataAccumulated,
+      'graphDataAccumulatedAfterTax': graphDataAccumulatedAfterTax,
       'graphDataInflationAdjusted': graphDataInflationAdjusted,
     };
   }
 
   /// Calculates the total expenses for a given year, considering each expense's frequency.
   double _calculateYearlyAccumulatedSalary(int year) {
-    double totalExpenses = 0;
+    double totalSalary = 0;
     for (Salary salary in salaries) {
       if (salary.isSelected) {
-        totalExpenses += salary.getYearlyAmount(year);
+        totalSalary += salary.getYearlyAmount(year);
       }
     }
-    return totalExpenses;
+    return totalSalary;
   }
 
   /// Creates a map for each year with formatted data for the table.
