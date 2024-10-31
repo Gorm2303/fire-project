@@ -55,7 +55,7 @@ class SalaryChart extends StatelessWidget {
                   dotData: const FlDotData(show: false),
                 ),
                 LineChartBarData(
-                  spots: graphDataInflationAdjusted,
+                  spots: graphDataAccumulatedAfterTax,
                   isCurved: true,
                   color: Colors.lime,
                   barWidth: 3,
@@ -66,7 +66,7 @@ class SalaryChart extends StatelessWidget {
                   dotData: const FlDotData(show: false),
                 ),
                 LineChartBarData(
-                  spots: graphDataAccumulatedAfterTax,
+                  spots: graphDataInflationAdjusted,
                   isCurved: true,
                   color: Colors.green,
                   barWidth: 3,
