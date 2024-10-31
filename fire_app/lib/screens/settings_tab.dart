@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsTab extends StatefulWidget {
-    final ValueChanged<bool> onThemeChanged;
+  final ValueChanged<bool> onThemeChanged;
   const SettingsTab({super.key, required this.onThemeChanged});
 
   @override
@@ -10,8 +11,21 @@ class SettingsTab extends StatefulWidget {
 
 class _SettingsTabState extends State<SettingsTab> {
   bool _notificationsEnabled = false;
-  bool _darkModeEnabled = false;
+  bool _isDarkMode = false;
   String _selectedLanguage = 'English';
+
+    @override
+  void initState() {
+    super.initState();
+    _loadTheme(); // Load the theme setting on initialization
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isDarkMode = prefs.getBool('isDarkMode') ?? false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +54,10 @@ class _SettingsTabState extends State<SettingsTab> {
           // Dark Mode toggle
           SwitchListTile(
             title: const Text('Dark Mode'),
-            value: _darkModeEnabled,
+            value: _isDarkMode,
             onChanged: (bool value) {
               setState(() {
-                _darkModeEnabled = value;
+                _isDarkMode = value;
               });
               widget.onThemeChanged(value); // Toggle dark mode
             },

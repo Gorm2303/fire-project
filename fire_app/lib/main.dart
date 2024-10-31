@@ -24,17 +24,17 @@ class _FireAppState extends State<FireApp> {
     _loadThemeMode(); // Load theme mode on startup
   }
 
-  // Save theme preference
+  // Toggle and save theme mode
   void toggleTheme(bool isDarkMode) async {
-    final prefs = await SharedPreferences.getInstance();
     setState(() {
       _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
     });
-    await prefs.setBool('isDarkMode', isDarkMode);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isDarkMode', isDarkMode); // Save theme mode preference
   }
 
-  // Load theme preference
-  void _loadThemeMode() async {
+  // Load theme mode from SharedPreferences
+  Future<void> _loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
     final isDarkMode = prefs.getBool('isDarkMode') ?? false;
     setState(() {
