@@ -25,6 +25,7 @@ class SalaryInputField extends StatelessWidget {
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(labelText: 'Yearly Pay Raise (%)'),
         ),
+        const SizedBox(height: 16),
         ElevatedButton(
           onPressed: addSalaryCallback,
           child: const Text('Add Salary'),

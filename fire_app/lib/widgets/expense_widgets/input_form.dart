@@ -23,9 +23,8 @@ class ExpenseInputForm extends StatelessWidget {
         TextField(
           controller: expenseController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Expense', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Expense'),
         ),
-        const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: selectedFrequency,
           items: frequencies.map((String value) {
@@ -35,7 +34,7 @@ class ExpenseInputForm extends StatelessWidget {
             );
           }).toList(),
           onChanged: (newValue) => onFrequencyChanged(newValue ?? 'One Time'),
-          decoration: const InputDecoration(labelText: 'Frequency', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Frequency'),
         ),
         const SizedBox(height: 16),
         ElevatedButton(onPressed: onAddExpense, child: const Text('Add Expense')),
