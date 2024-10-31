@@ -32,9 +32,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
   // Load selected tab index
   Future<void> _loadSelectedTab() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _selectedTab = prefs.getInt('selectedTab') ?? 0;
-    });
+    _selectedTab = prefs.getInt('selectedTab') ?? 0; // Set _selectedTab directly
+    setState(() {}); // Trigger rebuild after loading
   }
 
   Widget investmentCalculatorContent() {
@@ -68,6 +67,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
               ),
             ),
             TabMenuWidget(
+              key: ValueKey(_selectedTab), // Ensures TabMenuWidget updates with correct tab
               selectedIndex: _selectedTab,
               onChanged: (int newIndex) {
                 setState(() {
@@ -83,10 +83,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
                     ? expensesCalculatorContent()
                     : _selectedTab == 2
                         ? investmentCalculatorContent()
-                        : statisticsCalculatorContent()
+                        : statisticsCalculatorContent(),
           ],
         ),
       ),
     );
   }
+
 }
