@@ -22,7 +22,7 @@ class SalaryList extends StatelessWidget {
       itemBuilder: (context, index) {
         final salary = salaries[index];
         return ListTile(
-          title: Text('${salary.amount} Monthly Salary - ${salary.raiseYearlyPercentage}% Yearly Raise'),
+          title: Text('${salary.amount} - ${salary.raiseYearlyPercentage}% Yearly Raise'),
           leading: Checkbox(
             value: salary.isSelected,
             onChanged: (_) => toggleSalaryCallback(index),

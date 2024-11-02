@@ -25,15 +25,15 @@ class AdditionalInputs extends StatelessWidget {
           onChanged: (value) => onParameterChanged(),
         ),
         TextField(
-          controller: durationController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Duration (Years)'),
-          onChanged: (value) => onParameterChanged(),
-        ),
-        TextField(
           controller: inflationRateController,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(labelText: 'Inflation Rate (%)'),
+          onChanged: (value) => onParameterChanged(),
+        ),
+        TextField(
+          controller: durationController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(labelText: 'Duration (Years)'),
           onChanged: (value) => onParameterChanged(),
         ),
       ],

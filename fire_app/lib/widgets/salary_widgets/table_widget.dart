@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class SalaryTable extends StatelessWidget {
   final List<Map<String, dynamic>> tableData;
 
-
   const SalaryTable({
     super.key,
     required this.tableData,
@@ -19,19 +18,19 @@ class SalaryTable extends StatelessWidget {
         horizontalMargin: 12,
         minWidth: 600,
         columns: const [
-          DataColumn(label: Text('Year')),
-          DataColumn(label: Text('Salary (Monthly)')),
-          DataColumn(label: Text('Salary (Total)')),
-          DataColumn(label: Text('After Tax')),
-          DataColumn(label: Text('Inflation Adjusted')),
+          DataColumn2(label: Center(child: Text('Year')), size: ColumnSize.S),
+          DataColumn2(label: Center(child: Text('Salary (Monthly)')), size: ColumnSize.M),
+          DataColumn2(label: Center(child: Text('Salary (Total)')), size: ColumnSize.M),
+          DataColumn2(label: Center(child: Text('After Tax')), size: ColumnSize.M),
+          DataColumn2(label: Center(child: Text('Inflation Adjusted')), size: ColumnSize.M),
         ],
         rows: tableData.map((data) {
           return DataRow(cells: [
-            DataCell(Text(data['year'].toString())),
-            DataCell(Text(data['Salary (Monthly)'])),
-            DataCell(Text(data['Salary (Total)'])),
-            DataCell(Text(data['After Tax'])),
-            DataCell(Text(data['Inflation Adjusted'])),
+            DataCell(Center(child: Text(data['year'].toString()))),
+            DataCell(Center(child: Text(data['Salary (Monthly)']))),
+            DataCell(Center(child: Text(data['Salary (Total)']))),
+            DataCell(Center(child: Text(data['After Tax']))),
+            DataCell(Center(child: Text(data['Inflation Adjusted']))),
           ]);
         }).toList(),
       ),

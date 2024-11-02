@@ -52,9 +52,9 @@ class _TabMenuWidgetState extends State<TabMenuWidget> with SingleTickerProvider
           unselectedLabelColor: Colors.grey,
           tabs: const [
             Tab(text: 'Salary'),
-            Tab(text: 'Expenses'),
-            Tab(text: 'Investments'),
-            Tab(text: 'Statistics'),
+            Tab(text: 'Expense'),
+            Tab(text: 'Invest'),
+            Tab(text: 'Stats'),
           ],
         ),
       ],

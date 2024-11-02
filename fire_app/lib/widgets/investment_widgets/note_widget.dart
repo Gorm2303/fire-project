@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
-import 'investment_compounding_results_widget.dart'; // Assuming you have this class separately
+import 'compounding_results_widget.dart'; // Assuming you have this class separately
 
 class InvestmentNoteWidget extends StatelessWidget {
   final double totalDeposits;

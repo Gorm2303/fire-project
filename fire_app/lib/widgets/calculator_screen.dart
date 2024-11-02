@@ -1,7 +1,7 @@
-import 'package:fire_app/screens/expenses_tab.dart';
-import 'package:fire_app/screens/investment_tab.dart';
-import 'package:fire_app/screens/salary_tab.dart';
-import 'package:fire_app/screens/statistics_tab.dart';
+import 'package:fire_app/tabs/expenses_tab.dart';
+import 'package:fire_app/tabs/investment_tab.dart';
+import 'package:fire_app/tabs/salary_tab.dart';
+import 'package:fire_app/tabs/statistics_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:fire_app/widgets/tab_menu_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,7 +62,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> with TickerProvider
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
-                'Compound Interest Calculators',
+                'FIRE Calculators',
                 style: TextStyle(fontSize: 24),
               ),
             ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/calculator_screen.dart';
-import 'screens/statistics_tab.dart';
-import 'screens/settings_tab.dart';
+import 'widgets/calculator_screen.dart';
+import 'tabs/statistics_tab.dart';
+import 'tabs/settings_tab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
