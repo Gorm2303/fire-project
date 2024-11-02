@@ -313,12 +313,12 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
             controller: _tableTabController,
             children: [
               InvestmentTableWidget(
-                yearlyValues: _investmentPlan.depositPlan.yearlyValues,
+                yearlyValues: Utils.formatListOfMaps(_investmentPlan.depositPlan.yearlyValues),
                 isDepositingTable: true,
                 isWithdrawingTable: false,
               ),
               InvestmentTableWidget(
-                yearlyValues: _investmentPlan.withdrawalPlan.yearlyValues,
+                yearlyValues: Utils.formatListOfMaps(_investmentPlan.withdrawalPlan.yearlyValues),
                 isDepositingTable: false,
                 isWithdrawingTable: true,
               ),

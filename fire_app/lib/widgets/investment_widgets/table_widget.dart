@@ -1,8 +1,9 @@
+import 'package:fire_app/services/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:data_table_2/data_table_2.dart';
 
 class InvestmentTableWidget extends StatelessWidget {
-  final List<Map<String, double>> yearlyValues;
+  final List<Map<String, dynamic>> yearlyValues;
   final bool isDepositingTable;
   final bool isWithdrawingTable;
 
@@ -46,14 +47,18 @@ class InvestmentTableWidget extends StatelessWidget {
               ],
         rows: yearlyValues.map((value) {
           return DataRow(cells: [
-            DataCell(Center(child: Text(value['year']!.toInt().toString()))),
-            DataCell(Center(child: Text(value['totalValue']!.toStringAsFixed(0)))),
-            if (isDepositingTable) DataCell(Center(child: Text(value['totalDeposits']!.toStringAsFixed(0)))),
-            DataCell(Center(child: Text(value['compoundThisYear']!.toStringAsFixed(0)))),
-            DataCell(Center(child: Text(value['compoundEarnings']!.toStringAsFixed(0)))),
-            if (isWithdrawingTable) DataCell(Center(child: Text((value['withdrawal']! / 12).toStringAsFixed(0)))),
-            if (isWithdrawingTable) DataCell(Center(child: Text(value['withdrawal']?.toStringAsFixed(0) ?? '0'))),
-            DataCell(Center(child: Text(value['tax']?.toStringAsFixed(0) ?? '0'))),
+            DataCell(Center(child: Text(value['year']!.toString()))),
+            DataCell(Center(child: Text(value['totalValue']!.toString()))),
+            if (isDepositingTable)
+              DataCell(Center(child: Text(value['totalDeposits']!.toString()))),
+            DataCell(Center(child: Text(value['compoundThisYear']!.toString()))),
+            DataCell(Center(child: Text(value['compoundEarnings']!.toString()))),
+            if (isWithdrawingTable)
+              DataCell(Center(child: Text(Utils.parseDivideAndFormat(value['withdrawal']!)))),
+
+            if (isWithdrawingTable)
+              DataCell(Center(child: Text((value['withdrawal'])!.toString()))),
+            DataCell(Center(child: Text(value['tax']!.toString()))),
           ]);
         }).toList(),
         headingRowHeight: 56,

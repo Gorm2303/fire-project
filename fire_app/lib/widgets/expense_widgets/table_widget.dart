@@ -35,6 +35,9 @@ class ExpenseTable extends StatelessWidget {
             DataCell(Center(child: Text(data['Inflation Adjusted']))),
           ]);
         }).toList(),
+        headingRowHeight: 56,
+        showBottomBorder: true,
+        fixedLeftColumns: 1,
       ),
     );
   }

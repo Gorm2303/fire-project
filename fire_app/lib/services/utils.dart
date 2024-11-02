@@ -46,4 +46,18 @@ class Utils {
     );
   }
 
+  static List<Map<String, dynamic>> formatListOfMaps(List<Map<String, double>> list) {
+    return list.map((map) {
+      return map.map((key, value) => MapEntry(key, formatNumber(value)));
+    }).toList();
+  }
+
+  static String parseDivideAndFormat(String value) {
+    value = value.replaceAll(',', '');
+    double parsedValue = parseTextToDouble(value);
+    double dividedValue = parsedValue / 12;
+    String formattedValue = formatNumber(dividedValue);
+    return formattedValue;
+  }
+
 }
