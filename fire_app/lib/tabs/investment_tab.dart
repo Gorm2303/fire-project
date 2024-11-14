@@ -1,5 +1,5 @@
 import 'package:fire_app/models/tax_option.dart';
-import 'package:fire_app/widgets/investment_widgets/deposit_widgets/calculation_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/investment_calculation_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/break_period_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/deposit_widgets/deposit_note_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/withdrawal_widget.dart';
@@ -9,7 +9,7 @@ import 'package:fire_app/services/tax_option_manager.dart';
 import 'package:fire_app/widgets/investment_widgets/tax_widgets/tax_note_widget.dart';
 import 'package:fire_app/models/investment_plan.dart';
 import 'package:fire_app/widgets/investment_widgets/table_widget.dart';
-import 'package:fire_app/widgets/investment_widgets/deposit_widgets/input_fields_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/input_fields_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/tax_widgets/tax_calculation_results_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/tax_widget.dart';
 import 'package:fire_app/services/presetting_service.dart';
@@ -150,7 +150,7 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
   }
 
   Widget _buildInvestmentCalculationWidget() {
-    return CalculationWidget(
+    return InvestmentCalculationWidget(
       showInvestmentNote: showInvestmentNote, 
       totalDeposits: _investmentPlan.depositPlan.deposits, 
       totalValue: _investmentPlan.depositPlan.totalValue, 

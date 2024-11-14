@@ -40,6 +40,10 @@ class WithdrawalPlan {
 
     // Apply interest growth during the break period
     if (breakPeriod >= 1) {
+        breakValues.add({
+        'year': 0,
+        'compoundThisYear': 0, // Compound earnings for the year
+      });
       for (int year = 1; year <= breakPeriod; year++) {
         previousValue = totalValue;
         totalValue *= (1 + interestRate / 100);
@@ -53,14 +57,14 @@ class WithdrawalPlan {
       // Store yearly break values for reporting
       breakValues.add({
         'year': year.toDouble(),
-        'totalValue': totalValue,
+        'compoundThisYear': totalValue - previousValue, // Compound earnings for the year
       });
       }
     }
 
     yearlyValues = [
       {
-        'year': 0.0,
+        'year': 0,
         'totalValue': totalValue,
         'compoundThisYear': 0,
         'compoundEarnings': 0,

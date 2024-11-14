@@ -3,7 +3,7 @@ import 'package:fire_app/widgets/investment_widgets/deposit_widgets/formula_widg
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class CalculationWidget extends StatelessWidget {
+class InvestmentCalculationWidget extends StatelessWidget {
   final bool showInvestmentNote;  // Whether to show the investment note
   final double totalDeposits;
   final double totalValue;
@@ -16,7 +16,7 @@ class CalculationWidget extends StatelessWidget {
   final VoidCallback toggleInvestmentNote;  // Callback to handle toggling
   final FormulaWidget formulaWidget;
 
-  const CalculationWidget({
+  const InvestmentCalculationWidget({
     super.key, 
     required this.showInvestmentNote, 
     required this.totalDeposits,
