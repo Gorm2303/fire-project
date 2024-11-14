@@ -19,6 +19,7 @@ class WithdrawalPlan {
   double taxYearlyAfterBreak = 0;
   double totalValue;
   double deposits;
+  List<Map<String, double>> breakValues = [];
   List<Map<String, double>> yearlyValues = [];
   double inflationRate;
 
@@ -44,8 +45,16 @@ class WithdrawalPlan {
         totalValue *= (1 + interestRate / 100);
         if (selectedTaxOption.isNotionallyTaxed) {
           // Notional gains tax applies only to yearly earnings (not the withdrawal)
-          taxDuringBreak += _notionalGainsTax(totalValue - previousValue);
+          double taxThisYear = _notionalGainsTax(totalValue - previousValue);
+          totalValue -= taxThisYear;
+          taxDuringBreak += taxThisYear;
         }
+
+      // Store yearly break values for reporting
+      breakValues.add({
+        'year': year.toDouble(),
+        'totalValue': totalValue,
+      });
       }
     }
 
@@ -59,8 +68,7 @@ class WithdrawalPlan {
         'tax': 0,
       }
     ];
-    // Subtract tax in break period from total value
-    totalValue -= taxDuringBreak;
+
     interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
 
     // Calculate earnings after break period and withdrawal
