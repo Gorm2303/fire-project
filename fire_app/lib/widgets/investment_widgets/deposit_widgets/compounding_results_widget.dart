@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class InvestmentCompoundingResults extends StatelessWidget {
+class CompoundingResults extends StatelessWidget {
   final double totalDeposits;
   final double totalValue;
   final double totalInterestFromPrincipal;
@@ -9,7 +9,7 @@ class InvestmentCompoundingResults extends StatelessWidget {
   final double compoundEarnings;
   final double tax;
 
-  const InvestmentCompoundingResults({
+  const CompoundingResults({
     super.key, 
     required this.totalDeposits, 
     required this.totalValue, 

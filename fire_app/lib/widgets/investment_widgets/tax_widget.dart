@@ -3,17 +3,17 @@ import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:fire_app/widgets/wrappers/textfield_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import Provider package
-import 'custom_tax_switch.dart';
-import 'tax_rate_dropdown.dart';
-import 'tax_exemption_switch.dart';
-import 'tax_type_dropdown.dart';
+import 'tax_widgets/custom_tax_switch.dart';
+import 'tax_widgets/tax_rate_dropdown.dart';
+import 'tax_widgets/tax_exemption_switch.dart';
+import 'tax_widgets/tax_type_dropdown.dart';
 import '../../services/tax_option_manager.dart';
 
-class TaxRateWidget extends StatelessWidget {
+class TaxWidget extends StatelessWidget {
   final TextEditingController customTaxController;
   final VoidCallback recalculateValues;
 
-  const TaxRateWidget({
+  const TaxWidget({
     super.key,
     required this.customTaxController,
     required this.recalculateValues,

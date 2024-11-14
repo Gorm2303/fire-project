@@ -1,20 +1,20 @@
 import 'package:fire_app/models/tax_option.dart';
-import 'package:fire_app/widgets/investment_widgets/calculation_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/deposit_widgets/calculation_widget.dart';
 import 'package:fire_app/widgets/investment_widgets/break_period_widget.dart';
-import 'package:fire_app/widgets/investment_widgets/note_widget.dart';
-import 'package:fire_app/widgets/withdrawal_tax_widgets/withdrawal_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/deposit_widgets/deposit_note_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/withdrawal_widget.dart';
 import 'package:fire_app/widgets/wrappers/card_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:fire_app/services/tax_option_manager.dart';
-import 'package:fire_app/widgets/withdrawal_tax_widgets/tax_note_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/tax_widgets/tax_note_widget.dart';
 import 'package:fire_app/models/investment_plan.dart';
 import 'package:fire_app/widgets/investment_widgets/table_widget.dart';
-import 'package:fire_app/widgets/investment_widgets/input_fields_widget.dart';
-import 'package:fire_app/widgets/withdrawal_tax_widgets/tax_calculation_results_widget.dart';
-import 'package:fire_app/widgets/withdrawal_tax_widgets/tax_rate_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/deposit_widgets/input_fields_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/tax_widgets/tax_calculation_results_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/tax_widget.dart';
 import 'package:fire_app/services/presetting_service.dart';
 import 'package:fire_app/services/utils.dart';
-import 'package:fire_app/widgets/investment_widgets/formula_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/deposit_widgets/formula_widget.dart';
 import 'package:provider/provider.dart';
 
 class InvestmentTab extends StatefulWidget {
@@ -150,7 +150,7 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
   }
 
   Widget _buildInvestmentCalculationWidget() {
-    return InvestmentCalculationWidget(
+    return CalculationWidget(
       showInvestmentNote: showInvestmentNote, 
       totalDeposits: _investmentPlan.depositPlan.deposits, 
       totalValue: _investmentPlan.depositPlan.totalValue, 
@@ -231,7 +231,7 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
   }
 
   Widget _buildInvestmentNoteWidget() {
-    return InvestmentNoteWidget(
+    return DepositNoteWidget(
       totalDeposits: _investmentPlan.depositPlan.deposits,
       totalValue: _investmentPlan.depositPlan.totalValue,
       totalInterestFromPrincipal: _investmentPlan.depositPlan.totalInterestFromPrincipal,
@@ -274,7 +274,7 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
   }
 
   Widget _buildTaxRateWidget() {
-    return TaxRateWidget(
+    return TaxWidget(
       customTaxController: _customTaxController,
       recalculateValues: _recalculateValues, // Callback for recalculating
     );

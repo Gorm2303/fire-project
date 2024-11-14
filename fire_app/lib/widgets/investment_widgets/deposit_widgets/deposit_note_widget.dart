@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'compounding_results_widget.dart'; // Assuming you have this class separately
 
-class InvestmentNoteWidget extends StatelessWidget {
+class DepositNoteWidget extends StatelessWidget {
   final double totalDeposits;
   final double totalValue;
   final double totalInterestFromPrincipal;
@@ -10,7 +10,7 @@ class InvestmentNoteWidget extends StatelessWidget {
   final double compoundEarnings;
   final double tax;
 
-  const InvestmentNoteWidget({
+  const DepositNoteWidget({
     super.key,
     required this.totalDeposits,
     required this.totalValue,
@@ -38,7 +38,7 @@ class InvestmentNoteWidget extends StatelessWidget {
         _buildMathTexWidget(),
         const SizedBox(height: 8),
         // Widget displaying investment contribution ratio
-        InvestmentCompoundingResults(
+        CompoundingResults(
           totalDeposits: totalDeposits,
           totalValue: totalValue,
           totalInterestFromPrincipal: totalInterestFromPrincipal,

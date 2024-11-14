@@ -1,4 +1,4 @@
-import 'package:fire_app/widgets/withdrawal_tax_widgets/tax_calculation_results_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/tax_widgets/tax_calculation_results_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 class TaxNoteWidget extends StatelessWidget {
