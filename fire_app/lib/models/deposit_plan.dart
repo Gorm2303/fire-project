@@ -68,7 +68,6 @@ class DepositPlan {
       });
       additionalContribution += additionalContribution * (increaseInContribution / 100); // Increase contributions for next year
     }
-    additionalContribution = additionalContribution / (pow((1 + increaseInContribution / 100), duration).toDouble()); // Update deposits to include all contributions
     calculateTotalInterest();
 
     return yearlyValues;

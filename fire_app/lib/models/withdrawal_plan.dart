@@ -2,15 +2,12 @@ import 'package:fire_app/models/tax_option.dart';
 
 class WithdrawalPlan {
   double interestRate;
-  int breakPeriod; // Years during which investment grows but no withdrawals are made
   int duration;
-  double interestGatheredDuringBreak = 0;
   double withdrawalPercentage;
   double withdrawalYearly = 0;
   double taxableWithdrawalYearly = 0;
   TaxOption selectedTaxOption;
   double taxYearly = 0;
-  double taxDuringBreak = 0;
   double withdrawalAfterTax = 0;
   double earningsAfterBreak = 0;
   double earningsPercentAfterBreak = 0;
@@ -19,13 +16,11 @@ class WithdrawalPlan {
   double taxYearlyAfterBreak = 0;
   double totalValue;
   double deposits;
-  List<Map<String, double>> breakValues = [];
   List<Map<String, double>> yearlyValues = [];
   double inflationRate;
 
   WithdrawalPlan({
     required this.interestRate,
-    this.breakPeriod = 0,
     required this.duration,
     required this.withdrawalPercentage,
     required this.selectedTaxOption,
@@ -34,33 +29,9 @@ class WithdrawalPlan {
     required this.inflationRate,
   });
 
-  List<Map<String, double>> calculateYearlyValues(double valueAfterDepositYears) {
-    totalValue = valueAfterDepositYears;
+  List<Map<String, double>> calculateYearlyValues(double valueBeforeWithdrawalYears) {
+    totalValue = valueBeforeWithdrawalYears;
     double previousValue;
-
-    // Apply interest growth during the break period
-    if (breakPeriod >= 1) {
-        breakValues.add({
-        'year': 0,
-        'compoundThisYear': 0, // Compound earnings for the year
-      });
-      for (int year = 1; year <= breakPeriod; year++) {
-        previousValue = totalValue;
-        totalValue *= (1 + interestRate / 100);
-        if (selectedTaxOption.isNotionallyTaxed) {
-          // Notional gains tax applies only to yearly earnings (not the withdrawal)
-          double taxThisYear = _notionalGainsTax(totalValue - previousValue);
-          totalValue -= taxThisYear;
-          taxDuringBreak += taxThisYear;
-        }
-
-      // Store yearly break values for reporting
-      breakValues.add({
-        'year': year.toDouble(),
-        'compoundThisYear': totalValue - previousValue, // Compound earnings for the year
-      });
-      }
-    }
 
     yearlyValues = [
       {
@@ -72,8 +43,6 @@ class WithdrawalPlan {
         'tax': 0,
       }
     ];
-
-    interestGatheredDuringBreak = totalValue - valueAfterDepositYears;
 
     // Calculate earnings after break period and withdrawal
     earningsAfterBreak = totalValue - deposits;

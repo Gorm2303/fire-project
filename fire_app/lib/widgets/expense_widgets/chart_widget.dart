@@ -109,7 +109,7 @@ class ExpenseLineChart extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

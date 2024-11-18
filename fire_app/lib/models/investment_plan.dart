@@ -1,11 +1,13 @@
 import 'package:fire_app/models/tax_option.dart';
 import 'deposit_plan.dart';
 import 'withdrawal_plan.dart';
+import 'break_period_plan.dart';
 import 'package:flutter/foundation.dart'; 
 
 class InvestmentPlan extends ChangeNotifier {
   String name;
   DepositPlan depositPlan;
+  BreakPeriodPlan breakPeriodPlan;
   WithdrawalPlan withdrawalPlan;
   int totalDuration = 0;
 
@@ -31,6 +33,12 @@ class InvestmentPlan extends ChangeNotifier {
           increaseInContribution: increaseInContribution,
           selectedTaxOption: selectedTaxOption,
         ),
+        breakPeriodPlan = BreakPeriodPlan(
+          interestRate: interestRate,
+          duration: breakPeriod,
+          selectedTaxOption: selectedTaxOption,
+          totalValue: 0,  // Initial value after deposit years, to be updated later
+        ),
         withdrawalPlan = WithdrawalPlan(
           interestRate: interestRate,
           duration: withdrawalPeriod,
@@ -39,16 +47,16 @@ class InvestmentPlan extends ChangeNotifier {
           selectedTaxOption: selectedTaxOption,
           totalValue: 0,  // Initial value after deposit years, to be updated later
           deposits: 0,    // Initial deposits, to be updated later
-          breakPeriod: breakPeriod,  // Pass break period to the WithdrawalPlan
         );
 
   // Method to calculate the investment
   void calculateInvestment() {
     depositPlan.calculateYearlyValues();
-    withdrawalPlan.totalValue = depositPlan.totalValue;
+    breakPeriodPlan.calculateYearlyValues(depositPlan.totalValue, depositPlan.additionalContribution * 12);
+    withdrawalPlan.totalValue = breakPeriodPlan.totalValue;
     withdrawalPlan.deposits = depositPlan.deposits;
-    withdrawalPlan.calculateYearlyValues(depositPlan.totalValue);
-    totalDuration = depositPlan.duration + withdrawalPlan.breakPeriod + withdrawalPlan.duration;
+    withdrawalPlan.calculateYearlyValues(breakPeriodPlan.totalValue);
+    totalDuration = depositPlan.duration + breakPeriodPlan.duration + withdrawalPlan.duration;
     notifyListeners();  // Notify listeners after calculation
   }
 }

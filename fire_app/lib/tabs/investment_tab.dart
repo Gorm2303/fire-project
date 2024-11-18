@@ -15,6 +15,9 @@ import 'package:fire_app/widgets/investment_widgets/tax_widget.dart';
 import 'package:fire_app/services/presetting_service.dart';
 import 'package:fire_app/services/utils.dart';
 import 'package:fire_app/widgets/investment_widgets/deposit_widgets/formula_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/deposit_widgets/deposit_chart_widget.dart';
+import 'package:fire_app/widgets/investment_widgets/break_chart_widget.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 
 class InvestmentTab extends StatefulWidget {
@@ -176,13 +179,16 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
       children: <Widget>[
         SizedBox(
           width: widget.maxWidth,
-          child: Column(
-            children: [
-              _buildInputFields(),
-              _buildInvestmentCalculationWidget(),
-            ],
-          ),
+          child: _buildInputFields(),
         ),
+        SizedBox(
+          width: widget.maxWidth,
+          child: _buildInvestmentCalculationWidget(),
+        ),
+        const SizedBox(height: 16),
+        _buildDepositChartWidget(),
+        const SizedBox(height: 16),
+
         showInvestmentNote ? ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
             child: CardWrapper(
@@ -195,6 +201,16 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
           child: Column(
             children: <Widget>[
               _buildBreakPeriodWidget(),
+            ],
+          ), 
+        ),
+        const SizedBox(height: 16),
+        _buildBreakChartWidget(), 
+        const SizedBox(height: 16),
+        SizedBox(
+          width: widget.maxWidth,
+          child: Column(
+            children: <Widget>[
               _buildTaxRateWidget(),
               _buildWithdrawalWidget(),
             ],
@@ -262,13 +278,73 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
     );
   }
 
+  Widget _buildDepositChartWidget() {
+    // Convert yearlyValues to List<FlSpot> for totalValue, totalDeposits, and compoundEarnings
+    List<FlSpot> totalValueSpots = _investmentPlan.depositPlan.yearlyValues
+        .map((entry) {
+          double year = entry['year']!; // Use the year key as x-axis
+          double totalValue = entry['totalValue']!; // Use totalValue as y-axis
+          return FlSpot(year, totalValue);
+        }).toList();
+
+    List<FlSpot> totalDepositsSpots = _investmentPlan.depositPlan.yearlyValues
+        .map((entry) {
+          double year = entry['year']!; // Use the year key as x-axis
+          double totalDeposits = entry['totalDeposits']!; // Use totalDeposits as y-axis
+          return FlSpot(year, totalDeposits);
+        }).toList();
+
+    List<FlSpot> compoundEarningsSpots = _investmentPlan.depositPlan.yearlyValues
+        .map((entry) {
+          double year = entry['year']!; // Use the year key as x-axis
+          double compoundEarnings = entry['compoundEarnings']!; // Use compoundEarnings as y-axis
+          return FlSpot(year, compoundEarnings);
+        }).toList();
+
+    return DepositLineChart(
+      graphDataTotalValue: totalValueSpots,
+      graphDataEarnings: compoundEarningsSpots,
+      graphDataTotalDeposits: totalDepositsSpots,
+    );
+  }
+
+  Widget _buildBreakChartWidget() {
+    // Convert yearlyValues to List<FlSpot> for totalValue, totalDeposits, and compoundEarnings
+    List<FlSpot> totalValueSpots = _investmentPlan.breakPeriodPlan.yearlyValues
+        .map((entry) {
+          double year = entry['year']!; // Use the year key as x-axis
+          double totalValue = entry['totalValue']!; // Use totalValue as y-axis
+          return FlSpot(year, totalValue);
+        }).toList();
+
+    List<FlSpot> compoundEarningsSpots = _investmentPlan.breakPeriodPlan.yearlyValues
+        .map((entry) {
+          double year = entry['year']!; // Use the year key as x-axis
+          double compoundEarnings = entry['compoundEarnings']!; // Use compoundEarnings as y-axis
+          return FlSpot(year, compoundEarnings);
+        }).toList();
+
+    List<FlSpot> ifDepositsContinuedSpots = _investmentPlan.breakPeriodPlan.yearlyValues
+        .map((entry) {
+          double year = entry['year']!; // Use the year key as x-axis
+          double ifDepositsContinued = entry['ifDepositsContinued']!; // Use totalDeposits as y-axis
+          return FlSpot(year, ifDepositsContinued);
+        }).toList();
+
+    return BreakLineChart(
+      graphDataTotalValue: totalValueSpots,
+      graphDataEarnings: compoundEarningsSpots,
+      graphDataIfDepositsContinued: ifDepositsContinuedSpots,
+    );
+  }
+
   Widget _buildBreakPeriodWidget() {
     return BreakPeriodWidget(
       breakController: _breakController,
-      interestGatheredDuringBreak: _investmentPlan.withdrawalPlan.interestGatheredDuringBreak,
+      interestGatheredDuringBreak: _investmentPlan.breakPeriodPlan.earnings,
       totalDeposits: _investmentPlan.depositPlan.deposits,
       totalValue: _investmentPlan.withdrawalPlan.earningsAfterBreak + _investmentPlan.depositPlan.deposits,
-      taxDuringBreak: _investmentPlan.withdrawalPlan.taxDuringBreak,
+      taxDuringBreak: _investmentPlan.breakPeriodPlan.taxTotal,
       recalculateValues: _recalculateValues,
     );
   }
@@ -293,7 +369,7 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
         },
         withdrawalDurationController: _withdrawalDurationController,
         inflationController: _inflationController,
-        durationAfterBreak: _investmentPlan.withdrawalPlan.breakPeriod + _investmentPlan.depositPlan.duration,
+        durationAfterBreak: _investmentPlan.breakPeriodPlan.duration + _investmentPlan.depositPlan.duration,
     );
   }
 
