@@ -204,9 +204,16 @@ class _InvestmentTabState extends State<InvestmentTab> with TickerProviderStateM
             ],
           ), 
         ),
-        const SizedBox(height: 16),
-        _buildBreakChartWidget(), 
-        const SizedBox(height: 16),
+        if (_investmentPlan.breakPeriodPlan.duration > 0) Container(
+          child: 
+            Column(
+              children: <Widget>[
+                const SizedBox(height: 16),
+                _buildBreakChartWidget(),
+                const SizedBox(height: 16),
+              ],
+            ),
+        ),
         SizedBox(
           width: widget.maxWidth,
           child: Column(

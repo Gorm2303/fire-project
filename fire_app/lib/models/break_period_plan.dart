@@ -91,19 +91,4 @@ class BreakPeriodPlan {
     }
   }
 
-  // Prepare chart data for visualization
-  Map<String, List<FlSpot>> getChartData() {
-    List<FlSpot> breakGrowthSpots = yearlyValues
-        .map((entry) => FlSpot(entry['year']!, entry['totalValue']!))
-        .toList();
-
-    List<FlSpot> continuousContributionSpots = yearlyValues
-        .map((entry) => FlSpot(entry['year']!, entry['ifDepositsContinued']!))
-        .toList();
-
-    return {
-      'breakGrowth': breakGrowthSpots,
-      'continuousContributions': continuousContributionSpots,
-    };
-  }
 }

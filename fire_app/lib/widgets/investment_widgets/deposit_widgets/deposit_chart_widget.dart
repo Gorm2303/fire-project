@@ -113,11 +113,11 @@ class DepositLineChart extends StatelessWidget {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            LegendEntry(color: Colors.blue, label: 'Total Investment'),
+            LegendEntry(color: Colors.blue, label: 'Investment'),
             SizedBox(width: 16),
-            LegendEntry(color: Colors.green, label: 'Total Earnings'),
+            LegendEntry(color: Colors.green, label: 'Earnings'),
             SizedBox(width: 16),
-            LegendEntry(color: Colors.red, label: 'Total Deposits'),
+            LegendEntry(color: Colors.red, label: 'Deposits'),
           ],
         ),
       ],
