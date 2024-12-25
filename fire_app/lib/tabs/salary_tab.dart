@@ -51,7 +51,7 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
     await prefs.setString('inflationRate', _inflationRateController.text);
 
     // Save salaries as a JSON-like string
-    List<String> salaryList = _salaries.map((salary) => '${salary.amount},${salary.raiseYearlyPercentage},${salary.isSelected}').toList();
+    List<String> salaryList = _salaries.map((salary) => '${salary.amountMonthly},${salary.raiseYearlyPercentage},${salary.isSelected}').toList();
     await prefs.setStringList('salaries', salaryList);
   }
 
@@ -79,7 +79,7 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
           final amount = double.tryParse(parts[0]) ?? 0.0;
           final raise = double.tryParse(parts[1]) ?? 0.0;
           final isSelected = parts[2] == 'true';
-          _salaries.add(Salary(amount: amount, raiseYearlyPercentage: raise, isSelected: isSelected));
+          _salaries.add(Salary(amountMonthly: amount, raiseYearlyPercentage: raise, isSelected: isSelected));
         }
       }
     });
@@ -102,7 +102,7 @@ void didChangeDependencies() {
     final yearlyRaise = double.tryParse(_raiseYearlyController.text) ?? 0;
 
     Salary salary = Salary(
-      amount: monthlySalary,
+      amountMonthly: monthlySalary,
       raiseYearlyPercentage: yearlyRaise,
     );
     setState(() {

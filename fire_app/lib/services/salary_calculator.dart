@@ -27,7 +27,7 @@ class SalaryCalculator {
 
     double cumulativeTotalSalary = 0.0;
     double cumulativeTotalSalaryAfterTax = 0.0;
-    double taxYearly = 0.0;
+    double inflationAdjusted = 0.0;
 
     // Initial insertion for Year 0
     tableData.add(_createYearData(
@@ -44,17 +44,18 @@ class SalaryCalculator {
 
     // Loop to calculate data for each year
     for (int year = 1; year <= duration; year++) {
-      double totalSalaries = _calculateYearlyAccumulatedSalary(year);
+      double cumulativeSalaries = _calculateAccumulatedSalary(year);
+      cumulativeTotalSalary += cumulativeSalaries;
 
-      cumulativeTotalSalary += totalSalaries * 12;
-      taxYearly = totalSalaries * (taxRate / 100);
-      cumulativeTotalSalaryAfterTax += (totalSalaries - taxYearly) * 12;
-      double inflationAdjusted = cumulativeTotalSalaryAfterTax / pow(1 + (inflationRate / 100), year);
+      double taxYearly = cumulativeSalaries * (taxRate / 100);
+      double salaryAfterTax = cumulativeSalaries - taxYearly;
+      cumulativeTotalSalaryAfterTax += salaryAfterTax;
+      inflationAdjusted += salaryAfterTax / pow(1 + inflationRate / 100, year);
 
       // Add yearly data to table and graph
       tableData.add(_createYearData(
         year: year,
-        salaryMonthly: totalSalaries,
+        salaryMonthly: cumulativeSalaries/12,
         cumulativeSalary: cumulativeTotalSalary,
         cumulativeTotalSalaryAfterTax: cumulativeTotalSalaryAfterTax,
         inflationAdjusted: inflationAdjusted,
@@ -74,11 +75,11 @@ class SalaryCalculator {
   }
 
   /// Calculates the total expenses for a given year, considering each expense's frequency.
-  double _calculateYearlyAccumulatedSalary(int year) {
+  double _calculateAccumulatedSalary(int year) {
     double totalSalary = 0;
     for (Salary salary in salaries) {
       if (salary.isSelected) {
-        totalSalary += salary.getYearlyAmount(year);
+        totalSalary += salary.getTotalAmount(year);
       }
     }
     return totalSalary;

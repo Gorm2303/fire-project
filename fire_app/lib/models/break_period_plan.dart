@@ -1,5 +1,4 @@
 import 'package:fire_app/models/tax_option.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class BreakPeriodPlan {
   double interestRate;
