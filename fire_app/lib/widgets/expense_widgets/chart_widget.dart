@@ -110,16 +110,23 @@ class ExpenseLineChart extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            LegendEntry(color: Colors.blue, label: 'If Invested'),
-            SizedBox(width: 16),
-            LegendEntry(color: Colors.green, label: 'Inflation Adjusted'),
-            SizedBox(width: 16),
-            LegendEntry(color: Colors.red, label: 'Uninvested'),
-          ],
+        const SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: 375, // Adjust width to fit your chart content
+            child:         Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                LegendEntry(color: Colors.blue, label: 'If Invested'),
+                SizedBox(width: 16),
+                LegendEntry(color: Colors.green, label: 'Inflation Adjusted'),
+                SizedBox(width: 16),
+                LegendEntry(color: Colors.red, label: 'Uninvested'),
+              ],
+            ),
+          ),
         ),
+
       ],
     );
   }

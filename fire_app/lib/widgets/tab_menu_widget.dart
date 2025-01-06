@@ -51,10 +51,30 @@ class _TabMenuWidgetState extends State<TabMenuWidget> with SingleTickerProvider
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
           tabs: const [
-            Tab(text: 'Salary'),
-            Tab(text: 'Expense'),
-            Tab(text: 'Invest'),
-            Tab(text: 'Stats'),
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+                child: Text('Salary'),
+              ),
+            ),
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+                child: Text('Expense'),
+              ),
+            ),
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+                child: Text('Invest'),
+              ),
+            ),
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+                child: Text('Stats'),
+              ),
+            ),
           ],
         ),
       ],

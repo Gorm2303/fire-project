@@ -32,7 +32,9 @@ class _SalaryTabState extends State<SalaryTab> with TickerProviderStateMixin {
   List<Map<String, dynamic>> _tableData = [];
   List<FlSpot> _graphDataAccumulated = [];
   List<FlSpot> _graphDataAccumulatedAfterTax = [];
+  List<FlSpot> _graphDataAccumulatedAfterTaxNoRaise = [];
   List<FlSpot> _graphDataInflationAdjusted = [];
+  List<FlSpot> _graphDataInflationAdjustedNoRaise = [];
 
   @override
   void initState() {
@@ -127,7 +129,9 @@ void didChangeDependencies() {
       _tableData = results['tableData'];
       _graphDataAccumulated = results['graphDataAccumulated'];
       _graphDataAccumulatedAfterTax = results['graphDataAccumulatedAfterTax'];
+      _graphDataAccumulatedAfterTaxNoRaise = results['graphDataAccumulatedAfterTaxNoRaise'];
       _graphDataInflationAdjusted = results['graphDataInflationAdjusted'];
+      _graphDataInflationAdjustedNoRaise = results['graphDataInflationAdjustedNoRaise'];
     });
 
     _saveData(); // Save data after calculations
@@ -195,7 +199,9 @@ void didChangeDependencies() {
         SalaryChart(
           graphDataAccumulated: _graphDataAccumulated,
           graphDataAccumulatedAfterTax: _graphDataAccumulatedAfterTax,
+          graphDataAfterTaxNoRaise: _graphDataAccumulatedAfterTaxNoRaise,
           graphDataInflationAdjusted: _graphDataInflationAdjusted,
+          graphDataNoRaise: _graphDataInflationAdjustedNoRaise,
         ),
         const SizedBox(height: 16),
         TabBar(

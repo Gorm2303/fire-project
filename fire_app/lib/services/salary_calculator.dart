@@ -23,11 +23,15 @@ class SalaryCalculator {
     List<Map<String, dynamic>> tableData = [];
     List<FlSpot> graphDataAccumulated = [];
     List<FlSpot> graphDataAccumulatedAfterTax = [];
+    List<FlSpot> graphDataAccumulatedAfterTaxNoRaise = [];
     List<FlSpot> graphDataInflationAdjusted = [];
+    List<FlSpot> graphDataInflationAdjustedWithoutRaise = [];
 
     double salariesTotal = 0.0;
-    double cumulativeTotalSalaryAfterTax = 0.0;
+    double salariesTotalAfterTax = 0.0;
+    double afterTaxNoRaise = 0.0;
     double inflationAdjusted = 0.0;
+    double inflationAdjustedWithoutRaise = 0.0;
 
     // Initial insertion for Year 0
     tableData.add(_createYearData(
@@ -40,16 +44,30 @@ class SalaryCalculator {
 
     graphDataAccumulatedAfterTax.add(const FlSpot(0, 0));
     graphDataAccumulated.add(const FlSpot(0, 0));
+    graphDataAccumulatedAfterTaxNoRaise.add(const FlSpot(0, 0));
     graphDataInflationAdjusted.add(const FlSpot(0, 0));
+    graphDataInflationAdjustedWithoutRaise.add(const FlSpot(0, 0));
 
     // Loop to calculate data for each year
     for (int year = 1; year <= duration; year++) {
+      // Calculate salaries for the year without pay raises
+      double salariesWithoutRaiseYearly = 0.0;
+      for (Salary salary in salaries) {
+        if (salary.isSelected) {
+          salariesWithoutRaiseYearly += salary.getMonthlyAmount(year);
+        }
+      }
+      double taxYearlyWithoutRaise = salariesWithoutRaiseYearly * (taxRate / 100);
+      double salaryAfterTaxWithoutRaise = salariesWithoutRaiseYearly - taxYearlyWithoutRaise;
+      afterTaxNoRaise += salaryAfterTaxWithoutRaise;
+      inflationAdjustedWithoutRaise += salaryAfterTaxWithoutRaise / pow(1 + inflationRate / 100, year);
+
       double salariesYearly = _calculateAccumulatedSalary(year);
       salariesTotal += salariesYearly;
 
       double taxYearly = salariesYearly * (taxRate / 100);
       double salaryAfterTax = salariesYearly - taxYearly;
-      cumulativeTotalSalaryAfterTax += salaryAfterTax;
+      salariesTotalAfterTax += salaryAfterTax;
       inflationAdjusted += salaryAfterTax / pow(1 + inflationRate / 100, year);
 
       // Add yearly data to table and graph
@@ -57,20 +75,24 @@ class SalaryCalculator {
         year: year,
         salaryMonthly: salariesYearly/12,
         cumulativeSalary: salariesTotal,
-        salariesTotalAfterTax: cumulativeTotalSalaryAfterTax,
+        salariesTotalAfterTax: salariesTotalAfterTax,
         inflationAdjusted: inflationAdjusted,
       ));
 
       graphDataAccumulated.add(FlSpot(year.toDouble(), salariesTotal.roundToDouble()));
-      graphDataAccumulatedAfterTax.add(FlSpot(year.toDouble(), cumulativeTotalSalaryAfterTax.roundToDouble()));
+      graphDataAccumulatedAfterTax.add(FlSpot(year.toDouble(), salariesTotalAfterTax.roundToDouble()));
+      graphDataAccumulatedAfterTaxNoRaise.add(FlSpot(year.toDouble(), afterTaxNoRaise.roundToDouble()));
       graphDataInflationAdjusted.add(FlSpot(year.toDouble(), inflationAdjusted.roundToDouble()));
+      graphDataInflationAdjustedWithoutRaise.add(FlSpot(year.toDouble(), inflationAdjustedWithoutRaise.roundToDouble()));
     }
 
     return {
       'tableData': tableData,
       'graphDataAccumulated': graphDataAccumulated,
       'graphDataAccumulatedAfterTax': graphDataAccumulatedAfterTax,
+      'graphDataAccumulatedAfterTaxNoRaise': graphDataAccumulatedAfterTaxNoRaise,
       'graphDataInflationAdjusted': graphDataInflationAdjusted,
+      'graphDataInflationAdjustedNoRaise': graphDataInflationAdjustedWithoutRaise,
     };
   }
 

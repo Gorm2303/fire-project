@@ -12,6 +12,10 @@ class Salary {
     return amountMonthly * 12 * pow(1 + raiseYearlyPercentage / 100, year - 1);
   }
 
+  double getMonthlyAmount(int year) {
+    return amountMonthly * 12;
+  }
+
   // Toggle selection state
   void toggleSelection() {
     isSelected = !isSelected;

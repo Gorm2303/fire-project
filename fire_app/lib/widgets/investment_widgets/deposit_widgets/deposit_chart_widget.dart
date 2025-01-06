@@ -110,15 +110,21 @@ class DepositLineChart extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            LegendEntry(color: Colors.blue, label: 'Investment'),
-            SizedBox(width: 16),
-            LegendEntry(color: Colors.green, label: 'Earnings'),
-            SizedBox(width: 16),
-            LegendEntry(color: Colors.red, label: 'Deposits'),
-          ],
+        const SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: 350, // Adjust width to fit your chart content
+            child:         Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                LegendEntry(color: Colors.blue, label: 'Investment'),
+                SizedBox(width: 16),
+                LegendEntry(color: Colors.green, label: 'Earnings'),
+                SizedBox(width: 16),
+                LegendEntry(color: Colors.red, label: 'Deposits'),
+              ],
+            ),
+          ),
         ),
       ],
     );
