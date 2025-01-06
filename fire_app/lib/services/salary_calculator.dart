@@ -25,7 +25,7 @@ class SalaryCalculator {
     List<FlSpot> graphDataAccumulatedAfterTax = [];
     List<FlSpot> graphDataInflationAdjusted = [];
 
-    double cumulativeTotalSalary = 0.0;
+    double salariesTotal = 0.0;
     double cumulativeTotalSalaryAfterTax = 0.0;
     double inflationAdjusted = 0.0;
 
@@ -34,7 +34,7 @@ class SalaryCalculator {
       year: 0,
       salaryMonthly: 0,
       cumulativeSalary: 0,
-      cumulativeTotalSalaryAfterTax: 0,
+      salariesTotalAfterTax: 0,
       inflationAdjusted: 0,
     ));
 
@@ -44,24 +44,24 @@ class SalaryCalculator {
 
     // Loop to calculate data for each year
     for (int year = 1; year <= duration; year++) {
-      double cumulativeSalaries = _calculateAccumulatedSalary(year);
-      cumulativeTotalSalary += cumulativeSalaries;
+      double salariesYearly = _calculateAccumulatedSalary(year);
+      salariesTotal += salariesYearly;
 
-      double taxYearly = cumulativeSalaries * (taxRate / 100);
-      double salaryAfterTax = cumulativeSalaries - taxYearly;
+      double taxYearly = salariesYearly * (taxRate / 100);
+      double salaryAfterTax = salariesYearly - taxYearly;
       cumulativeTotalSalaryAfterTax += salaryAfterTax;
       inflationAdjusted += salaryAfterTax / pow(1 + inflationRate / 100, year);
 
       // Add yearly data to table and graph
       tableData.add(_createYearData(
         year: year,
-        salaryMonthly: cumulativeSalaries/12,
-        cumulativeSalary: cumulativeTotalSalary,
-        cumulativeTotalSalaryAfterTax: cumulativeTotalSalaryAfterTax,
+        salaryMonthly: salariesYearly/12,
+        cumulativeSalary: salariesTotal,
+        salariesTotalAfterTax: cumulativeTotalSalaryAfterTax,
         inflationAdjusted: inflationAdjusted,
       ));
 
-      graphDataAccumulated.add(FlSpot(year.toDouble(), cumulativeTotalSalary.roundToDouble()));
+      graphDataAccumulated.add(FlSpot(year.toDouble(), salariesTotal.roundToDouble()));
       graphDataAccumulatedAfterTax.add(FlSpot(year.toDouble(), cumulativeTotalSalaryAfterTax.roundToDouble()));
       graphDataInflationAdjusted.add(FlSpot(year.toDouble(), inflationAdjusted.roundToDouble()));
     }
@@ -90,14 +90,14 @@ class SalaryCalculator {
     required int year,
     required double salaryMonthly,
     required double cumulativeSalary,
-    required double cumulativeTotalSalaryAfterTax,
+    required double salariesTotalAfterTax,
     required double inflationAdjusted,
   }) {
     return {
       'year': year,
       'Salary (Monthly)': Utils.formatNumber(salaryMonthly),
       'Salary (Total)': Utils.formatNumber(cumulativeSalary),
-      'After Tax': Utils.formatNumber(cumulativeTotalSalaryAfterTax),
+      'After Tax': Utils.formatNumber(salariesTotalAfterTax),
       'Inflation Adjusted': Utils.formatNumber(inflationAdjusted),
     };
   }
